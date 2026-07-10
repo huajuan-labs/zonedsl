@@ -14,6 +14,8 @@
 
 **👉 [在线 Playground](https://zonedsl.huajuan-labs.com)** · **📖 [Spec](./protocol/spec.md)** · **🤖 [AI Skill](./packages/skill/SKILL.md)** · **🌐 [English](./README.en.md)**
 
+![ZoneDSL Playground](./assets/screenshots/playground.png)
+
 </div>
 
 ---
@@ -21,7 +23,7 @@
 ## 📋 目录
 
 - [为什么需要 ZoneDSL](#为什么需要-zonedsl)
-- [和 MDX / Markdown 有什么不同](#和-mdx--markdown-有什么不同)
+- [和 json-render 有什么不同](#和-json-render-有什么不同)
 - [30 秒体验](#30-秒体验)
 - [核心特性](#核心特性)
 - [Packages](#packages)
@@ -36,23 +38,26 @@
 大模型流式输出越来越长，但前端只能渲染成**一坨滚不完的 markdown**。四条行业痛点：
 
 - 🔸 **纯 markdown 无版式**：没图表、没交互、没杂志感，长回复阅读体验差
-- 🔸 **MDX/remark 假设输入完整**：AI 是流式的，吐到一半的输入让它们崩或闪
+- 🔸 **JSON 类 A2UI（如 json-render）无法与 markdown 散文混排**，且多为 web 框架（少小程序）
 - 🔸 **缺 AI 输出规范**：模型不知道何时该出结构化组件、怎么写
 - 🔸 **多端不统一**：Web / 小程序 / RN 各搞一套，无协议标准
 
 ZoneDSL 一次性解决：**流式安全 parser** + **AI skill 规范** + **多端统一协议** + **70+ 预制组件**。
 
-## 和 MDX / Markdown 有什么不同
+## 和 json-render 有什么不同
 
-| | ZoneDSL | MDX / remark | 原生 Markdown |
-|---|---|---|---|
-| 流式安全（半截输入不崩不闪） | ✅ parser 内置 `streamingSafe` | ❌ 假设完整输入 | ❌ |
-| AI 专属输出规范 | ✅ `@zonedsl/skill` | ❌ 无模型引导 | ❌ |
-| 多端统一协议 | ✅ web / wechat / RN 规划 | ❌ 强绑 React | — |
-| 内置杂志/图表/交互组件 | ✅ 70+ 预制 | ❌ 需自封 | ❌ |
-| 与 markdown 共存 | ✅ | ✅（JSX 混排） | 就是 |
+[json-render](https://json-render.dev)（Vercel，16k star）是主流 JSON 类 A2UI 框架。两者都流式、都预制组件，差异在范式：
 
-> 机械上 ZoneDSL 是"结构化块与 markdown 共存"，但值钱的不在语法——在**流式安全写进 parser**、**AI 是一等作者**、**协议非框架绑定**这三样没人占的。
+| | ZoneDSL | json-render |
+|---|---|---|
+| 流式渲染 | ✅ parser `streamingSafe` | ✅ partial-JSON 流式 |
+| 与 markdown 散文共存 | ✅ 文本交织，prose 里穿插 `::` | ❌ JSON 无法混入散文 |
+| AI 生成范式 | text-first，LLM 原生吐 DSL | JSON-first，schema 约束 |
+| 形态 | 协议 + 多端参考实现 | Web 框架（+ RN） |
+| 小程序运行时 | ✅ `@zonedsl/wechat` | ❌ web + RN，无小程序 |
+| AI 输出规范 | ✅ `@zonedsl/skill` 可移植 | ⚠️ 自带组件库 prompt |
+
+> ZoneDSL 占**长文杂志内容**（复盘/解读/报告，prose + 组件交织），json-render 占**仪表盘/widget 生成**。不同市场，不打正面。
 
 ## 30 秒体验
 
@@ -125,15 +130,18 @@ parser **组件无关**——`::任何名字` 都能解析成 AST，组件是否
 
 ## 让 AI 学会 ZoneDSL
 
-把 [`packages/skill/SKILL.md`](./packages/skill/SKILL.md) 放进你的 agent：
+下载 skill 压缩包，解压到 agent 的 skills 目录：
 
 ```bash
 # Claude Code
-mkdir -p ~/.claude/skills/zonedsl
-cp packages/skill/SKILL.md packages/skill/CATALOG-*.md ~/.claude/skills/zonedsl/
+curl -L https://zonedsl.huajuan-labs.com/assets/zonedsl-skill.zip -o /tmp/zonedsl.zip
+unzip /tmp/zonedsl.zip -d ~/.claude/skills/
 ```
 
 AI 就知道：什么时候用 ZoneDSL（多小节 + 结构化）、什么时候退回纯 markdown（单句问答）、每个组件怎么写。
+
+> 开发者（接入/扩展/跨平台）用 [dev skill](https://zonedsl.huajuan-labs.com/assets/zonedsl-dev-skill.zip)。
+> 已 clone 仓库也可 `cp packages/skill/SKILL.md packages/skill/CATALOG-*.md ~/.claude/skills/zonedsl/`。
 
 ## FAQ
 

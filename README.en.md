@@ -14,6 +14,8 @@ Turn AI streaming replies from "an endless wall of markdown" into "a magazine pa
 
 **👉 [Live Playground](https://zonedsl.huajuan-labs.com)** · **📖 [Spec](./protocol/spec.md)** · **🤖 [AI Skill](./packages/skill/SKILL.md)** · **🌐 [中文](./README.md)**
 
+![ZoneDSL Playground](./assets/screenshots/playground.png)
+
 </div>
 
 ---
@@ -21,7 +23,7 @@ Turn AI streaming replies from "an endless wall of markdown" into "a magazine pa
 ## 📋 Table of Contents
 
 - [Why ZoneDSL](#why-zonedsl)
-- [How it differs from MDX / Markdown](#how-it-differs-from-mdx--markdown)
+- [How it differs from json-render](#how-it-differs-from-json-render)
 - [30-second try](#30-second-try)
 - [Core features](#core-features)
 - [Packages](#packages)
@@ -36,23 +38,26 @@ Turn AI streaming replies from "an endless wall of markdown" into "a magazine pa
 LLM streaming output keeps getting longer, yet the frontend renders it as **an endless scroll of markdown**. Four pain points:
 
 - 🔸 **Plain markdown has no layout**: no charts, no interaction, no magazine feel — long replies read poorly.
-- 🔸 **MDX/remark assume complete input**: AI is streaming; half-typed input breaks or flickers them.
+- 🔸 **JSON-class A2UI (e.g. json-render) can't mix with markdown prose**, and is mostly web-framework-bound (rarely mini-program)
 - 🔸 **No AI output spec**: models don't know when to emit structured components or how.
 - 🔸 **No cross-platform standard**: Web / mini-program / RN each roll their own, no protocol.
 
 ZoneDSL fixes all four: **streaming-safe parser** + **AI skill spec** + **unified multi-platform protocol** + **70+ built-in components**.
 
-## How it differs from MDX / Markdown
+## How it differs from json-render
 
-| | ZoneDSL | MDX / remark | Plain Markdown |
-|---|---|---|---|
-| Streaming-safe (half input won't break/flicker) | ✅ parser `streamingSafe` | ❌ assumes complete input | ❌ |
-| AI output spec | ✅ `@zonedsl/skill` | ❌ no model guidance | ❌ |
-| Multi-platform unified protocol | ✅ web / wechat / RN planned | ❌ React-bound | — |
-| Built-in magazine/chart/interactive components | ✅ 70+ | ❌ self-build | ❌ |
-| Coexists with markdown | ✅ | ✅ (JSX mix) | is |
+[json-render](https://json-render.dev) (Vercel, 16k stars) is the mainstream JSON-class A2UI framework. Both stream and ship prebuilt components — the difference is the paradigm:
 
-> Mechanically ZoneDSL is "structured blocks coexisting with markdown", but the value isn't the syntax — it's **streaming-safe baked into the parser**, **AI as first-class author**, and **protocol not framework-locked**. Nobody else owns these.
+| | ZoneDSL | json-render |
+|---|---|---|
+| Streaming render | ✅ parser `streamingSafe` | ✅ partial-JSON streaming |
+| Coexists with markdown prose | ✅ text interleaved, `::` inside prose | ❌ JSON can't mix into prose |
+| AI generation paradigm | text-first, LLM emits DSL natively | JSON-first, schema-constrained |
+| Form | protocol + multi-platform reference impls | Web framework (+ RN) |
+| Mini-program runtime | ✅ `@zonedsl/wechat` | ❌ web + RN, no mini-program |
+| AI output spec | ✅ `@zonedsl/skill` portable | ⚠️ bundled component prompt |
+
+> ZoneDSL owns **long-form magazine content** (recap/decode/report, prose + components interleaved); json-render owns **dashboard/widget generation**. Different markets, no head-on clash.
 
 ## 30-second try
 
@@ -125,15 +130,18 @@ The protocol layer governs only the portable common set; everything platform-spe
 
 ## Teach AI to use ZoneDSL
 
-Drop [`packages/skill/SKILL.md`](./packages/skill/SKILL.md) into your agent:
+Download the skill zip and unzip into your agent's skills directory:
 
 ```bash
 # Claude Code
-mkdir -p ~/.claude/skills/zonedsl
-cp packages/skill/SKILL.md packages/skill/CATALOG-*.md ~/.claude/skills/zonedsl/
+curl -L https://zonedsl.huajuan-labs.com/assets/zonedsl-skill.zip -o /tmp/zonedsl.zip
+unzip /tmp/zonedsl.zip -d ~/.claude/skills/
 ```
 
 The AI then knows: when to use ZoneDSL (multi-section + structured) vs. plain markdown (single-line Q&A), and how to write each component.
+
+> Developers (integrate/extend/cross-platform) use the [dev skill](https://zonedsl.huajuan-labs.com/assets/zonedsl-dev-skill.zip).
+> If you've cloned the repo, `cp packages/skill/SKILL.md packages/skill/CATALOG-*.md ~/.claude/skills/zonedsl/` also works.
 
 ## FAQ
 
