@@ -1,0 +1,44 @@
+{
+  "name": "@zonedsl/core",
+  "version": "1.0.0",
+  "description": "ZoneDSL canonical parser — text → AST. Pure JS, zero deps. Streaming-safe.",
+  "license": "MIT",
+  "author": "花卷实验室 / huajuan-labs",
+  "homepage": "https://github.com/huajuan-labs/zonedsl",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huajuan-labs/zonedsl.git",
+    "directory": "packages/core"
+  },
+  "bugs": "https://github.com/huajuan-labs/zonedsl/issues",
+  "keywords": ["zonedsl", "dsl", "parser", "ai", "streaming", "agent-ui", "markdown"],
+  "main": "parser.js",
+  "module": "parser.mjs",
+  "browser": "parser.umd.js",
+  "exports": {
+    ".": {
+      "require": "./parser.js",
+      "import": "./parser.mjs",
+      "browser": "./parser.umd.js",
+      "default": "./parser.js"
+    },
+    "./toWxNodes": "./toWxNodes.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "parser.js",
+    "parser.mjs",
+    "parser.umd.js",
+    "build.mjs",
+    "toWxNodes.js",
+    "INTENTS.md",
+    "LAYERS.md",
+    "THEMES.md",
+    "VERSIONS.md"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/parser.test.mjs",
+    "prepublishOnly": "npm run build"
+  }
+}

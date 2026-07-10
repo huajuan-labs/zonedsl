@@ -1,0 +1,27 @@
+{
+  "name": "@zonedsl/skill",
+  "version": "1.0.0",
+  "description": "ZoneDSL AI output spec — teaches any agent when to emit ZoneDSL vs markdown, and how to write each component.",
+  "license": "MIT",
+  "author": "花卷实验室 / huajuan-labs",
+  "homepage": "https://github.com/huajuan-labs/zonedsl",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huajuan-labs/zonedsl.git",
+    "directory": "packages/skill"
+  },
+  "bugs": "https://github.com/huajuan-labs/zonedsl/issues",
+  "keywords": ["zonedsl", "skill", "ai", "agent", "claude", "prompt", "system-prompt", "streaming"],
+  "files": [
+    "SKILL.md",
+    "SKILL-DEV.md",
+    "CATALOG-CHART.md",
+    "CATALOG-INTERACTIVE.md",
+    "CATALOG-PRESET.md",
+    "CATALOG-PRIMITIVE.md",
+    "CATALOG-STRUCTURE.md"
+  ],
+  "scripts": {
+    "test": "echo \"skill: no runtime tests\" && exit 0"
+  }
+}

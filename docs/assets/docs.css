@@ -1,0 +1,496 @@
+/* ============================================================
+   文档页布局:左侧目录 · 中间正文 · (小屏折叠)
+   ============================================================ */
+
+.doc-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 28px;
+  gap: 48px;
+  align-items: start;
+}
+@media (max-width: 780px) {
+  .doc-shell {
+    display: block;         /* 移动端不用 grid,toc 是 fixed 不占位 */
+    padding: 0;             /* 归零,避免和 doc-content 双重 padding */
+  }
+  /* 主动脱流:确保 aside.doc-toc 完全不占块级空间 */
+  aside.doc-toc {
+    padding: 0;
+    margin: 0;
+    float: none;
+  }
+  .doc-content {
+    padding: 12px 16px 60px !important;
+    max-width: 100%;
+  }
+  .doc-hero { margin-top: 0 !important; }
+  /* 移动端:doc-toc 变成左侧滑出全高抽屉(Material Drawer 风格) */
+  .doc-toc {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: auto;
+    bottom: 0;
+    width: min(300px, 85vw);
+    max-height: none;
+    height: 100vh;
+    background: var(--panel);
+    border: none;
+    border-right: 1px solid var(--line);
+    border-radius: 0;
+    box-shadow: 4px 0 24px -8px rgba(0,0,0,0.18);
+    padding: 0;
+    overflow: hidden;
+    z-index: 200;
+    transform: translateX(-100%);
+    opacity: 1;
+    pointer-events: none;
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    margin: 0;
+  }
+  .doc-toc.open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+  /* 抽屉打开时的背景遮罩,点击关闭 */
+  .doc-toc-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.32);
+    z-index: 190;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s ease;
+  }
+  .doc-toc-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* FAB toggle 按钮 —— 悬浮左侧偏下,不挡顶导 */
+  .doc-toc-toggle {
+    position: fixed;
+    left: 14px;
+    top: auto;
+    bottom: 24px;       /* 从底部起,不遮挡顶导 */
+    width: 40px;         /* 缩小 */
+    height: 40px;
+    z-index: 30;         /* 平时低于 nav(100),打开时提到 210 */
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 16px -4px rgba(255,130,0,0.42),
+                0 2px 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .doc-toc-toggle:hover,
+  .doc-toc-toggle:active {
+    transform: scale(1.06);
+    box-shadow: 0 12px 32px -6px rgba(255,130,0,0.6);
+  }
+  .doc-toc-toggle-label {
+    font-family: var(--serif);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #fff;
+  }
+  .doc-toc-toggle-caret {
+    display: none;   /* FAB 里不需要箭头 */
+  }
+  /* 打开时 FAB 提升到抽屉之上,可点关闭;同时变深墨 */
+  body.doc-toc-open .doc-toc-toggle {
+    background: var(--ink);
+    box-shadow: 0 6px 16px -4px rgba(0,0,0,0.32);
+    z-index: 210;
+  }
+  body.doc-toc-open .doc-toc-toggle-label { font-size: 20px; }
+
+  /* 抽屉内部滚动区 */
+  .doc-toc-body {
+    max-height: inherit;
+    overflow-y: auto;
+    padding: 4px 8px;
+  }
+  /* drawer 顶部留安全区 + 关闭提示头 */
+  .doc-toc::before {
+    content: '目录';
+    display: block;
+    padding: max(20px, env(safe-area-inset-top, 20px)) 20px 14px;
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink);
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .doc-toc-title {
+    display: block;
+    margin: 12px 16px 6px;
+    padding: 0;
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 2px;
+  }
+  .doc-toc-title:first-child { margin-top: 4px; }
+  .doc-toc ul {
+    display: block;
+    margin: 0 0 8px;
+    padding: 0 8px;
+    gap: 0;
+  }
+  .doc-toc li { margin: 2px 0; }
+  .doc-toc a {
+    display: block;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: normal;
+    background: transparent;
+    color: var(--ink);
+  }
+  .doc-toc a:hover,
+  .doc-toc a.active {
+    background: var(--accent-tint);
+    color: var(--accent);
+    border: none;
+  }
+
+  /* 正文标题字号 */
+  .doc-content { padding: 8px 0 60px; }
+  .doc-content h1 { font-size: 32px; line-height: 1.2; }
+  .doc-content h2 { font-size: 22px; margin-top: 32px; }
+  .doc-content h3 { font-size: 17px; margin-top: 24px; }
+  .doc-content pre { padding: 14px 16px; font-size: 11.5px; overflow-x: auto; }
+  .doc-content table { font-size: 12px; }
+  .doc-content table th, .doc-content table td { padding: 6px 8px; }
+}
+
+/* --- 左侧目录 —— 仅桌面(≥ 781px)才 sticky,移动端由上方 media query 接管 --- */
+@media (min-width: 781px) {
+  .doc-toc {
+    position: sticky;
+    top: 72px;
+    padding: 32px 0;
+    font-size: 14px;
+  }
+}
+.doc-toc-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.doc-toc ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+.doc-toc li { margin: 4px 0; }
+.doc-toc a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 4px 0;
+  display: block;
+  border-left: 2px solid transparent;
+  padding-left: 12px;
+  transition: color 0.12s, border-color 0.12s;
+}
+.doc-toc a:hover,
+.doc-toc a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+/* --- 右侧正文 --- */
+.doc-content {
+  padding: 32px 0 100px;
+  max-width: 720px;
+}
+.doc-content h1 {
+  font-family: var(--serif);
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin: 0 0 12px;
+}
+.doc-content h1 em {
+  font-style: normal;
+  color: var(--ink);
+  background: linear-gradient(180deg, transparent 55%, var(--accent-soft) 55%);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+.doc-content .lead {
+  font-size: 18px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin: 0 0 40px;
+}
+.doc-content h2 {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 800;
+  margin: 48px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 80px;
+}
+.doc-content h3 {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 32px 0 12px;
+  scroll-margin-top: 80px;
+}
+.doc-content p {
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+.doc-content a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-soft);
+  padding-bottom: 1px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.doc-content a:hover {
+  border-bottom-color: var(--accent);
+  color: var(--accent-warm, var(--accent));
+}
+.doc-content a code {
+  border-bottom: none;
+  padding: 1px 5px;
+}
+.doc-content strong {
+  background: linear-gradient(180deg, transparent 55%, var(--accent-soft) 55%);
+  padding: 0 3px;
+}
+.doc-content ul, .doc-content ol {
+  padding-left: 24px;
+  margin: 0 0 20px;
+}
+.doc-content li {
+  margin: 6px 0;
+}
+.doc-content code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--accent-tint);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--accent-soft);
+}
+.doc-content pre {
+  margin: 20px 0;
+  padding: 20px 24px;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.75;
+  border-radius: 12rpx;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+.doc-content pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.doc-content .c { color: var(--code-comment); }
+.doc-content .k { color: #F5C94A; }
+.doc-content .s { color: #A5D8A2; }
+.doc-content .a { color: #E38C60; }
+
+/* Skill 下载卡 —— 醒目大 CTA */
+.skill-download-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 28px;
+  margin: 24px 0 20px;
+  background: linear-gradient(135deg, var(--accent-tint) 0%, var(--panel) 100%);
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px -12px rgba(255,130,0,0.24);
+  flex-wrap: wrap;
+}
+.skill-download-icon {
+  font-size: 40px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.skill-download-body { flex: 1; min-width: 240px; }
+.skill-download-title {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.skill-download-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.skill-download-desc {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+.skill-download-desc code {
+  font-size: 11.5px;
+  padding: 1px 5px;
+}
+.skill-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 22px;
+  background: var(--accent);
+  color: #fff !important;
+  border-radius: 999px;
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 3px 12px rgba(255,130,0,0.28);
+  transition: transform 0.12s, box-shadow 0.12s;
+  flex-shrink: 0;
+}
+.skill-download-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(255,130,0,0.36);
+}
+
+/* dev-skill 卡片:换更中性的深色调,和 AI 输出 skill(橙)区分 */
+.skill-download-card-alt {
+  background: linear-gradient(135deg, var(--panel-soft) 0%, var(--panel) 100%);
+  border-color: var(--ink);
+  box-shadow: 0 8px 24px -12px rgba(0,0,0,0.14);
+}
+.skill-download-card-alt .skill-download-meta { color: var(--ink-soft); }
+.skill-download-card-alt .skill-download-btn {
+  background: var(--ink);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+}
+.skill-download-card-alt .skill-download-btn:hover {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+}
+
+.doc-content blockquote {
+  border-left: 4px solid var(--accent);
+  background: var(--accent-tint);
+  margin: 20px 0;
+  padding: 12px 20px;
+  color: var(--ink);
+  border-radius: 0 12px 12px 0;
+}
+
+.doc-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+  background: var(--panel);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.doc-content th,
+.doc-content td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.doc-content th {
+  background: var(--panel-soft);
+  font-weight: 700;
+  color: var(--ink);
+}
+.doc-content tr:last-child td { border-bottom: 0; }
+
+/* --- callout --- */
+.callout {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0;
+  font-size: 14px;
+}
+.callout-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+/* --- doc hero (每个文档页顶部) --- */
+.doc-hero {
+  padding: 60px 0 20px;
+}
+
+/* --- prev / next 页面导航 --- */
+.doc-nav {
+  display: flex;
+  gap: 12px;
+  margin-top: 60px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+.doc-nav a {
+  flex: 1;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--panel);
+  transition: border-color 0.15s;
+}
+.doc-nav a:hover { border-color: var(--accent); }
+.doc-nav .doc-nav-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+.doc-nav .doc-nav-title {
+  font-weight: 700;
+  font-family: var(--serif);
+  font-size: 17px;
+}

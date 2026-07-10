@@ -1,0 +1,36 @@
+{
+  "name": "@zonedsl/web",
+  "version": "1.0.0",
+  "description": "ZoneDSL web renderer — AST → DOM. Streaming-safe, with chart recipes and theme support.",
+  "license": "MIT",
+  "author": "花卷实验室 / huajuan-labs",
+  "homepage": "https://github.com/huajuan-labs/zonedsl",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huajuan-labs/zonedsl.git",
+    "directory": "packages/web"
+  },
+  "bugs": "https://github.com/huajuan-labs/zonedsl/issues",
+  "keywords": ["zonedsl", "renderer", "dom", "ai", "streaming", "agent-ui", "echarts", "markdown"],
+  "main": "src/web-renderer.js",
+  "browser": "src/web-renderer.js",
+  "files": [
+    "src/web-renderer.js",
+    "src/echarts-preview.js",
+    "src/theme-switcher.js"
+  ],
+  "scripts": {
+    "test": "echo \"web renderer tests: TODO v1.5\" && exit 0"
+  },
+  "peerDependencies": {
+    "@zonedsl/core": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "marked": { "optional": true },
+    "echarts": { "optional": true },
+    "morphdom": { "optional": true }
+  },
+  "dependencies": {
+    "@zonedsl/core": "^1.0.0"
+  }
+}

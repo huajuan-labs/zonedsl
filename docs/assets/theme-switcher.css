@@ -1,0 +1,359 @@
+/* ============================================================
+   全站主题切换 · 12 套主题作用于 [data-theme="xxx"] 根节点
+   通过 override CSS 变量实现,不改结构
+   ============================================================ */
+
+/* ---- 主题切换器 UI(右上角下拉) ---- */
+.theme-switcher {
+  position: relative;
+  display: inline-block;
+}
+.theme-switcher-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--ink);
+  text-transform: uppercase;
+  transition: border-color 0.12s;
+}
+.theme-switcher-toggle:hover { border-color: var(--accent); }
+.theme-switcher-toggle .ts-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+.theme-switcher-toggle .ts-caret {
+  font-size: 9px;
+  opacity: 0.6;
+  margin-left: 2px;
+  transition: transform 0.15s;
+}
+.theme-switcher.open .theme-switcher-toggle .ts-caret {
+  transform: rotate(180deg);
+}
+.theme-switcher-body {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  padding: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 300;
+}
+.theme-switcher.open .theme-switcher-body { display: flex; }
+
+/* 移动端:nav-links 是 overflow-x:auto 会裁剪 absolute 下拉,
+   改成 fixed 定位逃出裁剪,贴右上 nav 下方 */
+@media (max-width: 780px) {
+  .theme-switcher-body {
+    position: fixed;
+    top: 60px;
+    right: 12px;
+    left: auto;
+    width: min(220px, calc(100vw - 24px));
+    max-height: 70vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.12s;
+  text-align: left;
+  width: 100%;
+}
+.theme-btn:hover { background: var(--panel-soft); }
+.theme-btn.active {
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+.theme-btn .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+.theme-btn .theme-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.theme-btn .theme-check {
+  opacity: 0;
+  color: var(--accent);
+  font-size: 13px;
+}
+.theme-btn.active .theme-check { opacity: 1; }
+
+/* ============================================================
+   12 主题作用域 · override :root 变量
+   杂志系 7 套 + markdown 接管系 5 套
+   ============================================================ */
+
+/* editorial(默认已在 :root 里定义, 这里显式声明防止污染) */
+html[data-theme="editorial"] {
+  --bg: #FBF3E7; --panel: #FFFFFF; --panel-soft: #FFF9F0;
+  --ink: #1A1A1A; --ink-soft: #4A4A4A; --ink-mute: #8B8B8B;
+  --line: #EFE0CC; --line-strong: #D9C4A6;
+  --accent: #FF8200; --accent-warm: #FFB347; --accent-soft: #FFE4C4; --accent-tint: #FFF3E0;
+  --hl: #FFB700;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+}
+
+/* literary(文人风,象牙 + 焦茶 + 宋体) */
+html[data-theme="literary"] {
+  --bg: #FDF8EF; --panel: #FFFFFF; --panel-soft: #F5EDD9;
+  --ink: #4A3728; --ink-soft: #6B5540; --ink-mute: #A08B72;
+  --line: #E8DCC0; --line-strong: #D2C199;
+  --accent: #A17141; --accent-warm: #C89B5D; --accent-soft: #F0DFC0; --accent-tint: #F9F1DF;
+  --hl: #C89B5D;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+  --sans: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+}
+
+/* serious(严肃,冷灰 + 深炭) */
+html[data-theme="serious"] {
+  --bg: #F4F4F2; --panel: #FFFFFF; --panel-soft: #EBEBE8;
+  --ink: #0F0F0F; --ink-soft: #3A3A3A; --ink-mute: #7A7A7A;
+  --line: #D8D8D3; --line-strong: #A8A8A0;
+  --accent: #0F0F0F; --accent-warm: #2D2D2D; --accent-soft: #D8D8D3; --accent-tint: #EBEBE8;
+  --hl: #FFB700;
+}
+
+/* data(数据体,白底 + 蓝调) */
+html[data-theme="data"] {
+  --bg: #FFFFFF; --panel: #FAFAFA; --panel-soft: #F5F5F5;
+  --ink: #0F172A; --ink-soft: #334155; --ink-mute: #475569;
+  --line: #E5E7EB; --line-strong: #CBD5E1;
+  --accent: #2563EB; --accent-warm: #3B82F6; --accent-soft: #A8CAFD; --accent-tint: #EFF6FF;
+  --hl: #DBEAFE;
+  --serif: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* serene(中式青绿,温白 + 青竹 + 宋体) */
+html[data-theme="serene"] {
+  --bg: #FCFAF7; --panel: #FFFFFF; --panel-soft: #E8EEEA;
+  --ink: #2A2A2A; --ink-soft: #3F4A42; --ink-mute: #4A5A4D;
+  --line: #DDE3DE; --line-strong: #B8C4BC;
+  --accent: #5E8265; --accent-warm: #86AF89; --accent-soft: #A8C2AE; --accent-tint: #EDF3EE;
+  --hl: #D8E3DA;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+  --sans: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+}
+
+/* warm(朱橙 + 温白 + 宋体) */
+html[data-theme="warm"] {
+  --bg: #FBF8F3; --panel: #FFFFFF; --panel-soft: #FAEEDE;
+  --ink: #2A2A2A; --ink-soft: #555555; --ink-mute: #999999;
+  --line: #EFE0CC; --line-strong: #D9C4A6;
+  --accent: #C56F3E; --accent-warm: #D89060; --accent-soft: #F5E1CD; --accent-tint: #FBF0E1;
+  --hl: #FAEEDE;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+  --sans: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+}
+
+/* luxe(深金铜 + 温白 + 宋体) */
+html[data-theme="luxe"] {
+  --bg: #FAF7F0; --panel: #FFFFFF; --panel-soft: #F5F0E4;
+  --ink: #2A2A2A; --ink-soft: #555555; --ink-mute: #A08C6B;
+  --line: #E5DFCC; --line-strong: #C4B896;
+  --accent: #A88232; --accent-warm: #C4A052; --accent-soft: #EDE3C7; --accent-tint: #F7F1DE;
+  --hl: #F5E9C0;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+  --sans: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+}
+
+/* purple(紫底 + 黄胶囊) —— 文档站定位:紫是「环境色」,主要内容仍在白 panel 上 */
+html[data-theme="purple"] {
+  --bg: #7C6EE0; --panel: #FFFFFF; --panel-soft: #F0EDFF;
+  /* 白 panel 上要 AA 达标(对比 ≥ 4.5:1):ink 深墨、soft 深灰、mute 深紫灰 */
+  --ink: #1A1A1A; --ink-soft: #3F3F55; --ink-mute: #6A5E8C;
+  --line: #D6D0FF; --line-strong: #A599EE;
+  --accent: #5847C4; --accent-warm: #7566DA; --accent-soft: #B5A8FF; --accent-tint: #EEEAFF;
+  --hl: #F5C94A;
+}
+/* 直接坐紫底上的元素(hero 大标题、hero-mock caption)保留白字 */
+html[data-theme="purple"] .hero-title,
+html[data-theme="purple"] .hero-sub,
+html[data-theme="purple"] .hero-mock-caption {
+  color: #FFFFFF;
+}
+html[data-theme="purple"] .hero-sub strong { color: #F5C94A; }
+
+/* sky(蓝底 + 白胶囊 + 黄内联) —— 文档站定位:蓝是「环境色」,主要内容仍在白 panel 上 */
+html[data-theme="sky"] {
+  --bg: #4A87E8; --panel: #FFFFFF; --panel-soft: #EAF2FF;
+  --ink: #1A1A1A; --ink-soft: #3A4A5A; --ink-mute: #4A6A9A;
+  --line: #C7DAF3; --line-strong: #7EA8E0;
+  --accent: #2B6BC7; --accent-warm: #4A87E8; --accent-soft: #9CC2F0; --accent-tint: #EAF2FF;
+  --hl: #F5C94A;
+}
+html[data-theme="sky"] .hero-title,
+html[data-theme="sky"] .hero-sub,
+html[data-theme="sky"] .hero-mock-caption {
+  color: #FFFFFF;
+}
+html[data-theme="sky"] .hero-sub strong { color: #F5C94A; }
+
+/* pop 也是深红粉底、容易白字白底,预防性同样锁 hero 白字 */
+html[data-theme="pop"] .hero-title em { color: #1A1A1A; }
+
+/* purple/sky/sage 三个环境色主题下,section-kicker 在 section-soft 底(同色系淡底)上
+   容易与 accent 融合。加深字色 + 加 pill 背景,一次让它跳出来。 */
+html[data-theme="purple"] .section-kicker,
+html[data-theme="sky"] .section-kicker,
+html[data-theme="sage"] .section-kicker {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid var(--line-strong);
+}
+html[data-theme="purple"] .section-kicker { color: #3D2D9E; border-color: #A599EE; }
+html[data-theme="sky"] .section-kicker    { color: #1A4A9E; border-color: #7EA8E0; }
+html[data-theme="sage"] .section-kicker   { color: #2E5238; border-color: #A8B3A0; }
+
+/* feature-num 也同处理,毕竟它是卡内 kicker */
+html[data-theme="purple"] .feature-num { color: #3D2D9E; }
+html[data-theme="sky"] .feature-num    { color: #1A4A9E; }
+html[data-theme="sage"] .feature-num   { color: #2E5238; }
+
+/* ============ 语法参考页(doc-content / doc-toc)在三环境色主题下的可读性修复 ============ */
+/* 左侧 toc 小 kicker */
+html[data-theme="purple"] .doc-toc-title { color: #3D2D9E; }
+html[data-theme="sky"] .doc-toc-title    { color: #1A4A9E; }
+html[data-theme="sage"] .doc-toc-title   { color: #2E5238; }
+
+/* 正文加粗:三主题下 accent-soft 太淡,底色几乎消失 —— 换成主题色更饱和的 tint */
+html[data-theme="purple"] .doc-content strong { background: linear-gradient(180deg, transparent 55%, #E0D9FF 55%); }
+html[data-theme="sky"] .doc-content strong    { background: linear-gradient(180deg, transparent 55%, #C7DAF3 55%); }
+html[data-theme="sage"] .doc-content strong   { background: linear-gradient(180deg, transparent 55%, #D8D4C4 55%); }
+
+/* 内联代码:三主题下 accent-tint 与白 panel 靠得太近,加强边界。
+   :not(pre *) 确保只影响正文里的 <code>,不打扰 <pre> 里作为语法高亮容器的 <code> */
+html[data-theme="purple"] .doc-content code:not(pre code) { background: #EEEAFF; border-color: #A599EE; color: #3D2D9E; }
+html[data-theme="sky"] .doc-content code:not(pre code)    { background: #EAF2FF; border-color: #7EA8E0; color: #1A4A9E; }
+html[data-theme="sage"] .doc-content code:not(pre code)   { background: #EDF0E6; border-color: #A8B3A0; color: #2E5238; }
+/* 强化:即使有其它规则想给 pre 内 code 上浅底,一律回归透明,继承 pre 深底/浅字 */
+html[data-theme="purple"] .doc-content pre code,
+html[data-theme="sky"] .doc-content pre code,
+html[data-theme="sage"] .doc-content pre code {
+  background: transparent !important;
+  border: none !important;
+  color: inherit;
+}
+
+/* 侧边栏当前 active 项在三主题下也用加深色,避免与 hover 状态 accent 融进背景 */
+html[data-theme="purple"] .doc-toc a:hover,
+html[data-theme="purple"] .doc-toc a.active { color: #3D2D9E; border-left-color: #3D2D9E; }
+html[data-theme="sky"] .doc-toc a:hover,
+html[data-theme="sky"] .doc-toc a.active    { color: #1A4A9E; border-left-color: #1A4A9E; }
+html[data-theme="sage"] .doc-toc a:hover,
+html[data-theme="sage"] .doc-toc a.active   { color: #2E5238; border-left-color: #2E5238; }
+
+/* footer 坐在紫/蓝/绿的 body 大底色上,深字反而看不清 —— 换白字 + 顶边线加深 */
+html[data-theme="purple"] footer,
+html[data-theme="sky"] footer,
+html[data-theme="sage"] footer {
+  color: rgba(255,255,255,0.78);
+  border-top-color: rgba(255,255,255,0.18);
+}
+html[data-theme="purple"] footer a,
+html[data-theme="sky"] footer a,
+html[data-theme="sage"] footer a {
+  color: #FFFFFF;
+}
+html[data-theme="purple"] footer a:hover { color: #F5C94A; }
+html[data-theme="sky"] footer a:hover    { color: #F5C94A; }
+html[data-theme="sage"] footer a:hover   { color: #D4C29B; }
+html[data-theme="purple"] footer strong,
+html[data-theme="sky"] footer strong,
+html[data-theme="sage"] footer strong {
+  color: #F5C94A !important;
+}
+
+/* pop(白底 + 红粉描边) */
+html[data-theme="pop"] {
+  --bg: #FFFFFF; --panel: #FFFFFF; --panel-soft: #FFF0F3;
+  --ink: #1A1A1A; --ink-soft: #4A4A4A; --ink-mute: #8B8B8B;
+  --line: #FF4D75; --line-strong: #FF4D75;
+  --accent: #FF4D75; --accent-warm: #FF8FA5; --accent-soft: #FFB3C4; --accent-tint: #FFF0F3;
+  --hl: #FFB3C4;
+}
+
+/* sage(深墨绿 + 米色描边) —— 文档站定位:深绿是「环境色」,主要内容仍在白 panel 上 */
+html[data-theme="sage"] {
+  --bg: #2F4F3F; --panel: #FFFFFF; --panel-soft: #F0EFE6;
+  --ink: #2A3E33; --ink-soft: #4F6154; --ink-mute: #8B9A82;
+  --line: #D8D4C4; --line-strong: #A8B3A0;
+  --accent: #5E8265; --accent-warm: #7BA085; --accent-soft: #C8D6C4; --accent-tint: #EDF3EE;
+  --hl: #D4C29B;
+}
+html[data-theme="sage"] .hero-title,
+html[data-theme="sage"] .hero-sub,
+html[data-theme="sage"] .hero-mock-caption {
+  color: #EDE5D0;
+}
+html[data-theme="sage"] .hero-sub strong { color: #D4C29B; }
+
+/* 深「环境色」主题(sky/purple/sage):bg 是深色,文档页的 sidebar + 正文直接坐深底上会看不清.
+   给 .doc-shell 套白 panel,让阅读区整体浮在白底上,符合"内容在白 panel 上"的设计定位. */
+@media (min-width: 781px) {
+  html[data-theme="sky"] .doc-shell,
+  html[data-theme="purple"] .doc-shell,
+  html[data-theme="sage"] .doc-shell {
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 36px 40px 48px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  /* shell 已有 padding,正文顶部别再叠 */
+  html[data-theme="sky"] .doc-content,
+  html[data-theme="purple"] .doc-content,
+  html[data-theme="sage"] .doc-content { padding-top: 0; }
+}
+
+/* note(白底 + 红粉大标题 + 无卡片极简) */
+html[data-theme="note"] {
+  --bg: #FFFFFF; --panel: #FFFFFF; --panel-soft: #FFF0F3;
+  --ink: #1A1A1A; --ink-soft: #4A4A4A; --ink-mute: #8B8B8B;
+  --line: #F5C94A; --line-strong: #FF4D75;
+  --accent: #FF4D75; --accent-warm: #FF8FA5; --accent-soft: #FFB3C4; --accent-tint: #FFF0F3;
+  --hl: #F5C94A;
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'PingFang SC', serif;
+}

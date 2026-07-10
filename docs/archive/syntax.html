@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语法参考 · ::ZoneDSL 小程序版</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/theme-switcher.css">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html"><span class="lg-mark">::</span><span class="lg-name">ZoneDSL</span><span class="lg-suffix">小程序版</span></a><span class="lg-huajuan" title="来自花卷实验室"><span class="lg-hj-label">来自</span><img class="lg-hj-icon" src="assets/huajuan-logo.png" alt="花卷"><span class="lg-hj-name">花卷实验室</span></span>
+    <div class="nav-links">
+      <a href="quickstart.html">快速上手</a>
+      <a href="syntax.html" class="active">语法参考</a>
+      <a href="components.html">组件全览</a>
+      <a href="examples.html">示例画廊</a>
+    </div>
+  </div>
+</nav>
+
+<div class="doc-shell">
+  <aside class="doc-toc">
+    <div class="doc-toc-title">DSL 基础</div>
+    <ul>
+      <li><a href="#component">组件声明</a></li>
+      <li><a href="#attrs">属性 attrs</a></li>
+      <li><a href="#children">子节点</a></li>
+      <li><a href="#main">main 快捷值</a></li>
+    </ul>
+    <div class="doc-toc-title">混排</div>
+    <ul>
+      <li><a href="#inline">markdown 与 zone 混排</a></li>
+      <li><a href="#fence">围栏语法</a></li>
+      <li><a href="#hl">行内高亮</a></li>
+    </ul>
+    <div class="doc-toc-title">主题</div>
+    <ul>
+      <li><a href="#theme-decl">主题声明</a></li>
+    </ul>
+    <div class="doc-toc-title">避坑</div>
+    <ul>
+      <li><a href="#pitfalls">常见错误</a></li>
+    </ul>
+  </aside>
+
+  <main class="doc-content">
+    <div class="doc-hero">
+      <h1>语法<em>参考</em></h1>
+      <p class="lead">
+        ZoneDSL 一共只有 4 个语法要素:<strong>组件声明、属性、子节点、行内高亮</strong>。
+        本页把它们全部列清楚,同时说明和 markdown 的混排方式。
+      </p>
+    </div>
+
+    <h2 id="component">组件声明</h2>
+    <p>顶格两个冒号加组件名,一行一个:</p>
+<pre><code><span class="k">::text</span> <span class="s">"这是一段文字"</span>
+<span class="k">::divider</span>
+<span class="k">::magazine-cover</span> <span class="a">title=</span><span class="s">"标题"</span></code></pre>
+    <p>组件名会在项目内 <code>zone-plugin/zone-dsl/toWxNodes.js</code> 的
+      <code>COMPONENT_REGISTRY</code> 里查找;查不到默认<strong>静默丢弃</strong>,
+      不会渲染出「未支持」占位。</p>
+
+    <h2 id="attrs">属性 attrs</h2>
+    <p>组件名后面跟属性,格式 <code>key=value</code>,值有引号和裸值两种:</p>
+<pre><code><span class="c">// 引号包裹的字符串</span>
+<span class="k">::magazine-cover</span> <span class="a">title=</span><span class="s">"两天刷屏"</span> <span class="a">subtitle=</span><span class="s">"48 小时高光时刻"</span>
+
+<span class="c">// 裸值(单词/数字,无空格)</span>
+<span class="k">::grid</span> <span class="a">cols=</span><span class="s">3</span> <span class="a">gap=</span><span class="s">md</span>
+
+<span class="c">// flag 属性(无 = 号,值为 true)</span>
+<span class="k">::radio</span> <span class="s">"选项 A"</span> selected</code></pre>
+    <div class="callout">
+      <div class="callout-title">值内引号转义</div>
+      属性值里如果要出现英文双引号,用 <code>\"</code> 转义,或者用中文引号
+      <code>「」</code> 「」代替。<br>
+      换行用 <code>\n</code>(在模板字符串里写 <code>\\n</code>)。
+    </div>
+
+    <h2 id="children">子节点</h2>
+    <p>用 <strong>2 空格缩进</strong>表示子节点:</p>
+<pre><code><span class="k">::numbered-list</span> <span class="s">"看点在哪"</span>
+  item <span class="s">"四姐气场碰撞"</span>
+  item <span class="s">"南美世界杯氛围"</span>
+  item <span class="s">"新老代际对话"</span>
+
+<span class="k">::data-board</span> <span class="a">cols=</span><span class="s">4</span>
+  item <span class="s">"主榜最高"</span> <span class="a">value=</span><span class="s">"8位"</span>
+  item <span class="s">"在榜时长"</span> <span class="a">value=</span><span class="s">"11h+"</span></code></pre>
+    <p>子关键字白名单:<code>item</code> / <code>row</code> / <code>field</code> /
+      <code>series</code> / <code>option</code> / <code>step</code> / <code>radio</code>。
+      不在白名单里的裸词会被当纯文本处理。</p>
+
+    <h2 id="main">main 快捷值</h2>
+    <p>组件名紧跟一个字符串,等价于 <code>main="..."</code>(约定就是主标题/主内容):</p>
+<pre><code><span class="c">// 这两种写法等价:</span>
+<span class="k">::card</span> <span class="s">"Q4 核心指标"</span>
+<span class="k">::card</span> <span class="a">main=</span><span class="s">"Q4 核心指标"</span></code></pre>
+    <div class="callout">
+      <div class="callout-title">⚠️ 别重复写</div>
+      写了 main 就别再写 title:<code>::card "Q4" title="Q4 核心"</code> 是重复。
+      引号紧跟组件名就是 main,大部分组件会自动把 main 用作 title。
+    </div>
+
+    <h2 id="inline">markdown 与 zone 混排</h2>
+    <p>ZoneDSL 支持三种混排:</p>
+    <h3>A · 纯 markdown</h3>
+    <p>如果只需要标题+段落+列表,直接写 markdown。zone-DSL 引擎照常识别。</p>
+
+    <h3>B · 顶格 <code>::</code> 混排(推荐 95% 场景)</h3>
+    <p>markdown 正文中穿插顶格 <code>::</code>,前后各留一行空行:</p>
+<pre><code><span class="c"># 今日热点</span>
+
+三条线索都值得看。
+
+<span class="k">::magazine-cover</span> <span class="a">tag=</span><span class="s">"HOT SPOTS"</span> <span class="a">title=</span><span class="s">"今日三焦点"</span>
+
+<span class="c">## 焦点一: 花少 8</span>
+
+正文继续...</code></pre>
+
+    <h3 id="fence">C · 围栏 <code>```zone</code> 块</h3>
+    <p>用 <code>```zone</code> ... <code>```</code> 显式围出一段 zone,parser 只处理围栏内的部分:</p>
+<pre><code>```zone
+::magazine-cover
+  tag="HOT RECAP" title="**48小时刷屏**"
+
+::chapter "01" title="先看数据"
+::data-board cols=2
+  item "主榜最高" value="8位"
+  item "在榜时长" value="11h+"
+```
+
+markdown 段落继续,不会被 zone 影响。</code></pre>
+
+    <div class="callout">
+      <div class="callout-title">两种边界的等价性</div>
+      <p style="margin:0 0 6px;">
+        <strong>B · 顶格 <code>::</code> 混排</strong> 和 <strong>C · <code>```zone</code> 围栏</strong>
+        在渲染结果上完全等价 —— parser 会把两种边界都替换成同一个
+        <code>zone-dsl-placeholder</code> 占位,再统一走 zone-DSL 引擎。
+      </p>
+      <p style="margin:0;">
+        选哪种取决于场景:AI 流式吐字用 B(无围栏,吐一行渲一行体验最好);
+        正式文档 / Web / 长内容 用 C(边界最清晰,不怕缩进错位)。
+      </p>
+    </div>
+
+    <h4>B vs C · 什么时候用哪个</h4>
+    <table>
+      <thead><tr><th></th><th>B · 顶格 <code>::</code></th><th>C · <code>```zone</code> 围栏</th></tr></thead>
+      <tbody>
+        <tr><td>边界</td><td>隐式(空行止)</td><td>显式(围栏字符)</td></tr>
+        <tr><td>AI 流式吐字</td><td>✅ 首选 —— 吐一行渲一行</td><td>需吐完首行 <code>```zone</code></td></tr>
+        <tr><td>长内容 / Web</td><td>混排时得小心空行</td><td>✅ 首选 —— 边界最稳</td></tr>
+        <tr><td>主题声明</td><td>用顶格 <code>::theme xxx</code></td><td>可用围栏 meta:<code>```zone theme=xxx</code></td></tr>
+        <tr><td>嵌套 markdown</td><td>zone 段前后各留空行</td><td>围栏外的 markdown 完全隔离</td></tr>
+      </tbody>
+    </table>
+
+    <h4>围栏 meta 传主题(可选)</h4>
+    <p>用围栏时可以直接在开栏行写 <code>theme=xxx</code>,parser 会把它当作块首 <code>::theme</code> 处理:</p>
+<pre><code>```zone theme=literary
+::magazine-cover title="梅雨季"
+::chapter ...
+```</code></pre>
+    <p>等价于:</p>
+<pre><code>```zone
+::theme literary
+::magazine-cover title="梅雨季"
+::chapter ...
+```</code></pre>
+
+    <h2 id="hl">行内高亮(title/subtitle 通用)</h2>
+    <p>ZoneDSL 在标题/副标题里支持三档行内高亮,和 markdown 语法一致:</p>
+    <table>
+      <thead><tr><th>语法</th><th>视觉</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>**text**</code></td>
+          <td>亮金黄块 + 深炭字</td>
+          <td>主强调,视觉重量拉满</td>
+        </tr>
+        <tr>
+          <td><code>~~text~~</code></td>
+          <td>橙色字 + 底部半高浅金橙块</td>
+          <td>次强调,马克笔效果</td>
+        </tr>
+        <tr>
+          <td><code>==text==</code></td>
+          <td>title:深炭字 + 橙下划线<br>subtitle:橙色加粗字</td>
+          <td>轻强调</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="theme-decl">主题声明</h2>
+    <p>三种入口都可以,一个 zone 块只需要写一次:</p>
+<pre><code><span class="c">// 入口 A:magazine-cover 属性</span>
+<span class="k">::magazine-cover</span> <span class="a">theme=</span><span class="s">literary</span> <span class="a">title=</span><span class="s">"..."</span>
+
+<span class="c">// 入口 B:顶格伪组件(推荐用于 markdown 接管系主题)</span>
+<span class="k">::theme</span> <span class="s">purple</span>
+
+<span class="c">// 入口 C:围栏 meta</span>
+```zone theme=data
+::chapter ...
+```</code></pre>
+    <p>三种声明等价,优先级 A > C > B。不写就是默认 <code>editorial</code>。</p>
+
+    <h2 id="pitfalls">常见错误</h2>
+    <ol>
+      <li><strong>顶格 <code>::</code> 前后不留空行</strong> —— towxml 用空行作为 zone 块的边界,紧贴段落会解析错乱</li>
+      <li><strong>子项用 Tab 或 4 空格缩进</strong> —— parser 按缩进层级识别子节点,必须用 <strong>2 空格</strong></li>
+      <li><strong>属性值里嵌英文双引号</strong> —— 用 <code>\"</code> 转义或改中文引号</li>
+      <li><strong>attrs 里直接按回车</strong> —— parser 按行 tokenize,attrs 内真实换行会截断组件,用 <code>\\n</code> 表示换行</li>
+      <li><strong>写不存在的组件名</strong> —— 默认静默丢弃,不会报错,但你的组件不会出现。请参考 <a href="components.html">组件全览</a></li>
+      <li><strong>网格深嵌套 3 层以上</strong> —— <code>row/col/grid</code> 深嵌小程序会卡顿,建议 2 层内</li>
+    </ol>
+
+    <div class="doc-nav">
+      <a href="quickstart.html">
+        <span class="doc-nav-label">← Prev</span>
+        <span class="doc-nav-title">快速上手</span>
+      </a>
+      <a href="components.html">
+        <span class="doc-nav-label">Next →</span>
+        <span class="doc-nav-title">组件全览</span>
+      </a>
+    </div>
+  </main>
+</div>
+
+<script src="assets/theme-switcher.js"></script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>快速上手 · ::ZoneDSL 小程序版</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/theme-switcher.css">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html"><span class="lg-mark">::</span><span class="lg-name">ZoneDSL</span><span class="lg-suffix">小程序版</span></a><span class="lg-huajuan" title="来自花卷实验室"><span class="lg-hj-label">来自</span><img class="lg-hj-icon" src="assets/huajuan-logo.png" alt="花卷"><span class="lg-hj-name">花卷实验室</span></span>
+    <div class="nav-links">
+      <a href="quickstart.html" class="active">快速上手</a>
+      <a href="syntax.html">语法参考</a>
+      <a href="components.html">组件全览</a>
+      <a href="examples.html">示例画廊</a>
+    </div>
+  </div>
+</nav>
+
+<div class="doc-shell">
+  <aside class="doc-toc">
+    <div class="doc-toc-title">目录</div>
+    <ul>
+      <li><a href="#core">核心链路</a></li>
+      <li><a href="#hello">Hello ZoneDSL</a></li>
+      <li><a href="#markdown">纯 markdown 用法</a></li>
+      <li><a href="#components">加入 zone 组件</a></li>
+      <li><a href="#theme">切换主题</a></li>
+    </ul>
+    <div class="doc-toc-title">迁移到新小程序</div>
+    <ul>
+      <li><a href="#install-copy">1 复制目录</a></li>
+      <li><a href="#install-import">2 修引用路径</a></li>
+      <li><a href="#install-handler">3 实现分发器</a></li>
+    </ul>
+  </aside>
+
+  <main class="doc-content">
+    <div class="doc-hero">
+      <h1>快速<em>上手</em></h1>
+      <p class="lead">
+        本页帮你在 <strong>5 分钟</strong>内跑通 ZoneDSL 的第一个 demo,并说明如何
+        把这套引擎迁移到你自己的微信小程序。
+      </p>
+    </div>
+
+    <h2 id="core">核心链路</h2>
+    <p>ZoneDSL 的工作流水线本质上是四步:</p>
+    <ol>
+      <li>AI 后端流式吐出一段 <strong>markdown + zone-DSL 混排</strong>文本</li>
+      <li>前端 <code>agentChat</code> 页把 content 拿到,交给 <code>buildAst()</code></li>
+      <li><code>towxml/index.js</code> 里的 <code>extractZoneBlocks()</code> 先拆出 zone 块,
+        markdown 走 towxml 原有解析,zone 块交给 <code>zone-dsl/toWxNodes.js</code> 转成组件节点树</li>
+      <li>页面渲染层遇到 <code>item.isZone</code> 派发给统一的 <code>&lt;zone-node&gt;</code> 组件,
+        wxml 里 60+ 个 <code>wx:elif</code> 分支各自渲染成对应 zone 组件</li>
+    </ol>
+    <div class="callout">
+      <div class="callout-title">TL;DR</div>
+      <strong>你只需要产出 DSL 文本</strong>,剩下的解析、组件派发、主题作用域、
+      流式安全全部由 ZoneDSL 引擎在小程序端搞定。
+    </div>
+
+    <h2 id="hello">Hello ZoneDSL</h2>
+    <p>最短的一个 zone 组件:</p>
+<pre><code><span class="k">::text</span> <span class="s">"你好, ZoneDSL"</span></code></pre>
+    <p>渲染出来就是一段正文文字。<code>::&lt;组件名&gt;</code> 就是 ZoneDSL 的核心语法。</p>
+
+    <h2 id="markdown">纯 markdown 用法</h2>
+    <p>ZoneDSL <strong>不排斥 markdown</strong>——你完全可以只写 markdown,ZoneDSL 引擎会照常
+      把它交给 towxml 渲染,得到跟你熟悉的 markdown 一样的结果:</p>
+<pre><code><span class="c"># 一级标题</span>
+
+正文段落,可以用 **加粗**、*斜体*、==高亮==、`inline code`。
+
+- 列表项 1
+- 列表项 2
+
+| 表头 | 数值 |
+| --- | --- |
+| A | 1 |</code></pre>
+
+    <h2 id="components">加入 zone 组件</h2>
+    <p>markdown 里穿插 <code>::</code> 组件(前后各空一行),得到杂志式结构化输出:</p>
+<pre><code><span class="c"># 今日热搜三看点</span>
+
+今天有三条线索都值得看。
+
+<span class="k">::magazine-cover</span> <span class="a">tag=</span><span class="s">"HOT SPOTS · 07.03"</span>
+  <span class="a">title=</span><span class="s">"今日三焦点"</span>
+  <span class="a">bg=</span><span class="s">light</span>
+
+<span class="c">## 焦点一: 花少 8</span>
+
+正文段落...
+
+<span class="k">::numbered-list</span> <span class="s">"看点在哪"</span>
+  item <span class="s">"四姐气场碰撞"</span>
+  item <span class="s">"南美世界杯氛围"</span></code></pre>
+    <div class="callout">
+      <div class="callout-title">规则</div>
+      顶格 <code>::</code> 前后必须各留一行空行,让 towxml 识别 zone 块边界。子项用
+      <strong>2 空格</strong>缩进,不能用 Tab 或 4 空格。
+    </div>
+
+    <h2 id="theme">切换主题</h2>
+    <p>ZoneDSL 内置 12 套主题——<strong>7 套杂志系</strong>作用于 zone 组件,
+      <strong>5 套 markdown 接管系</strong>让纯 markdown 也整体变杂志视觉。</p>
+    <p>不写 <code>::theme</code> 就是默认 <code>editorial</code> 暖橙风。要切主题:</p>
+<pre><code><span class="k">::theme</span> <span class="s">purple</span>
+
+<span class="c"># 我的备忘录</span>
+
+正文段落——现在<strong>整块内容</strong>会变成紫底黄胶囊白卡片的杂志视觉。</code></pre>
+    <p>可用主题:<code>editorial</code> / <code>literary</code> / <code>serious</code> /
+      <code>data</code> / <code>serene</code> / <code>warm</code> / <code>luxe</code> /
+      <code>purple</code> / <code>sky</code> / <code>pop</code> / <code>sage</code> /
+      <code>note</code>。详见 <a href="components.html#themes">组件全览 · 12 主题</a>。</p>
+
+    <h2 id="install-copy">迁移到你自己的小程序</h2>
+    <p>ZoneDSL 已拆成 npm 包:<code>@zonedsl/core</code>(parser) + <code>@zonedsl/web</code>(Web 渲染) + <code>@zonedsl/skill</code>(AI 规范),<code>npm i</code> 即用。</p>
+
+    <h3 id="install-copy-step">1. 复制目录</h3>
+    <p>把项目里这一个目录整体拷贝到你自己小程序的分包下(比如 <code>your-package/zone-plugin/</code>):</p>
+<pre><code>zone-plugin/
+├── towxml/                <span class="c"># markdown 渲染器</span>
+├── zone-dsl/              <span class="c"># DSL 解析器</span>
+└── zone-components/
+    ├── zone-node/         <span class="c"># 统一派发组件</span>
+    └── themes/            <span class="c"># 12 主题</span></code></pre>
+
+    <h3 id="install-import">2. 修引用路径</h3>
+    <p>在你消费方页面的 <code>index.json</code> 里注册 towxml 组件:</p>
+<pre><code>{
+  <span class="s">"usingComponents"</span>: {
+    <span class="s">"towxml"</span>: <span class="s">"/your-package/zone-plugin/towxml/towxml"</span>
+  }
+}</code></pre>
+    <p>在 JS 里 <code>require</code>:</p>
+<pre><code><span class="k">const</span> towxml = <span class="k">require</span>(<span class="s">'../zone-plugin/towxml/index.js'</span>)
+<span class="k">const</span> ast = towxml(content, <span class="s">'markdown'</span>)
+<span class="c">// 把 ast 塞进 &lt;towxml nodes="{{ast}}" /&gt; 里就行</span></code></pre>
+
+    <h3 id="install-handler">3. 实现 zone-action 分发器</h3>
+    <p>如果 DSL 里用了 <code>::button intent=xxx</code>,业务方需要在页面里实现分发器:</p>
+<pre><code>onZoneAction(e) {
+  <span class="k">const</span> { intent, value } = e.detail
+  <span class="k">switch</span> (intent) {
+    <span class="k">case</span> <span class="s">'search'</span>:
+      wx.navigateTo({ url: <span class="s">`/pages/search/index?q=${value}`</span> })
+      <span class="k">break</span>
+    <span class="k">case</span> <span class="s">'followup'</span>:
+      <span class="c">// 填充输入框</span>
+      <span class="k">break</span>
+    <span class="c">// ... 其他 intent 按你项目情况实现</span>
+  }
+}</code></pre>
+    <div class="callout">
+      <div class="callout-title">备注</div>
+      Intent 白名单一共 11 个,详见项目内 <code>zone-plugin/zone-dsl/INTENTS.md</code>。
+      未识别的 intent 静默降级为纯样式按钮,不会报错。
+    </div>
+
+    <div class="doc-nav">
+      <a href="index.html">
+        <span class="doc-nav-label">← Prev</span>
+        <span class="doc-nav-title">首页</span>
+      </a>
+      <a href="syntax.html">
+        <span class="doc-nav-label">Next →</span>
+        <span class="doc-nav-title">语法参考</span>
+      </a>
+    </div>
+  </main>
+</div>
+
+<script src="assets/theme-switcher.js"></script>
+</body>
+</html>

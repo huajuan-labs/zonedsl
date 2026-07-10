@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>::ZoneDSL 小程序版 · 让小程序 AI 也能流式输出结构化内容</title>
+<meta name="description" content="::ZoneDSL 小程序版来自花卷实验室——为解决小程序流式渲染美观度问题而生的 markdown 美化 + 结构化组件扩展方案。80+ 组件、12 套主题、支持主题定制与语法/组件扩展、流式渲染安全。同一份 DSL 也可用于 web / 客户端等其他平台的组件库构建。">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/theme-switcher.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html"><span class="lg-mark">::</span><span class="lg-name">ZoneDSL</span><span class="lg-suffix">小程序版</span></a><span class="lg-huajuan" title="来自花卷实验室"><span class="lg-hj-label">来自</span><img class="lg-hj-icon" src="assets/huajuan-logo.png" alt="花卷"><span class="lg-hj-name">花卷实验室</span></span>
+    <div class="nav-links">
+      <a href="quickstart.html">快速上手</a>
+      <a href="syntax.html">语法参考</a>
+      <a href="components.html">组件全览</a>
+      <a href="examples.html">示例画廊</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero container">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <span class="hero-kicker">花卷实验室 · v2.8 · WeChat Mini Program First</span>
+      <h1 class="hero-title">给小程序<br>流式渲染<br><em>加点儿美感</em>。</h1>
+      <p class="hero-sub">
+        来自<strong>花卷实验室</strong>——与 markdown 共存不冲突的
+        小程序结构化组件 DSL。保留 markdown 单行可渲染能力，无侵害地扩展组件与主题；
+        混合渲染的同时保留高度设计的样式效果，降低模型输出的样式心智负担，
+        也大幅减少 token 消耗。
+      </p>
+      <ul class="hero-facets" aria-label="核心能力">
+        <li><span class="hf-dot"></span>意图事件交互</li>
+        <li><span class="hf-dot"></span>组件白名单</li>
+        <li><span class="hf-dot"></span>业务定制组件与主题</li>
+        <li><span class="hf-dot"></span>标准 skill 约束 AI 输出</li>
+        <li><span class="hf-dot"></span>花卷主题工具</li>
+      </ul>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="quickstart.html">5 分钟上手 →</a>
+        <a class="btn btn-ghost" href="examples.html">看看能做什么</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-mock mock-phone">
+        <div class="mock-mag-cover">
+          <div class="mock-mag-tag">HOT RECAP</div>
+          <div class="mock-mag-title">丁程鑫<br><span class="mock-mag-title-hl">开推4名场面</span></div>
+          <div class="mock-mag-meta"><span>48小时刷屏</span><span>2026.07</span></div>
+        </div>
+        <div class="mock-chapter">
+          <span class="mock-chapter-idx">01</span>
+          <span class="mock-chapter-cat">DATA</span>
+          <span class="mock-chapter-title">先看数据</span>
+        </div>
+        <div class="mock-data-board">
+          <div class="mock-db-cell"><div class="mock-db-lbl">主榜最高</div><div class="mock-db-val">8位</div></div>
+          <div class="mock-db-cell"><div class="mock-db-lbl">在榜时长</div><div class="mock-db-val">11h<span>+</span></div></div>
+        </div>
+        <div class="mock-era-title">48 小时</div>
+        <div class="mock-era">
+          <div class="mock-era-item">
+            <div class="mock-era-node"></div>
+            <div class="mock-era-body">
+              <div class="mock-era-row"><span class="mock-era-date">06/30</span><span class="mock-era-lbl">到达</span></div>
+              <div class="mock-era-desc">长沙起飞</div>
+            </div>
+          </div>
+          <div class="mock-era-item">
+            <div class="mock-era-node highlight"></div>
+            <div class="mock-era-body">
+              <div class="mock-era-row"><span class="mock-era-date">07/01</span><span class="mock-era-lbl">爆点</span></div>
+              <div class="mock-era-desc">手怎么了 词条登榜</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-mock-caption">↑ 一段 zone-DSL 在小程序里的真实渲染</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ A2UI 协议定位 ============ -->
+<section class="container">
+  <div class="section-kicker">POSITIONING</div>
+  <h2 class="section-title">一种 <em>A2UI</em> 协议。</h2>
+  <p class="section-sub">
+    广义上，ZoneDSL 属于 <strong>A2UI（Agent-to-UI）</strong>这一类协议——让 agent /
+    模型的输出，直接变成结构化、可渲染的界面。它要解决的核心问题，和「让 AI 吐出结构化
+    UI」这件事是一致的：<strong>agent 产出 → 解析 → 组件树 → 界面</strong>。
+  </p>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-num">A2UI / WHAT</div>
+      <h3 class="feature-title">agent<br>产出即界面</h3>
+      <p class="feature-desc">
+        A2UI 的本质是<strong>把模型输出映射成 UI</strong>。ZoneDSL 里，AI 只需吐出一段带
+        <code>::组件</code> 的文本流，前端解析成组件树并渲染成卡片、图表、时间线。
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">A2UI / HOW</div>
+      <h3 class="feature-title">文本优先<br>而非协议优先</h3>
+      <p class="feature-desc">
+        同类方案多走<strong>结构化 JSON / 协议</strong>下发。ZoneDSL 选了另一条路：<strong>文本优先、与 markdown 共生</strong>，最小侵入地扩展组件与主题，更贴合 AI 天然的文本输出习惯，也更省 token。
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">A2UI / EDGE</div>
+      <h3 class="feature-title">为流式<br>而生</h3>
+      <p class="feature-desc">
+        面向 AI <strong>流式吐字</strong>做了 <code>streamingSafe</code> 保护，属性未闭合前不更新——这正是把 A2UI 落到<strong>真实流式对话</strong>场景时最容易被忽略、却最关键的一环。
+      </p>
+    </div>
+  </div>
+
+  <!-- 对比表:JSON / JSONL 协议 vs ZoneDSL -->
+  <div class="a2ui-compare">
+    <div class="a2ui-compare-head">JSON / JSONL 协议 vs ZoneDSL · 五个关键维度</div>
+    <table class="a2ui-compare-table">
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>结构化 JSON / JSONL 协议</th>
+          <th>ZoneDSL(文本优先)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Token 消耗</td>
+          <td>高——键名/引号/括号占 30-50% 字符</td>
+          <td>低——只写值,组件名用 <code>::</code> 前缀标记</td>
+        </tr>
+        <tr>
+          <td>Schema 约束</td>
+          <td>硬——键漏一个 / 类型错一个,整段解析失败</td>
+          <td>软——未知组件静默丢弃,不闭合的属性跳过,组件始终在场</td>
+        </tr>
+        <tr>
+          <td>流式渲染</td>
+          <td>不友好——JSON 必须闭合才能 parse,中途都是无效状态</td>
+          <td>行级渐进——一行完整就渲染一行,streamingSafe 兜底半截值</td>
+        </tr>
+        <tr>
+          <td>与 markdown 共存</td>
+          <td>需要额外字段包装 markdown 段(如 <code>{type:"md",content:"..."}</code>)</td>
+          <td>原生共存——markdown 段照常写,zone 组件用 <code>::</code> 顶格/围栏穿插</td>
+        </tr>
+        <tr>
+          <td>模型心智负担</td>
+          <td>需记住嵌套 schema、字段名、必填/选填、类型规则</td>
+          <td>只需记住组件名与几个属性,写法接近自然缩进的伪代码</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="a2ui-compare-note">
+      结构化协议的强项是<strong>严格性</strong>,适合内部服务间调用;ZoneDSL 的强项是<strong>宽容性</strong>与<strong>流式友好</strong>,适合直面用户的 AI 输出场景——两者互补,不是替代。
+    </p>
+  </div>
+</section>
+
+<!-- ============ 三大特性 ============ -->
+<section class="container">
+  <div class="section-kicker">CAPABILITY</div>
+  <h2 class="section-title">markdown 美化 + 结构化扩展。</h2>
+  <p class="section-sub">
+    小程序里 AI 吐出的 markdown 又硬又干，缺卡片、缺图表、缺主题气质。
+    ZoneDSL 在 markdown 之上叠了一层可扩展的<strong>结构化 DSL</strong>，
+    加上一套可定制的<strong>主题作用域</strong>——同一份内容，切主题即变身。
+  </p>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-num">01 / DSL</div>
+      <h3 class="feature-title">80+ 组件<br>5 层分组</h3>
+      <p class="feature-desc">
+        <strong>primitive</strong> 原语 · <strong>structure</strong> 结构 ·
+        <strong>interactive</strong> 交互 · <strong>chart</strong> 图表 ·
+        <strong>preset</strong> 业务预设。从 text/tag 到 magazine-cover /
+        era-timeline / data-board——一行 DSL 出成品卡。
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">02 / THEME</div>
+      <h3 class="feature-title">12 套主题<br>杂志系 + 接管系</h3>
+      <p class="feature-desc">
+        <strong>杂志系 7 套</strong>作用于 zone 组件(editorial/literary/serious/
+        data/serene/warm/luxe)。<strong>markdown 接管系 5 套</strong>(purple/sky/
+        pop/sage/note)让普通 markdown 也整体变杂志视觉——不写组件也能出效果。
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">03 / STREAMING</div>
+      <h3 class="feature-title">流式<br>渲染保护</h3>
+      <p class="feature-desc">
+        针对 AI 流式吐字场景做了 <strong>streamingSafe</strong> 保护:
+        parser 只在属性完整闭合时更新 attrs,避免
+        <code>bg=a → bg=accent</code> 半截值导致视觉闪烁。组件始终在场,
+        细节逐帧稳定加入。
+      </p>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============ 代码对照示例 ============ -->
+<section class="container">
+  <div class="section-kicker">EXAMPLE</div>
+  <h2 class="section-title">写 DSL,渲染页面 / 卡片。</h2>
+  <p class="section-sub">
+    左边是一段 ZoneDSL 源码,右边是它在小程序里的渲染效果。
+    AI 只需要输出这样的文本流,前端自动解析成组件树。
+  </p>
+
+  <div class="split">
+    <div class="split-src">
+      <div class="split-header">ZoneDSL Source</div>
+<pre><span class="c">// 一段完整的杂志式复盘</span>
+<span class="k">::magazine-cover</span> <span class="a">tag=</span><span class="s">"HOT RECAP"</span> <span class="a">date=</span><span class="s">"2026.07"</span>
+  <span class="a">title=</span><span class="s">"丁程鑫\n**开推4名场面**"</span>
+  <span class="a">subtitle=</span><span class="s">"48小时刷屏"</span>
+  <span class="a">bg=</span><span class="s">light</span>
+
+<span class="k">::chapter</span> <span class="s">"01"</span> <span class="a">title=</span><span class="s">"先看数据"</span> <span class="a">category=</span><span class="s">"DATA"</span>
+
+<span class="k">::data-board</span> <span class="a">cols=</span><span class="s">4</span>
+  item <span class="s">"主榜最高"</span> <span class="a">value=</span><span class="s">"8位"</span>
+  item <span class="s">"在榜时长"</span> <span class="a">value=</span><span class="s">"11h+"</span>
+
+<span class="k">::era-timeline</span> <span class="s">"48小时"</span>
+  item <span class="s">"06/30"</span> <span class="a">label=</span><span class="s">"到达"</span>
+    <span class="a">desc=</span><span class="s">"长沙起飞"</span>
+  item <span class="s">"07/01"</span> <span class="a">label=</span><span class="s">"爆点"</span>
+    <span class="a">desc=</span><span class="s">"手怎么了 词条登榜"</span>
+  item <span class="s">"07/02"</span> <span class="a">label=</span><span class="s">"收官"</span>
+    <span class="a">desc=</span><span class="s">"整体互动 密度拉满"</span></pre>
+    </div>
+    <div class="split-render">
+      <div class="mock-phone">
+        <div class="mock-mag-cover">
+          <div class="mock-mag-tag">HOT RECAP</div>
+          <div class="mock-mag-title">丁程鑫<br><span class="mock-mag-title-hl">开推4名场面</span></div>
+          <div class="mock-mag-meta"><span>48小时刷屏</span><span>2026.07</span></div>
+        </div>
+        <div class="mock-chapter">
+          <span class="mock-chapter-idx">01</span>
+          <span class="mock-chapter-cat">DATA</span>
+          <span class="mock-chapter-title">先看数据</span>
+        </div>
+        <div class="mock-data-board">
+          <div class="mock-db-cell"><div class="mock-db-lbl">主榜最高</div><div class="mock-db-val">8位</div></div>
+          <div class="mock-db-cell"><div class="mock-db-lbl">在榜时长</div><div class="mock-db-val">11h<span>+</span></div></div>
+        </div>
+        <div class="mock-era-title">48 小时</div>
+        <div class="mock-era">
+          <div class="mock-era-item">
+            <div class="mock-era-node"></div>
+            <div class="mock-era-body">
+              <div class="mock-era-row"><span class="mock-era-date">06/30</span><span class="mock-era-lbl">到达</span></div>
+              <div class="mock-era-desc">长沙起飞</div>
+            </div>
+          </div>
+          <div class="mock-era-item">
+            <div class="mock-era-node highlight"></div>
+            <div class="mock-era-body">
+              <div class="mock-era-row"><span class="mock-era-date">07/01</span><span class="mock-era-lbl">爆点</span></div>
+              <div class="mock-era-desc">手怎么了 词条登榜</div>
+            </div>
+          </div>
+          <div class="mock-era-item">
+            <div class="mock-era-node"></div>
+            <div class="mock-era-body">
+              <div class="mock-era-row"><span class="mock-era-date">07/02</span><span class="mock-era-lbl">收官</span></div>
+              <div class="mock-era-desc">整体互动 密度拉满</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 跨平台扩展 ============ -->
+<section class="container">
+  <div class="section-kicker">CROSS PLATFORM</div>
+  <h2 class="section-title">DSL 一份，组件库多套。</h2>
+  <p class="section-sub">
+    小程序版是 ZoneDSL 语法体系的<strong>第一个落地</strong>。同一份 DSL
+    也可以在其他平台上构建自己的组件库——DSL 是接口，组件是实现，两者解耦。
+  </p>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-num">CURRENT</div>
+      <h3 class="feature-title">小程序版<br>WeChat Mini Program</h3>
+      <p class="feature-desc">
+        <strong>当前发布</strong>。基于 towxml + 自研 zone-DSL parser + zone-node
+        WeChat 组件。已在真实 AI Chat 小程序生产环境使用。
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">ROADMAP</div>
+      <h3 class="feature-title">Web 版<br>H5 / React / Vue</h3>
+      <p class="feature-desc">
+        <strong>规划中</strong>。同一份 DSL parser 可复用，只需替换组件层
+        为 React/Vue 组件。适合浏览器端 AI 助手、内容 CMS、报表工具。
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">ROADMAP</div>
+      <h3 class="feature-title">跨端 / 客户端<br>RN / Flutter / iOS</h3>
+      <p class="feature-desc">
+        <strong>可复刻</strong>。DSL 是纯文本约定，任何平台都能实现自己的
+        renderer。花卷实验室后续会陆续放出参考实现，社区也欢迎贡献。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 生产使用 ============ -->
+<section class="container-narrow">
+  <div class="section-kicker">IN PRODUCTION</div>
+  <h2 class="section-title">已在<br>真实 AI Chat 小程序<br>生产使用。</h2>
+  <p class="section-sub">
+    从「热搜复盘 / 事件解码 / 人物八卦 / 数据报告 / 科普长文」
+    到「多轮流式播放 / 多主题横向对比」——20+ demo 会话真实覆盖，
+    经受微信小程序生态、流式响应、复杂布局的实际考验。
+  </p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="examples.html">看示例画廊 →</a>
+    <a class="btn btn-ghost" href="quickstart.html">迁移到我的小程序</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <a href="quickstart.html">快速上手</a>
+    <a href="syntax.html">语法参考</a>
+    <a href="components.html">组件全览</a>
+    <a href="examples.html">示例画廊</a>
+    <br><br>
+    ::ZoneDSL 小程序版 · v2.8.1 · 来自<strong style="color:var(--accent);">花卷实验室</strong> · MIT
+  </div>
+</footer>
+
+<script src="assets/theme-switcher.js"></script>
+</body>
+</html>

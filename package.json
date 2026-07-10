@@ -1,0 +1,23 @@
+{
+  "name": "zonedsl",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZoneDSL — the streaming-first rendering layer for conversational AI. Monorepo root.",
+  "license": "MIT",
+  "author": "花卷实验室 / huajuan-labs",
+  "homepage": "https://github.com/huajuan-labs/zonedsl",
+  "repository": "https://github.com/huajuan-labs/zonedsl.git",
+  "bugs": "https://github.com/huajuan-labs/zonedsl/issues",
+  "keywords": ["zonedsl", "dsl", "ai", "streaming", "agent-ui", "protocol"],
+  "workspaces": [
+    "packages/core",
+    "packages/web",
+    "packages/skill"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces && bash docs/scripts/build-skill-zips.sh",
+    "test": "npm run test --workspaces",
+    "sync-docs": "node docs/scripts/sync-deps.mjs && bash docs/scripts/build-skill-zips.sh",
+    "verify": "node docs/scripts/sync-deps.mjs --check && npm run build && npm test"
+  }
+}
