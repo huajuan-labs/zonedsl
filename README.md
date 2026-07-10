@@ -3,6 +3,7 @@
 # ::ZoneDSL
 
 **The streaming-first A2UI protocol for conversational AI.**
+<sub>A2UI = AI-to-UI：AI 产出结构化文本，前端渲染成 UI。</sub>
 
 让 AI 的流式回复从「一堵 markdown 墙」变成「会排版、有图表、能交互的杂志页面」。
 
