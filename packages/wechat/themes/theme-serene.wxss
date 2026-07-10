@@ -1,0 +1,117 @@
+/**
+ * serene 主题(中式青绿+橙点缀,居中衬线,文人科普) v2.5 —— zone 组件规则.
+ * 参考图 34 梅雨季.
+ */
+.zone-theme-serene {
+  --mz-bg: #FCFAF7;
+  --mz-panel: #FFFFFF;
+  --mz-panel-soft: #E8EEEA;
+  --mz-ink: #2A2A2A;
+  --mz-ink-soft: #4A4A4A;
+  --mz-ink-mute: #8B9A8C;
+  --mz-line: #DDE3DE;
+  --mz-line-strong: #B8C4BC;
+  --mz-accent: #5E8265;
+  --mz-accent-warm: #86AF89;
+  --mz-accent-soft: #D8E3DA;
+  --mz-accent-tint: #EDF3EE;
+  --mz-gradient-warm: linear-gradient(135deg, #5E8265 0%, #86AF89 100%);
+  --mz-font: "Songti SC", "STSong", "SimSun", "PingFang SC", serif;
+  --mz-title-tracking: 1rpx;
+}
+.zone-theme-serene .zn-magazine-cover,
+.zone-theme-serene .zn-chapter,
+.zone-theme-serene .zn-editorial-hero,
+.zone-theme-serene .zn-editorial-pullquote,
+.zone-theme-serene .zn-statement,
+.zone-theme-serene .zn-mcover-title-text,
+.zone-theme-serene .zn-chapter-title,
+.zone-theme-serene .zn-df-text,
+.zone-theme-serene .zn-sb-main {
+  font-family: var(--mz-font);
+}
+.zone-theme-serene .zn-ol-num {
+  background: var(--mz-accent-soft);
+  color: var(--mz-accent);
+  border: 2rpx solid var(--mz-accent);
+  box-shadow: none;
+}
+.zone-theme-serene .zn-quote {
+  background: var(--mz-panel-soft);
+  border-left: 8rpx solid var(--mz-accent);
+  color: var(--mz-ink);
+  font-style: normal;
+  padding: 32rpx 40rpx;
+  border-radius: 12rpx;
+}
+.zone-theme-serene .zn-chapter-default {
+  border-bottom-color: var(--mz-accent-soft);
+}
+.zone-theme-serene .zn-editorial-hero {
+  background: var(--mz-panel);
+  border: 2rpx solid var(--mz-line);
+}
+.zone-theme-serene .zn-editorial-hero .zn-ehero-title-text,
+.zone-theme-serene .zn-editorial-hero .zn-ehero-subtitle {
+  color: var(--mz-ink);
+}
+.zone-theme-serene .zn-editorial-hero .zn-ehero-kicker-text {
+  color: var(--mz-accent);
+}
+.zone-theme-serene .zn-editorial-hero .zn-ehero-kicker-bar {
+  background: var(--mz-accent);
+}
+.zone-theme-serene .zn-editorial-hero::before {
+  background: rgba(0, 0, 0, 0);
+}
+.zone-theme-serene .zn-mcover-bg-light {
+  background: var(--mz-bg);
+  border: 2rpx solid var(--mz-line);
+}
+.zone-theme-serene .zn-mcover-bg-accent,
+.zone-theme-serene .zn-mcover-bg-warm,
+.zone-theme-serene .zn-mcover-bg-primary,
+.zone-theme-serene .zn-mcover-bg-success,
+.zone-theme-serene .zn-mcover-bg-purple {
+  background: var(--mz-bg);
+  border: 2rpx solid var(--mz-line);
+}
+.zone-theme-serene .zn-mcover-title-text,
+.zone-theme-serene .zn-mcover-subtitle-content,
+.zone-theme-serene .zn-mcover-subtitle-text,
+.zone-theme-serene .zn-mcover-footnote-text {
+  color: var(--mz-ink);
+}
+.zone-theme-serene .zn-mcover-subtitle-border {
+  background: var(--mz-accent);
+}
+.zone-theme-serene .zn-mcover-tag {
+  color: var(--mz-ink-soft);
+}
+.zone-theme-serene .zn-mcover-badge {
+  background: var(--mz-accent);
+}
+.zone-theme-serene .zn-kicker {
+  background: transparent;
+  color: #7A8B7C;
+  padding: 0;
+  border: none;
+  font-family: var(--mz-font);
+  letter-spacing: 4rpx;
+  font-size: 24rpx;
+}
+.zone-theme-serene .zn-df-prefix,
+.zone-theme-serene .zn-df-text {
+  color: var(--mz-accent);
+}
+.zone-theme-serene .zn-df-line {
+  background: var(--mz-line);
+}
+.zone-theme-serene .zn-text-hero,
+.zone-theme-serene .zn-text-title {
+  color: var(--mz-accent);
+  font-family: var(--mz-font);
+}
+.zone-theme-serene .zn-era-year {
+  color: var(--mz-accent);
+}

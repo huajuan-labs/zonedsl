@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "zone-node": "../zone-node/index",
+    "echarts": "@zonedsl/wechat/towxml/echarts/echarts"
+  }
+}

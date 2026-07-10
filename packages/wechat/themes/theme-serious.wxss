@@ -1,0 +1,25 @@
+/**
+ * serious 主题(严肃,深炭冷调,严格无饱和色) —— zone 组件规则.
+ */
+.zone-theme-serious {
+  --mz-bg: #F4F4F2;
+  --mz-panel: #FFFFFF;
+  --mz-panel-soft: #EBEBE8;
+  --mz-ink: #0F0F0F;
+  --mz-ink-soft: #3A3A3A;
+  --mz-ink-mute: #7A7A7A;
+  --mz-line: #D8D8D3;
+  --mz-line-strong: #A8A8A0;
+  --mz-accent: #0F0F0F;
+  --mz-accent-warm: #2D2D2D;
+  --mz-accent-soft: #D8D8D3;
+  --mz-accent-tint: #EBEBE8;
+  --mz-gradient-warm: linear-gradient(135deg, #0F0F0F 0%, #3A3A3A 100%);
+  --mz-font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+  --mz-title-tracking: 2rpx;
+}
+.zone-theme-serious .zn-magazine-cover .zn-mcover-title-text,
+.zone-theme-serious .zn-chapter-title,
+.zone-theme-serious .zn-editorial-hero .zn-ehero-title-text {
+  letter-spacing: var(--mz-title-tracking);
+}

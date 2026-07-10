@@ -1,0 +1,8 @@
+/* decode 是 towxml 递归渲染的子组件,styleIsolation=apply-shared 让父样式穿透进来,
+   但 towxml 主样式定义在 towxml.wxss(仅顶层组件加载)。
+   递归到深层 decode 后,父样式作用域不够,导致 .h2w__* 样式失效。
+   解决:让 decode 自己也加载完整样式表,保证每层递归都有 markdown 排版规则。 */
+@import './style/main.wxss';
+@import './style/theme/light.wxss';
+@import './style/theme/dark.wxss';
+@import './style/zone.wxss';

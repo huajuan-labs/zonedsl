@@ -14,7 +14,7 @@ homepage: https://github.com/huajuan-labs/zonedsl
 | 任务 | 走哪条路径 |
 |---|---|
 | 我要在 Web 上渲染 zone-DSL | 装 `@zonedsl/web`，见「接入 · Web」 |
-| 我要在 WeChat 小程序里渲染 | `@zonedsl/wechat` 🚧 coming soon，见「接入 · WeChat 小程序」 |
+| 我要在 WeChat 小程序里渲染 | 装 `@zonedsl/wechat`（zone-node + towxml，生产验证），见「接入 · WeChat 小程序」 |
 | 我要在 RN / Flutter 上支持 | parser 纯 JS 可复用,组件层按平台重写,见「跨平台接入」 |
 | 我要给 zone-DSL 加一个新组件 / 主题 / intent | 见「扩展 · 4 处登记流程」 |
 
@@ -31,20 +31,19 @@ homepage: https://github.com/huajuan-labs/zonedsl
 
 或 `import { ZonePlayground } from '@zonedsl/web'`（ESM）。流式渲染传 `{ streaming: true }`，骨架传 `{ skeleton: true }`。完整 API 见 [playground](https://zonedsl.dev) 源码 `docs/`。
 
-## 接入 · WeChat 小程序（🚧 coming soon）
+## 接入 · WeChat 小程序
 
-`@zonedsl/wechat` 包（zone-node 派发组件 + towxml + 12 主题）规划中，届时源码在 `packages/wechat/`。届时结构：
+`@zonedsl/wechat`（zone-node 派发组件 + towxml + 12 主题，生产验证）。源码在 `packages/wechat/`，结构：
 
 ```
 packages/wechat/
+├── zone-node/        ← 统一派发组件
 ├── towxml/           ← markdown 渲染器
-├── zone-node/        ← 派发组件
-└── themes/           ← 12 主题 wxss
+├── themes/           ← 12 主题 wxss
+└── shared.wxss
 ```
 
-> 在包发布前，可参考本仓库 `packages/`（上游小程序的实际集成，含 zone-components/towxml）作为手动接入样例。包发布后此段替换为正式安装步骤。
-
-### Step 1 · 注册组件（包发布后）
+### Step 1 · 注册组件
 
 页面 `index.json`:
 

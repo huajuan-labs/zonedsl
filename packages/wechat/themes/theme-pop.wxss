@@ -1,0 +1,167 @@
+/**
+ * pop 主题 —— 白底 + 红粉描边卡片 + 红粉胶囊 H1/H2.
+ * 参考图: huajuan-md_波普述职_预览_2026-06-230858.png
+ */
+.zone-theme-pop {
+  --mz-bg: #FFFFFF;
+  --mz-panel: #FFFFFF;
+  --mz-accent: #FF4D75;
+  --mz-line: #FF4D75;
+}
+.zone-theme-pop.h2w {
+  background: #FFFFFF;
+  padding: 24rpx 20rpx;
+  border-radius: 20rpx;
+}
+/* H1 —— 红粉底白字胶囊 */
+.zone-theme-pop .h2w__h1 {
+  display: inline-block;
+  background: #FF4D75;
+  color: #FFFFFF;
+  padding: 14rpx 32rpx;
+  border-radius: 8rpx;
+  font-weight: 700;
+  font-size: 34rpx;
+  margin: 28rpx 0 20rpx;
+  line-height: 1.4;
+  border-bottom: none;
+}
+/* H2 —— 红粉底白字胶囊, 更小 */
+.zone-theme-pop .h2w__h2 {
+  display: inline-block;
+  background: #FF4D75;
+  color: #FFFFFF;
+  padding: 12rpx 28rpx;
+  border-radius: 8rpx;
+  font-weight: 700;
+  font-size: 30rpx;
+  margin: 28rpx 0 20rpx;
+  line-height: 1.4;
+  border-bottom: none;
+}
+/* 段落 / 列表 —— 白卡片 + 红粉粗描边 */
+.zone-theme-pop .h2w__p,
+.zone-theme-pop .h2w__ul,
+.zone-theme-pop .h2w__ol {
+  background: #FFFFFF;
+  padding: 24rpx 28rpx;
+  border-radius: 12rpx;
+  border: 3rpx solid #FF4D75;
+  margin-bottom: 16rpx;
+  color: #1A1A1A;
+}
+/* 引用块 —— 淡粉底 + 红粉描边 */
+.zone-theme-pop .h2w__blockquote {
+  background: #FFF0F3;
+  border: 3rpx solid #FF4D75;
+  color: #1A1A1A;
+  padding: 24rpx 28rpx;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-pop .h2w__blockquote .h2w__p {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+/* 表格 —— 白卡, 红粉描边 */
+.zone-theme-pop .h2w__table {
+  background: #FFFFFF;
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  border: 3rpx solid #FF4D75;
+  margin-bottom: 16rpx;
+  border-collapse: collapse;
+  width: 100%;
+}
+.zone-theme-pop .h2w__th,
+.zone-theme-pop .h2w__td {
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #FFB3C4;
+  color: #1A1A1A;
+  font-size: 26rpx;
+}
+.zone-theme-pop .h2w__th {
+  font-weight: 700;
+  background: #FFF0F3;
+}
+/* 内联强调 —— 红粉高亮块 */
+.zone-theme-pop .h2w__b,
+.zone-theme-pop .h2w__strong {
+  background: #FF4D75;
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 2rpx 10rpx;
+  border-radius: 4rpx;
+}
+/* 分隔线 —— 红粉线 */
+.zone-theme-pop .h2w__hr {
+  border: none;
+  height: 3rpx;
+  background: #FF4D75;
+  margin: 32rpx 0;
+}
+/* 代码块 —— 黑底浅字 */
+.zone-theme-pop .h2w__pre {
+  background: #1E1E1E;
+  color: #E5E5E5;
+  border-radius: 12rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-pop .h2w__code {
+  color: #E5E5E5;
+  background: transparent;
+}
+
+/* ============ 补齐所有 markdown 元素(方案 A) ============ */
+.zone-theme-pop .h2w__h3,
+.zone-theme-pop .h2w__h4,
+.zone-theme-pop .h2w__h5,
+.zone-theme-pop .h2w__h6 {
+  color: #FF4D75;
+  font-weight: 700;
+  margin: 24rpx 0 12rpx;
+  border-bottom: none;
+}
+.zone-theme-pop .h2w__h3 { font-size: 28rpx; }
+.zone-theme-pop .h2w__h4 { font-size: 26rpx; }
+.zone-theme-pop .h2w__h5 { font-size: 24rpx; }
+.zone-theme-pop .h2w__h6 { font-size: 22rpx; }
+.zone-theme-pop .h2w__a {
+  color: #FF4D75;
+  border-bottom: 2rpx solid #FF4D75;
+  padding-bottom: 2rpx;
+}
+.zone-theme-pop .h2w__em,
+.zone-theme-pop .h2w__i { color: #FF4D75; font-style: italic; }
+.zone-theme-pop .h2w__del,
+.zone-theme-pop .h2w__s,
+.zone-theme-pop .h2w__strike { color: #B0B0B0; text-decoration: line-through; }
+.zone-theme-pop .h2w__mark {
+  background: #FFB3C4;
+  color: #1A1A1A;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+}
+.zone-theme-pop .h2w__ins { color: #FF4D75; text-decoration: underline; }
+.zone-theme-pop .h2w__sub,
+.zone-theme-pop .h2w__sup { color: #FF4D75; font-size: 20rpx; }
+.zone-theme-pop .h2w__img {
+  border-radius: 12rpx;
+  border: 3rpx solid #FF4D75;
+  max-width: 100%;
+}
+.zone-theme-pop .h2w__p .h2w__code,
+.zone-theme-pop .h2w__li .h2w__code,
+.zone-theme-pop .h2w__blockquote .h2w__code,
+.zone-theme-pop .h2w__td .h2w__code,
+.zone-theme-pop .h2w__th .h2w__code {
+  background: #FFF0F3;
+  color: #FF4D75;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  font-size: 26rpx;
+}
+.zone-theme-pop .h2w__li.task-list-item { color: #1A1A1A; }

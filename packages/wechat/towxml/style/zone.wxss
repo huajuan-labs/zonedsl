@@ -1,0 +1,26 @@
+/**
+ * v2.8 ZoneDSL 兜底样式(精简版)
+ *
+ * 历史遗留:早期用 .zone-* 前缀实现全套组件样式(1242 行).
+ * 现在 zone 组件全部由 zone-node 组件用 .zn-* 前缀渲染,zone.wxss 里 99% 是死代码.
+ * 精简后只保留 wxml 里 class="zone-*" 硬编码引用的规则:
+ *   .zone-node/index.wxml 引用了 .zone-block(root wrapper)
+ *   .zone-node/index.wxml 里 zone 组件 view 会有 .zone class(兜底铺满)
+ *
+ * 备份: zone.wxss.bak
+ */
+
+/* zone 组件根 view 铺满 —— 兜底给 h2w__viewParent 包壳的边界情况 */
+.zone .h2w__viewParent,
+.h2w__viewParent > .zone {
+  display: block;
+  width: 100%;
+}
+
+/* zone-block —— zone 组件的最外层容器,决定块间距和铺满 */
+.zone-block {
+  margin: 24rpx 0;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}

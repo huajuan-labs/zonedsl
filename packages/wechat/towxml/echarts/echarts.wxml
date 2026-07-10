@@ -1,0 +1,4 @@
+<view class="ec-canvas-wrap" style="height:{{size.height}}px;">
+  <canvas type="2d" class="ec-canvas" id="{{canvasId}}"
+    bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd"></canvas>
+</view>

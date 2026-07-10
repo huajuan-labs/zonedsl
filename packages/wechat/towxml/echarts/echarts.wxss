@@ -1,0 +1,11 @@
+.ec-canvas-wrap {
+  display: block;
+  width: 100%;
+  margin: 12rpx 0;
+  overflow: hidden;
+}
+.ec-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

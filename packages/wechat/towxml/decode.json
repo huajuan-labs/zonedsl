@@ -1,0 +1,10 @@
+{
+  "component": true,
+  "usingComponents": {
+    "decode": "@zonedsl/wechat/towxml/decode",
+    "echarts": "@zonedsl/wechat/towxml/echarts/echarts",
+    "table": "@zonedsl/wechat/towxml/table/table",
+    "img": "@zonedsl/wechat/towxml/img/img",
+    "zone-node": "@zonedsl/wechat/zone-node/index"
+  }
+}

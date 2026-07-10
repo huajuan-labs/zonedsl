@@ -1,0 +1,54 @@
+/**
+ * warm 主题(暖调科普,朱橙+温白,居中衬线) v2.5 —— zone 组件规则.
+ * 参考图 35 阳光疗法.
+ */
+.zone-theme-warm {
+  --mz-bg: #FBF8F3;
+  --mz-panel: #FFFFFF;
+  --mz-panel-soft: #FAEEDE;
+  --mz-ink: #2A2A2A;
+  --mz-ink-soft: #555555;
+  --mz-ink-mute: #999999;
+  --mz-line: #EFE0CC;
+  --mz-line-strong: #D9C4A6;
+  --mz-accent: #C56F3E;
+  --mz-accent-warm: #D89060;
+  --mz-accent-soft: #F5E1CD;
+  --mz-accent-tint: #FBF0E1;
+  --mz-gradient-warm: linear-gradient(135deg, #C56F3E 0%, #D89060 100%);
+  --mz-font: "Songti SC", "STSong", "SimSun", "PingFang SC", serif;
+  --mz-title-tracking: 0.5rpx;
+}
+.zone-theme-warm .zn-mcover-title-text,
+.zone-theme-warm .zn-chapter-title,
+.zone-theme-warm .zn-text-hero,
+.zone-theme-warm .zn-text-title,
+.zone-theme-warm .zn-ehero-title-text,
+.zone-theme-warm .zn-df-text {
+  font-family: var(--mz-font);
+  color: var(--mz-accent);
+}
+.zone-theme-warm .zn-kicker {
+  color: var(--mz-accent);
+  letter-spacing: 3rpx;
+  font-size: 24rpx;
+  text-transform: uppercase;
+}
+.zone-theme-warm .zn-ol-num {
+  background: var(--mz-panel-soft);
+  color: var(--mz-accent);
+  border: 2rpx solid var(--mz-accent-soft);
+  box-shadow: none;
+}
+.zone-theme-warm .zn-quote,
+.zone-theme-warm .zn-callout {
+  background: var(--mz-panel-soft);
+  border-left: 8rpx solid var(--mz-accent);
+  color: var(--mz-ink);
+  padding: 28rpx 36rpx;
+  border-radius: 12rpx;
+}
+.zone-theme-warm .zn-mcover-bg-light {
+  background: var(--mz-bg);
+  border: 2rpx solid var(--mz-line);
+}

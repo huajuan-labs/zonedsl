@@ -1,0 +1,180 @@
+/**
+ * purple 主题 —— 紫底 + 黄胶囊 + 白卡片(带淡紫描边).
+ * 参考图: huajuan-md_绩效便签_2026-06-230854.png
+ */
+.zone-theme-purple {
+  --mz-bg: #7C6EE0;
+  --mz-panel: #FFFFFF;
+  --mz-panel-soft: #ECE9FF;
+  --mz-ink: #1A1A1A;
+  --mz-line: #E6E1FF;
+  --mz-accent: #F5C94A;
+  --mz-accent-soft: #FEE9A0;
+}
+/* 紫底外壳 */
+.zone-theme-purple.h2w {
+  background: #7C6EE0;
+  padding: 24rpx 20rpx;
+  border-radius: 20rpx;
+}
+/* H1 / H2 黄色胶囊 */
+.zone-theme-purple .h2w__h1,
+.zone-theme-purple .h2w__h2 {
+  display: inline-block;
+  background: #F5C94A;
+  color: #1A1A1A;
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  font-weight: 700;
+  margin: 28rpx 0 20rpx;
+  line-height: 1.4;
+  border-bottom: none;
+}
+.zone-theme-purple .h2w__h1 { font-size: 34rpx; }
+.zone-theme-purple .h2w__h2 { font-size: 30rpx; }
+/* 段落 / 列表 —— 白卡片 + 淡紫描边(参考图 49 精细描边) */
+.zone-theme-purple .h2w__p,
+.zone-theme-purple .h2w__ol,
+.zone-theme-purple .h2w__ul {
+  background: #FFFFFF;
+  padding: 24rpx 28rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #E6E1FF;
+  margin-bottom: 16rpx;
+  color: #1A1A1A;
+}
+/* 引用块 —— 虚线紫框(参考图 49 底部 "接下来 12 个月" 样式) */
+.zone-theme-purple .h2w__blockquote {
+  background: #ECE9FF;
+  border: 2rpx dashed #B8AEF5;
+  border-left: 2rpx dashed #B8AEF5;
+  color: #4A3FA5;
+  padding: 24rpx 28rpx;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-purple .h2w__blockquote .h2w__p {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #4A3FA5;
+}
+/* 表格 —— 白卡片外壳,内部行线用极淡紫 */
+.zone-theme-purple .h2w__table {
+  background: #FFFFFF;
+  padding: 16rpx 20rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #E6E1FF;
+  margin-bottom: 16rpx;
+  border-collapse: collapse;
+  width: 100%;
+}
+.zone-theme-purple .h2w__th,
+.zone-theme-purple .h2w__td {
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #F0EDFF;
+  color: #1A1A1A;
+  font-size: 26rpx;
+}
+.zone-theme-purple .h2w__th {
+  font-weight: 700;
+  color: #4A3FA5;
+  background: #F7F5FF;
+}
+/* li 保留 towxml 默认 padding-left:48rpx —— 给 ::before ✦ 留位置, 只微调垂直间距 */
+.zone-theme-purple .h2w__li {
+  padding-top: 6rpx;
+  padding-bottom: 6rpx;
+}
+.zone-theme-purple .h2w__li::before { color: #F5C94A; }
+/* 内联强调 —— 马克笔黄色高亮 */
+.zone-theme-purple .h2w__b,
+.zone-theme-purple .h2w__strong {
+  background: linear-gradient(180deg, transparent 55%, #FEE9A0 55%);
+  color: #1A1A1A;
+  font-weight: 700;
+  padding: 0 4rpx;
+}
+/* 分隔线 —— 黄色描边(替代默认灰线) */
+.zone-theme-purple .h2w__hr {
+  border: none;
+  height: 3rpx;
+  background: #F5C94A;
+  margin: 32rpx 0;
+  opacity: 0.9;
+}
+/* 代码块 —— 黑底浅字 */
+.zone-theme-purple .h2w__pre {
+  background: #1E1E1E;
+  color: #E5E5E5;
+  border-radius: 12rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-purple .h2w__code {
+  color: #E5E5E5;
+  background: transparent;
+}
+
+/* ============ 补齐所有 markdown 元素(方案 A) ============ */
+/* 小标题 h3-h6 —— 紫底黄字胶囊,尺寸递减 */
+.zone-theme-purple .h2w__h3,
+.zone-theme-purple .h2w__h4,
+.zone-theme-purple .h2w__h5,
+.zone-theme-purple .h2w__h6 {
+  color: #4A3FA5;
+  font-weight: 700;
+  margin: 24rpx 0 12rpx;
+  border-bottom: none;
+}
+.zone-theme-purple .h2w__h3 { font-size: 28rpx; }
+.zone-theme-purple .h2w__h4 { font-size: 26rpx; }
+.zone-theme-purple .h2w__h5 { font-size: 24rpx; }
+.zone-theme-purple .h2w__h6 { font-size: 22rpx; }
+/* 链接 —— 黄下划线 */
+.zone-theme-purple .h2w__a {
+  color: #4A3FA5;
+  border-bottom: 2rpx solid #F5C94A;
+  padding-bottom: 2rpx;
+}
+/* 斜体 */
+.zone-theme-purple .h2w__em,
+.zone-theme-purple .h2w__i { color: #4A3FA5; font-style: italic; }
+/* 删除线 */
+.zone-theme-purple .h2w__del,
+.zone-theme-purple .h2w__s,
+.zone-theme-purple .h2w__strike { color: #999999; text-decoration: line-through; }
+/* mark 高亮 —— 黄底 */
+.zone-theme-purple .h2w__mark {
+  background: #F5C94A;
+  color: #1A1A1A;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+}
+/* ins 下划线 */
+.zone-theme-purple .h2w__ins { color: #4A3FA5; text-decoration: underline; text-decoration-color: #F5C94A; }
+/* sub / sup */
+.zone-theme-purple .h2w__sub,
+.zone-theme-purple .h2w__sup { color: #4A3FA5; font-size: 20rpx; }
+/* 图片 —— 白卡描边 */
+.zone-theme-purple .h2w__img {
+  border-radius: 12rpx;
+  border: 2rpx solid #E6E1FF;
+  max-width: 100%;
+}
+/* 行内 code —— 浅紫底紫字 */
+.zone-theme-purple .h2w__p .h2w__code,
+.zone-theme-purple .h2w__li .h2w__code,
+.zone-theme-purple .h2w__blockquote .h2w__code,
+.zone-theme-purple .h2w__td .h2w__code,
+.zone-theme-purple .h2w__th .h2w__code {
+  background: #ECE9FF;
+  color: #4A3FA5;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  font-size: 26rpx;
+}
+/* task list */
+.zone-theme-purple .h2w__li.task-list-item { color: #1A1A1A; }
+/* emoji 保持默认 */

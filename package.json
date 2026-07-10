@@ -8,10 +8,11 @@
   "homepage": "https://github.com/huajuan-labs/zonedsl",
   "repository": "https://github.com/huajuan-labs/zonedsl.git",
   "bugs": "https://github.com/huajuan-labs/zonedsl/issues",
-  "keywords": ["zonedsl", "dsl", "ai", "streaming", "agent-ui", "protocol"],
+  "keywords": ["zonedsl", "dsl", "ai", "streaming", "agent-ui", "a2ui", "protocol"],
   "workspaces": [
     "packages/core",
     "packages/web",
+    "packages/wechat",
     "packages/skill"
   ],
   "scripts": {

@@ -1,8 +1,8 @@
-# ZoneDSL Intent 白名单
+# ZoneDSL Intent 机制
 
-`button` 组件通过 `intent=` 属性声明用户点击意图。intent 是**协议层枚举**，value 语义由 spec 定义；**具体跳转/行为由宿主平台在 `handleZoneAction(intent, value, ctx)` 里实现**——spec 不规定跳哪个页面。**未知 intent 静默忽略**，确保 AI 输出错误时用户不感知。
+intent 是一种**点击意图机制**：`button` 组件通过 `intent=` 声明用户点击意图，value 语义由 spec 定义，**具体跳转/行为由宿主平台在 `handleZoneAction(intent, value, ctx)` 里实现**——spec 不规定跳哪个页面。本文件列出的是**常用示例集**，宿主可任意扩展平台专属 intent（如电商 `open-cart`、视频 `play-video`），无需改 parser。**未知 intent 静默忽略**，确保 AI 输出错误时用户不感知。
 
-## 白名单
+## 常用示例集
 
 ### 会话操作
 

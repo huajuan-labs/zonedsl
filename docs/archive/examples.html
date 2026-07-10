@@ -853,7 +853,7 @@
     { t: 'br' },
     { t: 'v', v: '  ' },
     { t: 'a', v: 'stats=' },
-    { t: 's', v: '"19 条热搜,11h+ 最长在榜"', frame: 'cover.stats' },
+    { t: 's', v: '"19 条热议,11h+ 最长在榜"', frame: 'cover.stats' },
     { t: 'br' }, { t: 'br' },
     { t: 'k', v: '::chapter', frame: 'chapter.skeleton' },
     { t: ' ' },
@@ -959,7 +959,7 @@
       const el = cover.querySelector('[data-slot="subtitle"]'); el.classList.remove('pending'); el.textContent = raw;
     } else if (key === 'cover.stats' && cover) {
       const el = cover.querySelector('[data-slot="stats"]'); el.classList.remove('pending');
-      // "19 条热搜,11h+ 最长在榜" 转两个 mc-stat
+      // "19 条热议,11h+ 最长在榜" 转两个 mc-stat
       const items = raw.split(',').map(function (s) { return s.trim(); });
       el.innerHTML = items.map(function (s) {
         const m = s.match(/^(\S+)\s+(.+)$/);
@@ -1461,7 +1461,7 @@ markdown 段落继续,不会被 zone 影响。
   <span class="a">tag=</span><span class="s">"HOT RECAP · 2026.07"</span>
   <span class="a">title=</span><span class="s">"林晚\n**盛夏夜名场面**"</span>
   <span class="a">subtitle=</span><span class="s">"48 小时刷屏,4 大场面轮番出圈"</span>
-  <span class="a">stats=</span><span class="s">"19 条热搜,5 条冲主榜,11h+ 最长在榜"</span>
+  <span class="a">stats=</span><span class="s">"19 条热议,5 条冲主榜,11h+ 最长在榜"</span>
   <span class="a">bg=</span><span class="s">light</span></pre>
     </div>
     <div class="split-render render-preview">
@@ -1470,7 +1470,7 @@ markdown 段落继续,不会被 zone 影响。
         <div class="mc-title">林晚<br><em>盛夏夜名场面</em></div>
         <div class="mc-sub">48 小时刷屏,4 大场面轮番出圈</div>
         <div class="mc-stats">
-          <span class="mc-stat"><b>19</b>条热搜</span>
+          <span class="mc-stat"><b>19</b>条热议</span>
           <span class="mc-stat"><b>5</b>条冲主榜</span>
           <span class="mc-stat"><b>11h+</b>最长在榜</span>
         </div>
@@ -1635,7 +1635,7 @@ h1/h2 自动变成黄色胶囊,段落自动变白卡片。</pre>
     <span class="a">value=</span><span class="s">"还有哪些没聊到?"</span>
   <span class="k">::button</span> <span class="s">"搜相关"</span>
     <span class="a">intent=</span><span class="s">search</span>
-    <span class="a">value=</span><span class="s">"热搜"</span></pre>
+    <span class="a">value=</span><span class="s">"热议"</span></pre>
     </div>
     <div class="split-render render-preview">
       <div style="font-family:var(--sans); font-size:13px;">

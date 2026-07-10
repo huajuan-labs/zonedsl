@@ -1,0 +1,412 @@
+/**
+ * towxml markdown 样式 — 平移自 web 端 .markdown-body + 花卷主题(themes.css)。
+ * 默认色板:warm(暖橘,与 web "热搜agent5" 一致)。
+ * 切主题:给外层容器加 class(.h2w--forest / .h2w--midnight / .h2w--dark)。
+ * px → rpx:约 2 倍(web 移动端 375pt / 小程序 750rpx)。
+ */
+
+/* ===== 主题变量:默认 warm 暖橘 ===== */
+.h2w,
+.h2w__main {
+  --hj-bg: #f7f8fa;
+  --hj-panel: #ffffff;
+  --hj-text: #1a1a1a;
+  --hj-text-secondary: #666666;
+  --hj-accent: #FF8200;
+  --hj-accent-light: #FFE0BF;
+  --hj-accent-soft: #FFF3E5;
+  --hj-accent-deep: #D26800;
+  --hj-border: #e8e8e8;
+  --hj-code-bg: #fdf0e8;
+  --hj-code-fg: #a04820;
+  --hj-pre-bg: #1f1a17;
+  --hj-pre-fg: #fbe7d2;
+}
+
+/* forest 森林绿 */
+.h2w--forest,
+.h2w--forest .h2w__main {
+  --hj-bg: #f7f9f8;
+  --hj-panel: #ffffff;
+  --hj-text: #15211c;
+  --hj-text-secondary: #5a6b62;
+  --hj-accent: #1b5e45;
+  --hj-accent-light: #e3f0e9;
+  --hj-accent-soft: #f0f7f3;
+  --hj-accent-deep: #0f3d2c;
+  --hj-border: #dfe8e3;
+}
+
+/* midnight 深蓝 */
+.h2w--midnight,
+.h2w--midnight .h2w__main {
+  --hj-bg: #f5f7fb;
+  --hj-panel: #ffffff;
+  --hj-text: #111827;
+  --hj-text-secondary: #5c6580;
+  --hj-accent: #1e3a8a;
+  --hj-accent-light: #e1e8f5;
+  --hj-accent-soft: #f0f4fb;
+  --hj-accent-deep: #132559;
+  --hj-border: #dce3ef;
+}
+
+/* dark 深色模式 */
+.h2w--dark,
+.h2w--dark .h2w__main {
+  --hj-bg: #0f172a;
+  --hj-panel: #1e293b;
+  --hj-text: #e2e8f0;
+  --hj-text-secondary: #94a3b8;
+  --hj-accent: #f07a1f;
+  --hj-accent-light: #4a3520;
+  --hj-accent-soft: #2a2216;
+  --hj-accent-deep: #ffb570;
+  --hj-border: #334155;
+  --hj-code-bg: rgba(255, 255, 255, 0.08);
+  --hj-pre-bg: #020617;
+  --hj-pre-fg: #e2e8f0;
+}
+
+/* ===== 根容器 ===== */
+.h2w__main {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  color: var(--hj-text);
+  font-size: 28rpx;
+  line-height: 1.7;
+  word-wrap: break-word;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* ===== 标题(花卷主题:严格用同一字重 + 差异化字号) ===== */
+.h2w__h1,
+.h2w__h2,
+.h2w__h3,
+.h2w__h4,
+.h2w__h5,
+.h2w__h6 {
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--hj-text);
+  margin: 40rpx 0 20rpx;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Serif SC", serif;
+}
+.h2w__h1 { font-size: 40rpx; }
+.h2w__h2 { font-size: 34rpx; }
+.h2w__h3 { font-size: 30rpx; }
+.h2w__h4 { font-size: 28rpx; }
+.h2w__h5 { font-size: 26rpx; }
+.h2w__h6 { font-size: 24rpx; }
+
+/* ===== 段落 ===== */
+.h2w__p {
+  margin: 0 0 36rpx;
+  line-height: 1.8;
+  color: var(--hj-text);
+}
+
+/* ===== 加粗(花卷:accent-deep 色 + 半高橙色渐变底) ===== */
+.h2w__strong,
+.h2w__b {
+  font-weight: 700;
+  color: var(--hj-accent-deep);
+  background: linear-gradient(transparent 60%, var(--hj-accent-light) 60%);
+  padding: 0 4rpx;
+}
+
+/* ===== 斜体 ===== */
+.h2w__em,
+.h2w__i {
+  font-style: italic;
+}
+
+/* ===== 图片 ===== */
+.h2w__img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 24rpx;
+  display: block;
+  margin: 16rpx 0;
+}
+
+/* ===== 分隔线 ===== */
+.h2w__hr {
+  border: 0;
+  height: 1rpx;
+  background: var(--hj-border);
+  margin: 64rpx 0;
+  display: block;
+}
+
+/* ===== 行内代码(对齐 web:accent-soft 底 + accent-deep 橙深字) ===== */
+.h2w__code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  background: var(--hj-code-bg);
+  color: var(--hj-code-fg);
+  padding: 2rpx 12rpx;
+  border-radius: 8rpx;
+  font-size: 0.92em;
+  display: inline;
+}
+
+/* ===== 代码块(对齐 web:#1f1a17 底 / #fbe7d2 字 / 圆角 14px→28rpx) ===== */
+.h2w__pre {
+  background: var(--hj-pre-bg);
+  color: var(--hj-pre-fg);
+  padding: 36rpx 40rpx;
+  border-radius: 28rpx;
+  overflow-x: auto;
+  font-size: 26rpx;
+  line-height: 1.7;
+  margin: 36rpx 0;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+/* pre 里的 code(整个代码容器):透明底、继承色,不再是独立气泡 */
+.h2w__pre .h2w__code {
+  display: inline;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font-family: inherit;
+}
+/* pre 里的所有 span(hljs 高亮片段):继承色 + inline,不显示语法着色 */
+.h2w__pre .h2w__span,
+.h2w__pre view {
+  display: inline;
+  padding: 0;
+  background: transparent;
+  color: inherit !important;
+  font-family: inherit;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+}
+/* hljs 已把源码里的 \n 转成 <br>,pre 里必须靠这些 br 换行。
+   小程序 view 需强制 block 占满宽度才能触发换行,同时高度 0 避免多余空行 */
+.h2w__pre .h2w__br {
+  display: block;
+  width: 100%;
+  height: 0;
+  content: "";
+  overflow: hidden;
+}
+/* pre 内所有 span 的 inline 要在 br 的 block 之后被打断——
+   靠 br 前后自然中断.pre-wrap 保证内部空格保留 */
+/* 行号列表:强制隐藏 + 清零边距,压过通用 .h2w__ul 规则 */
+.h2w__pre .h2w__ul.h2w__lineNum,
+.h2w__pre .h2w__li.h2w__lineNumLine {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+/* hljs 在源码空行处插入的 <p> 需要强制 block 占满宽度才换行 */
+.h2w__pre .h2w__p {
+  display: block;
+  width: 100%;
+  margin: 0;
+  height: auto;
+  min-height: 1em;
+}
+
+/* ===== 引用块(花卷:accent 色左边框 + accent-soft 背景) ===== */
+.h2w__blockquote {
+  border-left: 8rpx solid var(--hj-accent);
+  background: var(--hj-accent-soft);
+  color: var(--hj-text);
+  padding: 24rpx 28rpx;
+  border-radius: 0 24rpx 24rpx 0;
+  margin: 36rpx 0;
+}
+.h2w__blockquote .h2w__p {
+  margin: 0;
+}
+
+/* ===== 链接(花卷:accent 橙色) ===== */
+.h2w__a {
+  color: var(--hj-accent);
+  text-decoration: underline;
+  text-underline-offset: 4rpx;
+}
+
+/* ===== 表格(对齐 web 花卷:accent 色边框 + accent-light 表头 + hj-bg 单元格) ===== */
+.h2w__tableParent {
+  width: 100%;
+  overflow-x: auto;
+  margin: 32rpx 0;
+}
+.h2w__table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: auto;
+  max-width: 100%;
+  font-size: 26rpx;
+  display: table;
+  border: 2rpx solid var(--hj-accent);
+  border-radius: 24rpx;
+  overflow: hidden;
+  margin: 0;
+}
+.h2w__thead { display: table-row-group; }
+.h2w__tbody { display: table-row-group; }
+.h2w__tfoot { display: table-row-group; }
+.h2w__tr { display: table-row; }
+.h2w__th {
+  background: var(--hj-accent-light);
+  color: var(--hj-accent-deep);
+  font-weight: 700;
+  padding: 16rpx 20rpx;
+  text-align: left;
+  display: table-cell;
+  border-bottom: 2rpx solid var(--hj-accent);
+}
+.h2w__td {
+  padding: 16rpx 20rpx;
+  border-top: 2rpx solid var(--hj-accent);
+  display: table-cell;
+  color: var(--hj-text);
+  background: var(--hj-bg);
+}
+.h2w__tbody .h2w__tr:first-child .h2w__td {
+  border-top: 0;
+}
+
+/* ===== 列表(对齐 web 花卷:去原生 marker,用 ::before 画 accent 色 ✦) ===== */
+.h2w__ul,
+.h2w__ol {
+  margin: 20rpx 0;
+  padding: 0;
+  list-style: none;
+}
+.h2w__li {
+  position: relative;
+  padding: 10rpx 0 10rpx 48rpx;
+  margin: 8rpx 0;
+  color: var(--hj-text);
+  line-height: 1.75;
+}
+.h2w__li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  top: 16rpx;
+  color: var(--hj-accent);
+  font-size: 24rpx;
+  line-height: 1;
+  width: 32rpx;
+  text-align: center;
+}
+/* 嵌套列表缩进 */
+.h2w__ul .h2w__ul,
+.h2w__ul .h2w__ol,
+.h2w__ol .h2w__ul,
+.h2w__ol .h2w__ol {
+  margin: 8rpx 0 8rpx 24rpx;
+}
+/* li 内嵌 p:紧凑显示,首段不额外撑高 */
+.h2w__li .h2w__p {
+  margin: 0 0 12rpx;
+  line-height: 1.75;
+}
+.h2w__li .h2w__p:last-child {
+  margin-bottom: 0;
+}
+/* 任务列表:去掉 ✦(前面是 checkbox) */
+.h2w__li.task-list-item::before {
+  display: none;
+}
+.h2w__li.task-list-item {
+  padding-left: 0;
+}
+.h2w__checkbox.h2w__todoCheckbox {
+  margin-right: 12rpx;
+  transform: scale(0.75);
+  vertical-align: middle;
+}
+
+/* ===== 删除线 ===== */
+.h2w__del,
+.h2w__s,
+.h2w__strike {
+  text-decoration: line-through;
+  color: var(--hj-text-secondary);
+}
+
+/* ===== 下划线 / 插入 ===== */
+.h2w__u,
+.h2w__ins {
+  text-decoration: underline;
+}
+
+/* ===== 高亮(花卷 mark:半高橙色渐变) ===== */
+.h2w__mark {
+  background: linear-gradient(180deg, transparent 55%, var(--hj-accent-light) 55%);
+  color: inherit;
+  padding: 0 6rpx;
+}
+
+/* ===== 上下标 ===== */
+.h2w__sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+}
+.h2w__sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+/* ===== emoji ===== */
+.h2w__g-emoji {
+  font-family: inherit;
+}
+
+/* ===== 行内元素基础(小程序 view 默认 block,行内元素要强制 inline) ===== */
+.h2w__span,
+.h2w__a,
+.h2w__code,
+.h2w__strong,
+.h2w__b,
+.h2w__em,
+.h2w__i,
+.h2w__del,
+.h2w__s,
+.h2w__strike,
+.h2w__u,
+.h2w__ins,
+.h2w__mark,
+.h2w__sub,
+.h2w__sup,
+.h2w__g-emoji,
+.h2w__emoji,
+.h2w__small,
+.h2w__cite,
+.h2w__q,
+.h2w__abbr,
+.h2w__var,
+.h2w__kbd,
+.h2w__samp {
+  display: inline !important;
+}
+/* 兜底:段落 / 标题 / 表格单元格 / 列表项内所有 view 子孙都 inline(但 br 除外) */
+.h2w__p view:not(.h2w__br),
+.h2w__h1 view, .h2w__h2 view, .h2w__h3 view,
+.h2w__h4 view, .h2w__h5 view, .h2w__h6 view,
+.h2w__li > view:not(.h2w__ul):not(.h2w__ol):not(.h2w__p):not(.h2w__pre):not(.h2w__blockquote):not(.h2w__table):not(.h2w__hr):not(.h2w__br),
+.h2w__td view:not(.h2w__br), .h2w__th view:not(.h2w__br),
+.h2w__blockquote .h2w__p view:not(.h2w__br),
+.h2w__a view {
+  display: inline;
+}
+/* 全局 br 兜底换行(段落、单元格、引用块里都靠这个) */
+.h2w__br {
+  display: block !important;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+}

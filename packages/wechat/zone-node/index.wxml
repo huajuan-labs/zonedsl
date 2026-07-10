@@ -1,0 +1,983 @@
+<!-- zone-node: 统一派发组件，inline 15 个 zone 组件模板 -->
+<!-- prop: item = { tag, attrs:{...}, children:[...] }
+     v2.5: item.attrs._theme 由 dslToNodes 注入到每个节点上,
+     让每个 zone-node 组件的最外层 view 都能挂 zone-theme-<name> class,
+     使 shared.wxss 里 .zone-theme-serene .zn-xxx 选择器能在每个组件内部命中. -->
+<view class="zone-node zone-node-{{item.tag}} {{item.attrs._theme ? 'zone-theme-' + item.attrs._theme : ''}}" wx:if="{{item && item.tag}}">
+
+  <!-- ===== zone-block 容器 (dslToNodes 根节点) ===== -->
+  <!-- attrs.theme 由 dslToNodes 从 ::theme / magazine-cover theme= 提取,默认 editorial -->
+  <block wx:if="{{item.tag==='zone-block'}}">
+    <view class="zone-block zone-theme-{{item.attrs.theme || 'editorial'}}">
+      <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+    </view>
+  </block>
+
+  <!-- ===== divider ===== -->
+  <block wx:elif="{{item.tag==='zone-divider'}}">
+    <view class="zn-divider"></view>
+  </block>
+
+  <!-- ===== spacer (留白) ===== -->
+  <block wx:elif="{{item.tag==='zone-spacer'}}">
+    <view class="zn-spacer {{item.attrs.size ? 'zn-spacer-' + item.attrs.size : ''}}" style="{{item.attrs.custom ? 'height:' + item.attrs.custom + ';' : ''}}"></view>
+  </block>
+
+  <!-- ===== text (支持行内 markdown:**bold** *italic* `code`) ===== -->
+  <block wx:elif="{{item.tag==='zone-text'}}">
+    <view class="zn-text {{item.attrs.size ? 'zn-text-'+item.attrs.size : ''}} {{item.attrs.align === 'center' ? 'zn-text-align-center' : ''}}">
+      <block wx:for="{{item.attrs.parts}}" wx:for-item="p" wx:key="index">
+        <text class="zn-text-bold" wx:if="{{p.type==='bold'}}">{{p.text}}</text>
+        <text class="zn-text-italic" wx:elif="{{p.type==='italic'}}">{{p.text}}</text>
+        <text class="zn-text-code" wx:elif="{{p.type==='code'}}">{{p.text}}</text>
+        <text wx:else>{{p.text}}</text>
+      </block>
+    </view>
+  </block>
+
+  <!-- ===== tag ===== -->
+  <block wx:elif="{{item.tag==='zone-tag'}}">
+    <view class="zn-tag {{item.attrs.color ? 'zn-color-'+item.attrs.color : ''}}">{{item.attrs.main}}</view>
+  </block>
+
+  <!-- ===== alert ===== -->
+  <block wx:elif="{{item.tag==='zone-alert'}}">
+    <view class="zn-alert zn-alert-{{item.attrs.type || 'info'}}">
+      <view class="zn-alert-icon">{{item.attrs.icon}}</view>
+      <view class="zn-alert-text">{{item.attrs.main}}</view>
+    </view>
+  </block>
+
+  <!-- ===== metric ===== -->
+  <block wx:elif="{{item.tag==='zone-metric'}}">
+    <view class="zn-metric {{item.attrs.align === 'center' ? 'zn-metric-align-center' : ''}}">
+      <view class="zn-metric-desc" wx:if="{{item.attrs.desc}}">{{item.attrs.desc}}</view>
+      <view class="zn-metric-value zn-color-{{item.attrs.color || 'accent'}}">{{item.attrs.main}}</view>
+      <view class="zn-metric-trend {{item.attrs.trendDir ? 'zn-trend-'+item.attrs.trendDir : ''}}" wx:if="{{item.attrs.trend}}">{{item.attrs.trend}}</view>
+    </view>
+  </block>
+
+  <!-- ===== progress ===== -->
+  <block wx:elif="{{item.tag==='zone-progress'}}">
+    <view class="zn-progress">
+      <view class="zn-progress-label" wx:if="{{item.attrs.label}}">{{item.attrs.label}} {{item.attrs.value}}%</view>
+      <view class="zn-progress-bar">
+        <view class="zn-progress-fill zn-color-bg-{{item.attrs.color || 'accent'}}" style="width:{{item.attrs.value}}%"></view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== quote ===== -->
+  <block wx:elif="{{item.tag==='zone-quote'}}">
+    <view class="zn-quote">
+      <view class="zn-quote-main">{{item.attrs.main}}</view>
+      <view class="zn-quote-cite" wx:if="{{item.attrs.cite}}">— {{item.attrs.cite}}</view>
+    </view>
+  </block>
+
+  <!-- ===== list ===== -->
+  <!-- item.attrs.items = [{main, desc?}, ...] -->
+  <block wx:elif="{{item.tag==='zone-list'}}">
+    <view class="zn-list">
+      <view class="zn-list-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-list-body">
+        <view class="zn-list-item" wx:for="{{item.attrs.items}}" wx:for-item="li" wx:key="index">
+          <view class="zn-list-dot"></view>
+          <view class="zn-list-text-wrap">
+            <view class="zn-list-text">{{li.main}}</view>
+            <view class="zn-list-desc" wx:if="{{li.desc}}">{{li.desc}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== numbered-list / ol ===== -->
+  <!-- item.attrs.items = [{index, main, desc?}, ...] -->
+  <block wx:elif="{{item.tag==='zone-numbered-list'}}">
+    <view class="zn-numbered-list">
+      <view class="zn-ol-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-ol-body">
+        <view class="zn-ol-item" wx:for="{{item.attrs.items}}" wx:for-item="li" wx:key="index">
+          <view class="zn-ol-num">{{li.index}}</view>
+          <view class="zn-ol-text-wrap">
+            <view class="zn-ol-text">{{li.main}}</view>
+            <view class="zn-ol-desc" wx:if="{{li.desc}}">{{li.desc}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== table ===== -->
+  <!-- item.attrs.headers = [...], item.attrs.rows = [[...], ...], item.attrs.cellsCount = N -->
+  <block wx:elif="{{item.tag==='zone-table'}}">
+    <view class="zn-table">
+      <view class="zn-table-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-table-header" wx:if="{{item.attrs.headers && item.attrs.headers.length}}">
+        <view class="zn-table-th zn-cell-of-{{item.attrs.cellsCount}}"
+              wx:for="{{item.attrs.headers}}" wx:for-item="th" wx:key="index">{{th}}</view>
+      </view>
+      <view class="zn-table-row" wx:for="{{item.attrs.rows}}" wx:for-item="row" wx:key="rIdx">
+        <view class="zn-table-td zn-cell-of-{{item.attrs.cellsCount}}"
+              wx:for="{{row}}" wx:for-item="cell" wx:key="cIdx">{{cell}}</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== timeline ===== -->
+  <!-- item.attrs.items = [{when?, main, desc?, tag?, location?, highlight?}, ...] -->
+  <block wx:elif="{{item.tag==='zone-timeline'}}">
+    <view class="zn-timeline">
+      <view class="zn-tl-header" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-tl-list">
+        <view class="zn-tl-item {{index === item.attrs.items.length - 1 ? 'zn-tl-last' : ''}} {{tl.highlight ? 'zn-tl-highlight' : ''}}"
+              wx:for="{{item.attrs.items}}" wx:for-item="tl" wx:key="index">
+          <view class="zn-tl-marker">
+            <view class="zn-tl-dot"></view>
+            <view class="zn-tl-line"></view>
+          </view>
+          <view class="zn-tl-body">
+            <view class="zn-tl-meta" wx:if="{{tl.when || tl.tag || tl.location}}">
+              <view class="zn-tl-when" wx:if="{{tl.when}}">{{tl.when}}</view>
+              <view class="zn-tl-tag" wx:if="{{tl.tag}}">{{tl.tag}}</view>
+              <view class="zn-tl-location" wx:if="{{tl.location}}">{{tl.location}}</view>
+            </view>
+            <view class="zn-tl-title">{{tl.main}}</view>
+            <view class="zn-tl-desc" wx:if="{{tl.desc}}">{{tl.desc}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== fact-bar ===== -->
+  <!-- item.attrs.items = [{label, value}, ...] -->
+  <block wx:elif="{{item.tag==='zone-fact-bar'}}">
+    <view class="zn-fact-bar">
+      <view class="zn-fact-bar-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-fact-bar-body">
+        <view class="zn-fact-bar-item" wx:for="{{item.attrs.items}}" wx:for-item="fi" wx:key="index">
+          <view class="zn-fact-bar-label">{{fi.label}}</view>
+          <view class="zn-fact-bar-value">{{fi.value}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== data-board ===== -->
+  <!-- item.attrs.items = [{label, value, desc?, tag?}, ...]
+       layout: grid(默认,2/3/4 列大数字) | row(行式:label 左 + value 右) -->
+  <block wx:elif="{{item.tag==='zone-data-board'}}">
+    <view class="zn-data-board zn-db-layout-{{item.attrs.layout || 'grid'}}">
+      <view class="zn-db-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <block wx:if="{{item.attrs.layout === 'row'}}">
+        <view class="zn-db-rows">
+          <view class="zn-db-row" wx:for="{{item.attrs.items}}" wx:for-item="bi" wx:key="index">
+            <view class="zn-db-row-left">
+              <view class="zn-db-row-label">{{bi.label}}</view>
+              <view class="zn-db-row-tag" wx:if="{{bi.tag}}">{{bi.tag}}</view>
+            </view>
+            <view class="zn-db-row-value">{{bi.value}}</view>
+          </view>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="zn-db-body zn-db-cols-{{item.attrs.cols || 2}}">
+          <view class="zn-db-item" wx:for="{{item.attrs.items}}" wx:for-item="bi" wx:key="index">
+            <view class="zn-db-tag" wx:if="{{bi.tag}}">{{bi.tag}}</view>
+            <view class="zn-db-value">{{bi.value}}</view>
+            <view class="zn-db-label">{{bi.label}}</view>
+            <view class="zn-db-desc" wx:if="{{bi.desc}}">{{bi.desc}}</view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <!-- ===== step-block(Step 1-N 米色块列表) ===== -->
+  <block wx:elif="{{item.tag==='zone-step-block'}}">
+    <view class="zn-step-block">
+      <view class="zn-sb-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-sb-body">
+        <view class="zn-sb-item" wx:for="{{item.attrs.items}}" wx:for-item="si" wx:key="index">
+          <view class="zn-sb-label">{{si.label}}</view>
+          <view class="zn-sb-text">
+            <view class="zn-sb-main">{{si.main}}</view>
+            <view class="zn-sb-desc" wx:if="{{si.desc}}">{{si.desc}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== icon-grid(emoji 网格,4/2×2) ===== -->
+  <block wx:elif="{{item.tag==='zone-icon-grid'}}">
+    <view class="zn-icon-grid">
+      <view class="zn-ig-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-ig-body zn-ig-cols-{{item.attrs.cols || 2}}">
+        <view class="zn-ig-item" wx:for="{{item.attrs.items}}" wx:for-item="gi" wx:key="index">
+          <view class="zn-ig-icon" wx:if="{{gi.icon}}">{{gi.icon}}</view>
+          <view class="zn-ig-main">{{gi.main}}</view>
+          <view class="zn-ig-desc" wx:if="{{gi.desc}}">{{gi.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== divider-fancy(装饰分隔线) ===== -->
+  <block wx:elif="{{item.tag==='zone-divider-fancy'}}">
+    <view class="zn-divider-fancy">
+      <text class="zn-df-prefix">{{item.attrs.prefix || '//'}}</text>
+      <text class="zn-df-text" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</text>
+      <view class="zn-df-line"></view>
+    </view>
+  </block>
+
+  <!-- ===== labeled-list ===== -->
+  <!-- item.attrs.items = [{label, desc, tag?, color?}, ...] -->
+  <block wx:elif="{{item.tag==='zone-labeled-list'}}">
+    <view class="zn-labeled-list">
+      <view class="zn-ll-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-ll-body">
+        <view class="zn-ll-item" wx:for="{{item.attrs.items}}" wx:for-item="li" wx:key="index">
+          <view class="zn-ll-tag zn-ll-tag-{{li.color || 'accent'}}" wx:if="{{li.tag || li.label}}">{{li.tag || li.label}}</view>
+          <view class="zn-ll-desc">{{li.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== glyph-compare ===== -->
+  <!-- item.attrs.items = [{glyph, label?, desc?}, ...] -->
+  <block wx:elif="{{item.tag==='zone-glyph-compare'}}">
+    <view class="zn-glyph-compare">
+      <view class="zn-gc-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-gc-frame">
+        <view class="zn-gc-tabs" wx:if="{{item.attrs.items && item.attrs.items[0] && item.attrs.items[0].label}}">
+          <view class="zn-gc-tab" wx:for="{{item.attrs.items}}" wx:for-item="gi" wx:key="index">
+            <view class="zn-gc-tab-bar"></view>
+            <view class="zn-gc-tab-text">{{gi.label}}</view>
+          </view>
+        </view>
+        <view class="zn-gc-body">
+          <view class="zn-gc-item" wx:for="{{item.attrs.items}}" wx:for-item="gi" wx:key="index">
+            <view class="zn-gc-glyph">{{gi.glyph}}</view>
+            <view class="zn-gc-desc" wx:if="{{gi.desc}}">{{gi.desc}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== statement ===== -->
+  <block wx:elif="{{item.tag==='zone-statement'}}">
+    <view class="zn-statement">
+      <view class="zn-st-title" wx:if="{{item.attrs.title}}">{{item.attrs.title}}</view>
+      <view class="zn-st-content">
+        <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+      </view>
+      <view class="zn-st-footer" wx:if="{{item.attrs.author || item.attrs.time || item.attrs.source}}">
+        <text class="zn-st-cite">
+          <text wx:if="{{item.attrs.author}}">— {{item.attrs.author}}</text><text wx:if="{{item.attrs.time}}"> · {{item.attrs.time}}</text><text wx:if="{{item.attrs.source}}"> · {{item.attrs.source}}</text>
+        </text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== section (递归容器) ===== -->
+  <block wx:elif="{{item.tag==='zone-section'}}">
+    <view class="zn-section">
+      <view class="zn-section-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-section-body">
+        <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== magazine-cover ===== -->
+  <block wx:elif="{{item.tag==='zone-magazine-cover'}}">
+    <view class="zn-magazine-cover zn-mcover-bg-{{item.attrs.bg || 'light'}} {{item.attrs.bgUrl ? 'zn-mcover-has-bg' : ''}} {{item.attrs.tagStyle ? 'zn-mcover-tag-' + item.attrs.tagStyle : ''}} {{item.attrs.align === 'center' ? 'zn-mcover-align-center' : ''}}" style="{{item.attrs.bgUrl ? 'background-image:url(' + item.attrs.bgUrl + ');' : ''}}">
+      <view class="zn-mcover-overlay" wx:if="{{item.attrs.bgUrl}}"></view>
+      <view class="zn-mcover-content">
+        <view class="zn-mcover-meta" wx:if="{{item.attrs.tag || item.attrs.date}}">
+          <view class="zn-mcover-tag" wx:if="{{item.attrs.tag}}">{{item.attrs.tag}}</view>
+          <view class="zn-mcover-meta-dot" wx:if="{{item.attrs.tag && item.attrs.date}}">·</view>
+          <view class="zn-mcover-date" wx:if="{{item.attrs.date}}">{{item.attrs.date}}</view>
+        </view>
+        <view class="zn-mcover-headline" wx:if="{{item.attrs.titleParts && item.attrs.titleParts.length}}">
+          <block wx:for="{{item.attrs.titleParts}}" wx:for-item="tp" wx:key="index">
+            <view class="zn-mcover-title-break" wx:if="{{tp.type==='break'}}"></view>
+            <text wx:else class="zn-mcover-title-text {{tp.type==='highlight' ? 'zn-mcover-hl-'+tp.style : ''}} {{tp.type==='colored' ? 'zn-mcover-colored' : ''}}">{{tp.text}}</text>
+          </block>
+        </view>
+        <!-- fallback: 若 titleParts 为空但 title 存在,直接展示纯文本主标题(向后兼容) -->
+        <view class="zn-mcover-headline" wx:elif="{{item.attrs.title}}">
+          <text class="zn-mcover-title-text">{{item.attrs.title}}</text>
+        </view>
+        <view class="zn-mcover-subtitle" wx:if="{{item.attrs.subtitleParts && item.attrs.subtitleParts.length}}">
+          <view class="zn-mcover-subtitle-border"></view>
+          <view class="zn-mcover-subtitle-content">
+            <block wx:for="{{item.attrs.subtitleParts}}" wx:for-item="sp" wx:key="index">
+              <text class="zn-mcover-subtitle-text {{sp.type==='highlight' ? 'zn-mcover-sub-hl-'+sp.style : ''}} {{sp.type==='colored' ? 'zn-mcover-sub-colored' : ''}}">{{sp.text}}</text>
+            </block>
+          </view>
+        </view>
+        <!-- fallback: subtitleParts 缺失时用 subtitle 纯文本 -->
+        <view class="zn-mcover-subtitle" wx:elif="{{item.attrs.subtitle}}">
+          <view class="zn-mcover-subtitle-border"></view>
+          <view class="zn-mcover-subtitle-content">{{item.attrs.subtitle}}</view>
+        </view>
+        <view class="zn-mcover-stats" wx:if="{{item.attrs.stats && item.attrs.stats.length}}">
+          <view class="zn-mcover-stat" wx:for="{{item.attrs.stats}}" wx:for-item="st" wx:key="index">
+            <block wx:if="{{st.num || st.rest || st.text}}">
+              <text class="zn-mcover-stat-num" wx:if="{{st.num}}">{{st.num}} </text><text class="zn-mcover-stat-rest">{{st.rest || st.text}}</text>
+            </block>
+            <text wx:else class="zn-mcover-stat-rest">{{st}}</text>
+          </view>
+        </view>
+        <view class="zn-mcover-footer" wx:if="{{item.attrs.footnote || item.attrs.badge}}">
+          <view class="zn-mcover-footnote" wx:if="{{item.attrs.footnote}}">
+            <view class="zn-mcover-footnote-dot"></view>
+            <view class="zn-mcover-footnote-text">{{item.attrs.footnote}}</view>
+          </view>
+          <view class="zn-mcover-badge" wx:if="{{item.attrs.badge}}">{{item.attrs.badge}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== card (递归容器) ===== -->
+  <block wx:elif="{{item.tag==='zone-card'}}">
+    <view class="zn-card zn-card-v-{{item.attrs.variant || 'default'}}">
+      <view class="zn-card-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-card-body">
+        <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== row (递归容器,v2.9: 支持 align=center) ===== -->
+  <block wx:elif="{{item.tag==='zone-row'}}">
+    <view class="zn-row {{item.attrs.align==='center' ? 'zn-row-center' : ''}}">
+      <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+    </view>
+  </block>
+
+  <!-- ===== center (v2.9: 通用居中容器,零参数,双向 flex 居中,宽度 100%) ===== -->
+  <block wx:elif="{{item.tag==='zone-center'}}">
+    <view class="zn-center">
+      <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+    </view>
+  </block>
+
+  <!-- ===== person-grid (人物卡网格容器) ===== -->
+  <block wx:elif="{{item.tag==='zone-person-grid'}}">
+    <view class="zn-person-grid zn-person-grid-cols-{{item.attrs.cols || 2}}">
+      <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+    </view>
+  </block>
+
+  <!-- ===== person-card ===== -->
+  <block wx:elif="{{item.tag==='zone-person-card'}}">
+    <view class="zn-person-card">
+      <image class="zn-person-avatar" src="{{item.attrs.avatar}}" mode="aspectFill" wx:if="{{item.attrs.avatar}}"/>
+      <view class="zn-person-fallback" wx:else>{{item.attrs.name ? item.attrs.name[0] : '?'}}</view>
+      <view class="zn-person-name" wx:if="{{item.attrs.name}}">{{item.attrs.name}}</view>
+      <view class="zn-person-desc" wx:if="{{item.attrs.desc}}">{{item.attrs.desc}}</view>
+    </view>
+  </block>
+
+  <!-- ===== scene-card ===== -->
+  <block wx:elif="{{item.tag==='zone-scene-card'}}">
+    <view class="zn-scene-card">
+      <view class="zn-scene-header" wx:if="{{item.attrs.icon || item.attrs.badge || item.attrs.rank}}">
+        <view class="zn-scene-icon" wx:if="{{item.attrs.icon}}">{{item.attrs.icon}}</view>
+        <view class="zn-scene-header-meta" wx:if="{{item.attrs.badge || item.attrs.rank}}">
+          <text wx:if="{{item.attrs.badge}}">{{item.attrs.badge}}</text>
+          <text class="zn-scene-header-dot" wx:if="{{item.attrs.badge && item.attrs.rank}}"> · </text>
+          <text wx:if="{{item.attrs.rank}}">{{item.attrs.rank}}</text>
+        </view>
+      </view>
+      <view class="zn-scene-body">
+        <view class="zn-scene-title" wx:if="{{item.attrs.title}}">{{item.attrs.title}}</view>
+        <view class="zn-scene-desc" wx:if="{{item.attrs.desc}}">{{item.attrs.desc}}</view>
+        <view class="zn-scene-tags" wx:if="{{item.attrs.tags && item.attrs.tags.length}}">
+          <view class="zn-scene-tag" wx:for="{{item.attrs.tags}}" wx:for-item="st" wx:key="index">{{st}}</view>
+        </view>
+        <view class="zn-scene-children" wx:if="{{item.children && item.children.length}}">
+          <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== city-card / itinerary-card ===== -->
+  <block wx:elif="{{item.tag==='zone-city-card'}}">
+    <view class="zn-city-card zn-city-card-{{item.attrs.color || 'accent'}}">
+      <view class="zn-city-header-tab" wx:if="{{item.attrs.num || item.attrs.country}}">
+        <text class="zn-city-num" wx:if="{{item.attrs.num}}">CITY {{item.attrs.num}}</text>
+        <text class="zn-city-dot" wx:if="{{item.attrs.num && item.attrs.country}}">·</text>
+        <text class="zn-city-country" wx:if="{{item.attrs.country}}">{{item.attrs.country}}</text>
+      </view>
+      <view class="zn-city-name" wx:if="{{item.attrs.city}}">
+        {{item.attrs.city}}<text class="zn-city-en" wx:if="{{item.attrs.en}}"> {{item.attrs.en}}</text>
+      </view>
+      <view class="zn-city-date" wx:if="{{item.attrs.date}}">
+        <text class="zn-city-date-pin">📍</text>{{item.attrs.date}}
+      </view>
+      <view class="zn-city-body" wx:if="{{item.attrs.items && item.attrs.items.length}}">
+        <view class="zn-city-item" wx:for="{{item.attrs.items}}" wx:for-item="ci" wx:key="index">
+          <view class="zn-city-item-text">
+            <view class="zn-city-item-main">
+              {{ci.main}}<text class="zn-city-item-idx">[{{index + 1}}]</text>
+            </view>
+            <view class="zn-city-item-desc" wx:if="{{ci.desc}}">{{ci.desc}}</view>
+          </view>
+        </view>
+      </view>
+      <view class="zn-city-tags" wx:if="{{item.attrs.tags && item.attrs.tags.length}}">
+        <view class="zn-city-tag" wx:for="{{item.attrs.tags}}" wx:for-item="ct" wx:key="index">{{ct}}</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== era-timeline 横向历史时间条 ===== -->
+  <block wx:elif="{{item.tag==='zone-era-timeline'}}">
+    <view class="zn-era-timeline">
+      <view class="zn-era-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <!-- 张数为 2/4:2 列网格;其他张数:横滑 -->
+      <!-- scroll-view 只管滚动,内层 wrapper 做 flex-stretch 严格等高 -->
+      <scroll-view wx:if="{{item.attrs.layout === 'scroll'}}" class="zn-era-scroll-outer" scroll-x>
+        <view class="zn-era-scroll-inner">
+          <view class="zn-era-item-flex" wx:for="{{item.attrs.items}}" wx:for-item="ei" wx:key="index">
+            <view class="zn-era-year">{{ei.year}}</view>
+            <view class="zn-era-label" wx:if="{{ei.label}}">{{ei.label}}</view>
+            <view class="zn-era-desc" wx:if="{{ei.desc}}">{{ei.desc}}</view>
+          </view>
+        </view>
+      </scroll-view>
+      <view wx:else class="zn-era-grid">
+        <view class="zn-era-item-grid" wx:for="{{item.attrs.items}}" wx:for-item="ei" wx:key="index">
+          <view class="zn-era-year">{{ei.year}}</view>
+          <view class="zn-era-label" wx:if="{{ei.label}}">{{ei.label}}</view>
+          <view class="zn-era-desc" wx:if="{{ei.desc}}">{{ei.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== media-card 图片+叠加标题 ===== -->
+  <block wx:elif="{{item.tag==='zone-media-card'}}">
+    <view class="zn-media-card zn-media-align-{{item.attrs.align || 'bottom'}} zn-media-overlay-{{item.attrs.overlay || 'gradient'}}" style="height: {{item.attrs.height}}rpx;">
+      <image class="zn-media-img" src="{{item.attrs.url}}" mode="aspectFill" wx:if="{{item.attrs.url}}"/>
+      <view class="zn-media-mask"></view>
+      <view class="zn-media-content">
+        <view class="zn-media-tag" wx:if="{{item.attrs.tag}}">{{item.attrs.tag}}</view>
+        <view class="zn-media-title" wx:if="{{item.attrs.title}}">{{item.attrs.title}}</view>
+        <view class="zn-media-subtitle" wx:if="{{item.attrs.subtitle}}">{{item.attrs.subtitle}}</view>
+        <view class="zn-media-tags" wx:if="{{item.attrs.tags && item.attrs.tags.length}}">
+          <view class="zn-media-tag-chip" wx:for="{{item.attrs.tags}}" wx:for-item="mt" wx:key="index">{{mt}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== col (递归容器,v2.9: 支持 align=center) ===== -->
+  <block wx:elif="{{item.tag==='zone-col'}}">
+    <view class="zn-col zn-col-{{item.attrs.span || 12}} {{item.attrs.align==='center' ? 'zn-col-center' : ''}}">
+      <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+    </view>
+  </block>
+
+  <!-- ===== grid (递归容器) ===== -->
+  <block wx:elif="{{item.tag==='zone-grid'}}">
+    <view class="zn-grid zn-grid-cols-{{item.attrs.cols || 2}} zn-gap-{{item.attrs.gap || 'md'}}">
+      <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+    </view>
+  </block>
+
+  <!-- ===== echarts(直接派发给 towxml 的 <echarts> 组件) ===== -->
+  <block wx:elif="{{item.tag==='echarts'}}">
+    <echarts data="{{item}}" data-data="{{item}}"/>
+  </block>
+
+  <!-- ===== image(zone-image 组件式) ===== -->
+  <block wx:elif="{{item.tag==='zone-image'}}">
+    <view class="zn-image">
+      <image class="zn-image-img" src="{{item.attrs.src}}" mode="{{item.attrs.mode || 'widthFix'}}" data-data="{{item}}" catch:tap="_tap"/>
+      <view class="zn-image-caption" wx:if="{{item.attrs.caption}}">{{item.attrs.caption}}</view>
+    </view>
+  </block>
+  <!-- ===== gallery(1/2/3/4/9 图) ===== -->
+  <block wx:elif="{{item.tag==='zone-gallery'}}">
+    <view class="zn-gallery-wrap">
+      <view class="zn-gallery-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-gallery zn-gallery-cols-{{item.attrs.cols}}">
+        <image
+          wx:for="{{item.attrs.urls}}"
+          wx:for-item="u"
+          wx:key="index"
+          class="zn-gallery-img"
+          src="{{u}}"
+          mode="aspectFill"
+          data-src="{{u}}"
+          data-urls="{{item.attrs.urls}}"
+          catch:tap="onGalleryTap"
+        />
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== hscroll(横向 scroll-view) ===== -->
+  <block wx:elif="{{item.tag==='zone-hscroll'}}">
+    <view class="zn-hscroll-wrap">
+      <view class="zn-hscroll-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <scroll-view class="zn-hscroll" scroll-x="true" show-scrollbar="{{false}}">
+        <view class="zn-hscroll-item" wx:for="{{item.children}}" wx:for-item="child" wx:key="index">
+          <zone-node item="{{child}}"/>
+        </view>
+      </scroll-view>
+    </view>
+  </block>
+
+  <!-- ===== swiper(原生轮播) ===== -->
+  <block wx:elif="{{item.tag==='zone-swiper'}}">
+    <view class="zn-swiper-wrap">
+      <view class="zn-swiper-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <swiper
+        class="zn-swiper"
+        style="height:{{item.attrs.height}}rpx"
+        indicator-dots="{{item.attrs.dots}}"
+        indicator-color="rgba(0,0,0,0.2)"
+        indicator-active-color="#FF8200"
+        autoplay="{{item.attrs.autoplay}}"
+        circular="{{item.attrs.circular}}"
+        interval="{{item.attrs.interval}}"
+        duration="400"
+      >
+        <swiper-item class="zn-swiper-item" wx:for="{{item.children}}" wx:for-item="child" wx:key="index">
+          <zone-node item="{{child}}"/>
+        </swiper-item>
+      </swiper>
+    </view>
+  </block>
+
+  <!-- ===== P1: badge ===== -->
+  <block wx:elif="{{item.tag==='zone-badge'}}">
+    <view class="zn-badge zn-badge-{{item.attrs.color || 'accent'}}">{{item.attrs.main}}</view>
+  </block>
+
+  <!-- ===== P1: pill ===== -->
+  <block wx:elif="{{item.tag==='zone-pill'}}">
+    <view class="zn-pill zn-pill-{{item.attrs.color || 'accent'}}">{{item.attrs.main}}</view>
+  </block>
+
+  <!-- ===== P1: button ===== -->
+  <!-- v2.0 有 intent 才绑点击;无 intent 保持纯样式(v1 兼容)
+       v2.4 intent=share 特殊处理:渲染原生 <button open-type="share">,
+       用 onShareAppMessage 拿 value 做分享文案. -->
+  <block wx:elif="{{item.tag==='zone-button'}}">
+    <button
+      wx:if="{{item.attrs.intent === 'share'}}"
+      class="zn-button zn-button-{{item.attrs.variant || 'primary'}} zn-button-sz-{{item.attrs.size || 'md'}} zn-button-clickable zn-button-native"
+      hover-class="zn-button-pressed"
+      hover-stay-time="80"
+      open-type="share"
+      data-intent="share"
+      data-value="{{item.attrs.value}}"
+      data-main="{{item.attrs.main}}"
+    >{{item.attrs.main}}</button>
+    <view
+      wx:else
+      class="zn-button zn-button-{{item.attrs.variant || 'primary'}} zn-button-sz-{{item.attrs.size || 'md'}} {{item.attrs.intent ? 'zn-button-clickable' : ''}}"
+      hover-class="{{item.attrs.intent ? 'zn-button-pressed' : ''}}"
+      hover-stay-time="80"
+      bindtap="{{item.attrs.intent ? 'onButtonAction' : ''}}"
+      data-intent="{{item.attrs.intent}}"
+      data-value="{{item.attrs.value}}"
+    >{{item.attrs.main}}</view>
+  </block>
+
+  <!-- ===== P1: icon ===== -->
+  <block wx:elif="{{item.tag==='zone-icon'}}">
+    <text class="zn-icon zn-icon-{{item.attrs.size || 'md'}}">{{item.attrs.main}}</text>
+  </block>
+
+  <!-- ===== P1: avatar ===== -->
+  <block wx:elif="{{item.tag==='zone-avatar'}}">
+    <view class="zn-avatar zn-avatar-{{item.attrs.size || 'md'}}">
+      <image wx:if="{{item.attrs.url}}" class="zn-avatar-img" src="{{item.attrs.url}}" mode="aspectFill"/>
+      <text wx:else class="zn-avatar-fallback">{{item.attrs.name ? item.attrs.name[0] : '?'}}</text>
+    </view>
+  </block>
+
+  <!-- ===== P1: kicker ===== -->
+  <block wx:elif="{{item.tag==='zone-kicker'}}">
+    <view class="zn-kicker {{item.attrs.align === 'center' ? 'zn-kicker-align-center' : ''}}">{{item.attrs.main}}</view>
+  </block>
+
+  <!-- ===== P1: trend ===== -->
+  <block wx:elif="{{item.tag==='zone-trend'}}">
+    <view class="zn-trend-badge zn-trend-badge-{{item.attrs.dir || 'flat'}}">{{item.attrs.main}}</view>
+  </block>
+
+  <!-- ===== P1: tip ===== -->
+  <block wx:elif="{{item.tag==='zone-tip'}}">
+    <view class="zn-tip zn-tip-{{item.attrs.type || 'info'}}">{{item.attrs.main}}</view>
+  </block>
+
+  <!-- ===== P1: callout ===== -->
+  <block wx:elif="{{item.tag==='zone-callout'}}">
+    <view class="zn-callout zn-callout-{{item.attrs.type || 'info'}}">
+      <view class="zn-callout-title" wx:if="{{item.attrs.title}}">{{item.attrs.title}}</view>
+      <view class="zn-callout-body">{{item.attrs.main}}</view>
+    </view>
+  </block>
+
+  <!-- ===== P1: display ===== -->
+  <block wx:elif="{{item.tag==='zone-display'}}">
+    <view class="zn-display {{item.attrs.align === 'center' ? 'zn-display-align-center' : ''}}">
+      <view class="zn-display-value zn-color-{{item.attrs.color || 'accent'}}">{{item.attrs.main}}</view>
+      <view class="zn-display-desc" wx:if="{{item.attrs.desc}}">{{item.attrs.desc}}</view>
+    </view>
+  </block>
+
+  <!-- ===== P1: tabs ===== -->
+  <!-- item.attrs.items = [{main, active}, ...] -->
+  <block wx:elif="{{item.tag==='zone-tabs'}}">
+    <view class="zn-tabs">
+      <view class="zn-tabs-bar">
+        <view class="zn-tabs-item {{index === activeTab ? 'zn-tabs-active' : ''}}"
+              wx:for="{{item.attrs.items}}" wx:for-item="ti" wx:key="index"
+              data-idx="{{index}}" catch:tap="onTabTap">{{ti.main}}</view>
+      </view>
+      <view class="zn-tabs-content" wx:if="{{item.attrs.items && item.attrs.items[activeTab]}}">
+        <view class="zn-tabs-pane">{{item.attrs.items[activeTab].main}}</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P1: accordion ===== -->
+  <!-- item.attrs.items = [{main, desc, open}, ...] -->
+  <block wx:elif="{{item.tag==='zone-accordion'}}">
+    <view class="zn-accordion">
+      <view class="zn-accordion-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-accordion-item {{accOpen[index] ? 'zn-acc-open' : ''}}"
+            wx:for="{{item.attrs.items}}" wx:for-item="ac" wx:key="index">
+        <view class="zn-accordion-header" data-idx="{{index}}" catch:tap="onAccTap">
+          <view class="zn-accordion-label">{{ac.main}}</view>
+          <text class="zn-accordion-arrow">{{accOpen[index] ? '▼' : '▶'}}</text>
+        </view>
+        <view class="zn-accordion-body" wx:if="{{accOpen[index]}}">
+          <view class="zn-accordion-desc" wx:if="{{ac.desc}}">{{ac.desc}}</view>
+          <zone-node wx:for="{{ac.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P1: steps ===== -->
+  <!-- item.attrs.items = [{main, desc, index}, ...], item.attrs.direction -->
+  <block wx:elif="{{item.tag==='zone-steps'}}">
+    <view class="zn-steps zn-steps-{{item.attrs.direction || 'vertical'}}">
+      <view class="zn-steps-item" wx:for="{{item.attrs.items}}" wx:for-item="st" wx:key="index">
+        <view class="zn-steps-marker">
+          <view class="zn-steps-num">{{st.index}}</view>
+          <view class="zn-steps-connector" wx:if="{{index < item.attrs.items.length - 1}}"></view>
+        </view>
+        <view class="zn-steps-body">
+          <view class="zn-steps-label">{{st.main}}</view>
+          <view class="zn-steps-desc" wx:if="{{st.desc}}">{{st.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P2: ring ===== -->
+  <block wx:elif="{{item.tag==='zone-ring'}}">
+    <view class="zn-ring">
+      <view class="zn-ring-track">
+        <view class="zn-ring-fill zn-ring-fill-{{item.attrs.color || 'accent'}}" style="--ring-val:{{item.attrs.value || 0}}"></view>
+        <view class="zn-ring-inner">
+          <view class="zn-ring-pct">{{item.attrs.value}}%</view>
+          <view class="zn-ring-desc" wx:if="{{item.attrs.desc}}">{{item.attrs.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P2: rank ===== -->
+  <!-- item.attrs.items = [{main, value, rank}, ...], item.attrs.max -->
+  <block wx:elif="{{item.tag==='zone-rank'}}">
+    <view class="zn-rank">
+      <view class="zn-rank-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-rank-item" wx:for="{{item.attrs.items}}" wx:for-item="ri" wx:key="index">
+        <view class="zn-rank-num zn-rank-num-{{ri.rank <= 3 ? ri.rank : 'normal'}}">{{ri.rank}}</view>
+        <view class="zn-rank-body">
+          <view class="zn-rank-row">
+            <view class="zn-rank-label">{{ri.main}}</view>
+            <view class="zn-rank-value">{{ri.value}}</view>
+          </view>
+          <view class="zn-rank-bar">
+            <view class="zn-rank-fill" style="width:{{item.attrs.max > 0 ? (ri.value / item.attrs.max * 100) : 0}}%"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P2: compare ===== -->
+  <block wx:elif="{{item.tag==='zone-compare'}}">
+    <view class="zn-compare">
+      <view class="zn-compare-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-compare-body" wx:if="{{item.attrs.items && item.attrs.items.length >= 2}}">
+        <view class="zn-compare-item zn-compare-from">
+          <view class="zn-compare-label">{{item.attrs.items[0].main}}</view>
+          <view class="zn-compare-val">{{item.attrs.items[0].value}}</view>
+        </view>
+        <view class="zn-compare-arrow">→</view>
+        <view class="zn-compare-item zn-compare-to">
+          <view class="zn-compare-label">{{item.attrs.items[1].main}}</view>
+          <view class="zn-compare-val">{{item.attrs.items[1].value}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P2: stairs ===== -->
+  <!-- item.attrs.items = [{main, index}, ...] -->
+  <block wx:elif="{{item.tag==='zone-stairs'}}">
+    <view class="zn-stairs">
+      <view class="zn-stairs-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-stairs-body">
+        <view class="zn-stairs-step" wx:for="{{item.attrs.items}}" wx:for-item="si" wx:key="index" style="height:{{(si.index + 1) * 40 + 40}}rpx">
+          <view class="zn-stairs-label">{{si.main}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P2: mechanism ===== -->
+  <!-- item.attrs.items = [{main, index}, ...] -->
+  <block wx:elif="{{item.tag==='zone-mechanism'}}">
+    <view class="zn-mechanism">
+      <view class="zn-mechanism-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-mechanism-flow">
+        <view class="zn-mechanism-step-wrap" wx:for="{{item.attrs.items}}" wx:for-item="ms" wx:key="index">
+          <view class="zn-mechanism-step">{{ms.main}}</view>
+          <view class="zn-mechanism-arrow" wx:if="{{index < item.attrs.items.length - 1}}">→</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P2: chapter ===== -->
+  <block wx:elif="{{item.tag==='zone-chapter'}}">
+    <view class="zn-chapter zn-chapter-{{item.attrs.variant || 'default'}} {{item.attrs.align === 'center' ? 'zn-chapter-align-center' : ''}}">
+      <block wx:if="{{item.attrs.variant === 'magazine'}}">
+        <view class="zn-chapter-magazine-tab">
+          <text class="zn-chapter-num-inline">{{item.attrs.main}}</text>
+          <text class="zn-chapter-slash" wx:if="{{item.attrs.category}}"> / </text>
+          <text class="zn-chapter-category-inline" wx:if="{{item.attrs.category}}">{{item.attrs.category}}</text>
+        </view>
+        <view class="zn-chapter-title" wx:if="{{item.attrs.titleParts && item.attrs.titleParts.length}}">
+          <block wx:for="{{item.attrs.titleParts}}" wx:for-item="cp" wx:key="index">
+            <view class="zn-chapter-title-break" wx:if="{{cp.type==='break'}}"></view>
+            <text wx:else class="zn-chapter-title-text {{cp.type==='highlight' ? 'zn-chapter-hl-'+cp.style : ''}} {{cp.type==='colored' ? 'zn-chapter-colored' : ''}}">{{cp.text}}</text>
+          </block>
+          <text class="zn-chapter-subtitle-inline" wx:if="{{item.attrs.subtitle}}"> {{item.attrs.subtitle}}</text>
+        </view>
+        <view class="zn-chapter-title" wx:elif="{{item.attrs.title}}">
+          <text class="zn-chapter-title-text">{{item.attrs.title}}</text>
+          <text class="zn-chapter-subtitle-inline" wx:if="{{item.attrs.subtitle}}"> {{item.attrs.subtitle}}</text>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="zn-chapter-num">{{item.attrs.main}}</view>
+        <view class="zn-chapter-text">
+          <view class="zn-chapter-category" wx:if="{{item.attrs.category}}">{{item.attrs.category}}</view>
+          <view class="zn-chapter-title" wx:if="{{item.attrs.title}}">{{item.attrs.title}}</view>
+          <view class="zn-chapter-subtitle" wx:if="{{item.attrs.subtitle}}">{{item.attrs.subtitle}}</view>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <!-- ===== P3: form (递归容器) ===== -->
+  <block wx:elif="{{item.tag==='zone-form'}}">
+    <view class="zn-form">
+      <view class="zn-form-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <zone-node wx:for="{{item.children}}" wx:for-item="child" wx:key="index" item="{{child}}"/>
+    </view>
+  </block>
+
+  <!-- ===== P3: checkbox ===== -->
+  <!-- attrs.checked = 初始态; cbState[key] = 用户点击后的 override -->
+  <block wx:elif="{{item.tag==='zone-checkbox'}}">
+    <view class="zn-checkbox {{(cbState[item.attrs.main] === undefined ? item.attrs.checked : cbState[item.attrs.main]) ? 'zn-checkbox-checked' : ''}}"
+          data-key="{{item.attrs.main}}" catch:tap="onCheckboxTap">
+      <view class="zn-checkbox-box"><view class="zn-checkbox-tick"></view></view>
+      <text class="zn-checkbox-label">{{item.attrs.main}}</text>
+    </view>
+  </block>
+
+  <!-- ===== P3: radio ===== -->
+  <!-- attrs.selected = 初始态; radioSel = 用户点击后的 override -->
+  <block wx:elif="{{item.tag==='zone-radio'}}">
+    <view class="zn-radio {{(radioSel === null ? item.attrs.selected : radioSel === item.attrs.main) ? 'zn-radio-selected' : ''}}"
+          data-key="{{item.attrs.main}}" catch:tap="onRadioTap">
+      <view class="zn-radio-circle"><view class="zn-radio-dot"></view></view>
+      <text class="zn-radio-label">{{item.attrs.main}}</text>
+    </view>
+  </block>
+
+  <!-- ===== checkbox-group(同组多选,复用 cbState + onCheckboxTap) v2.8 ===== -->
+  <block wx:elif="{{item.tag==='zone-checkbox-group'}}">
+    <view class="zn-checkbox-group">
+      <view class="zn-checkbox-group-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-checkbox {{(cbState[ci.main] === undefined ? ci.checked : cbState[ci.main]) ? 'zn-checkbox-checked' : ''}}"
+            wx:for="{{item.attrs.items}}" wx:for-item="ci" wx:key="index"
+            data-key="{{ci.main}}" catch:tap="onCheckboxTap">
+        <view class="zn-checkbox-box"><view class="zn-checkbox-tick"></view></view>
+        <text class="zn-checkbox-label">{{ci.main}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== radio-group(同组单选互斥) ===== -->
+  <block wx:elif="{{item.tag==='zone-radio-group'}}">
+    <view class="zn-radio-group">
+      <view class="zn-radio-group-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
+      <view class="zn-radio {{(radioSel === null ? (ri.selected === true) : radioSel === ri.main) ? 'zn-radio-selected' : ''}}"
+            wx:for="{{item.attrs.items}}" wx:for-item="ri" wx:key="index"
+            data-key="{{ri.main}}" catch:tap="onRadioTap">
+        <view class="zn-radio-circle"><view class="zn-radio-dot"></view></view>
+        <text class="zn-radio-label">{{ri.main}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P3: select ===== -->
+  <!-- 使用原生 picker 组件弹出选项列表 -->
+  <block wx:elif="{{item.tag==='zone-select'}}">
+    <picker mode="selector" range="{{item.attrs.options}}"
+            data-key="{{item.attrs.main}}" bindchange="onSelectChange">
+      <view class="zn-select">
+        <view class="zn-select-value">
+          {{selectVal[item.attrs.main] !== undefined ? item.attrs.options[selectVal[item.attrs.main]] : item.attrs.main}}
+        </view>
+        <text class="zn-select-arrow">▼</text>
+      </view>
+    </picker>
+  </block>
+
+  <!-- ===== P3: textarea ===== -->
+  <!-- 使用原生 textarea 实现双向绑定 -->
+  <block wx:elif="{{item.tag==='zone-textarea'}}">
+    <textarea class="zn-textarea-input" placeholder="{{item.attrs.placeholder || item.attrs.main}}"
+              value="{{textVal[item.attrs.main]}}"
+              data-key="{{item.attrs.main}}" bindinput="onTextInput"
+              auto-height placeholder-class="zn-textarea-ph"/>
+  </block>
+
+  <!-- ===== P3: quiz ===== -->
+  <!-- item.attrs.options = [{main, label}, ...] -->
+  <block wx:elif="{{item.tag==='zone-quiz'}}">
+    <view class="zn-quiz">
+      <view class="zn-quiz-question">{{item.attrs.main}}</view>
+      <view class="zn-quiz-options">
+        <view class="zn-quiz-option {{quizSel === index ? 'zn-quiz-selected' : ''}}"
+              wx:for="{{item.attrs.options}}" wx:for-item="qo" wx:key="index"
+              data-idx="{{index}}" catch:tap="onQuizSelect">
+          <view class="zn-quiz-opt-label {{quizSel === index ? 'zn-quiz-opt-label-sel' : ''}}">{{qo.label}}</view>
+          <view class="zn-quiz-opt-text">{{qo.main}}</view>
+        </view>
+      </view>
+      <view class="zn-quiz-actions" wx:if="{{quizSel !== null && quizSel !== undefined}}">
+        <view class="zn-quiz-submit" catch:tap="onQuizSubmit">提交</view>
+        <view class="zn-quiz-result" wx:if="{{quizSubmitted}}">已提交：{{item.attrs.options[quizSel].main}}</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P3: editorial-hero ===== -->
+  <block wx:elif="{{item.tag==='zone-editorial-hero'}}">
+    <view class="zn-editorial-hero zn-ehero-bg-{{item.attrs.bg || 'accent'}} {{item.attrs.align === 'center' ? 'zn-ehero-align-center' : ''}}">
+      <view class="zn-ehero-star">✱</view>
+      <view class="zn-ehero-kicker" wx:if="{{item.attrs.kicker}}">
+        <view class="zn-ehero-kicker-bar"></view>
+        <view class="zn-ehero-kicker-text">{{item.attrs.kicker}}</view>
+      </view>
+      <view class="zn-ehero-title" wx:if="{{item.attrs.titleParts && item.attrs.titleParts.length}}">
+        <block wx:for="{{item.attrs.titleParts}}" wx:for-item="tp" wx:key="index">
+          <view class="zn-ehero-title-break" wx:if="{{tp.type==='break'}}"></view>
+          <text wx:else class="zn-ehero-title-text {{tp.type==='highlight' ? 'zn-ehero-hl-'+tp.style : ''}} {{tp.type==='colored' ? 'zn-ehero-colored' : ''}}">{{tp.text}}</text>
+        </block>
+      </view>
+      <view class="zn-ehero-title" wx:elif="{{item.attrs.title}}">
+        <text class="zn-ehero-title-text">{{item.attrs.title}}</text>
+      </view>
+      <view class="zn-ehero-subtitle" wx:if="{{item.attrs.subtitle}}">{{item.attrs.subtitle}}</view>
+      <view class="zn-ehero-stats" wx:if="{{item.attrs.stats && item.attrs.stats.length}}">
+        <view class="zn-ehero-stat" wx:for="{{item.attrs.stats}}" wx:for-item="es" wx:key="index">{{es}}</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== P3: editorial-image ===== -->
+  <block wx:elif="{{item.tag==='zone-editorial-image'}}">
+    <view class="zn-editorial-image">
+      <image wx:if="{{item.attrs.url}}" class="zn-eimg-img" src="{{item.attrs.url}}" mode="widthFix"/>
+      <view wx:else class="zn-eimg-placeholder">
+        <text class="zn-eimg-camera">📷</text>
+        <view class="zn-eimg-search">{{item.attrs.search}}</view>
+      </view>
+      <view class="zn-eimg-caption" wx:if="{{item.attrs.caption}}">{{item.attrs.caption}}</view>
+    </view>
+  </block>
+
+  <!-- ===== P3: editorial-pullquote ===== -->
+  <block wx:elif="{{item.tag==='zone-editorial-pullquote'}}">
+    <view class="zn-editorial-pullquote">
+      <text class="zn-epq-open">"</text>
+      <view class="zn-epq-body">{{item.attrs.main}}</view>
+      <text class="zn-epq-close">"</text>
+      <view class="zn-epq-cite" wx:if="{{item.attrs.cite}}">— {{item.attrs.cite}}</view>
+    </view>
+  </block>
+
+  <!-- ===== P3: editorial-stat ===== -->
+  <block wx:elif="{{item.tag==='zone-editorial-stat'}}">
+    <view class="zn-editorial-stat">
+      <view class="zn-estat-value">{{item.attrs.main}}</view>
+      <view class="zn-estat-desc" wx:if="{{item.attrs.desc}}">{{item.attrs.desc}}</view>
+      <view class="zn-estat-trend" wx:if="{{item.attrs.trend}}">{{item.attrs.trend}}</view>
+    </view>
+  </block>
+
+  <!-- ===== P3: editorial-summary ===== -->
+  <block wx:elif="{{item.tag==='zone-editorial-summary'}}">
+    <view class="zn-editorial-summary">
+      <view class="zn-esum-title">{{item.attrs.title || 'TL;DR'}}</view>
+      <view class="zn-esum-body">{{item.attrs.main}}</view>
+    </view>
+  </block>
+
+  <!-- ===== zone-unknown 显式降级(带源代码卡片) ===== -->
+  <block wx:elif="{{item.tag==='zone-unknown'}}">
+    <view class="zn-unknown">
+      <view class="zn-unknown-badge">未支持的组件</view>
+      <view class="zn-unknown-code">{{item.attrs.main}}</view>
+    </view>
+  </block>
+
+  <!-- ===== 未匹配任何分支的兜底 ===== -->
+  <block wx:else>
+    <view class="zn-unknown">
+      <view class="zn-unknown-badge">未识别</view>
+      <view class="zn-unknown-code">{{item.tag}}</view>
+    </view>
+  </block>
+
+</view>

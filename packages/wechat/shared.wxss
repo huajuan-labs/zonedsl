@@ -1,0 +1,91 @@
+/**
+ * ZoneDSL 花卷主题 CSS 变量
+ * 被 zone-node/index.wxss @import 引用
+ */
+
+/* 主题色对齐用户消息气泡 #FF8200(亮橙)+ 首页极简灰白基底 */
+page, .zone-node {
+  --hj-accent: #FF8200;
+  --hj-accent-deep: #D26800;
+  --hj-accent-light: #FFE0BF;
+  --hj-accent-soft: #FFF3E5;
+  --hj-panel: #ffffff;       /* 卡片主底,纯白 */
+  --hj-bg: #F9F9F9;          /* 页面/次卡底,首页风灰白 */
+  --hj-text: #333333;        /* 主字,和首页 #333 一致 */
+  --hj-text-secondary: #999999; /* 弱字,和首页 #999 一致 */
+  --hj-border: #EEEEEE;      /* 极浅灰细边 */
+  --hj-success: #22a065;
+  --hj-warning: #ffa726;
+  --hj-danger: #ef4444;
+  --hj-primary: #3b82f6;
+  --hj-info: #38bdf8;
+
+  /* ========== 编辑/杂志视觉系统 ==========
+     magazine 系列组件使用独立的编辑级配色:
+     暖米色底 + 深炭主字 + 橙色作策略性点缀,
+     整体气质更接近纸媒杂志/内容书刊,而非通用 UI. */
+  --mz-bg: #FBF3E7;             /* 杂志页底(暖米) */
+  --mz-panel: #FFFFFF;          /* 内容卡底(纯白,与米色底形成对比) */
+  --mz-panel-soft: #FFF9F0;     /* 次级卡底(奶油白) */
+  --mz-ink: #1A1A1A;            /* 主字(深炭黑,不用纯黑) */
+  --mz-ink-soft: #4A4A4A;       /* 次字(深灰) */
+  --mz-ink-mute: #8B8B8B;       /* 弱字(中灰) */
+  --mz-line: #EFE0CC;           /* 米色调分隔线 */
+  --mz-line-strong: #D9C4A6;    /* 深米线 */
+  --mz-accent: #FF8200;         /* 主强调橙(与聊天橙同源) */
+  --mz-accent-warm: #FFB347;    /* 暖橙(高亮块用) */
+  --mz-accent-soft: #FFE4C4;    /* 浅橙(次级高亮) */
+  --mz-accent-tint: #FFF3E0;    /* 极浅橙(背景微染) */
+  --mz-ink-panel: #1E1E1E;      /* 深色对比板底(fact-bar/data-board) */
+
+  /* 杂志暖色渐变(editorial-hero/magazine-cover warm 主题使用):
+     参考截图的亮橙→金黄组合,气质偏轻盈鲜艳,不落入深棕. */
+  --mz-gradient-warm: linear-gradient(135deg, #FF8200 0%, #FFB700 100%);
+}
+
+
+/* v2.8: 12 主题集中在 themes/,由 themes/index.wxss 统一 barrel 导出 */
+@import "./themes/index.wxss";
+
+/* v2.6: era-timeline 横滑严格等高
+   scroll-view 只管滚动,内层 view 做 inline-flex 容器 —— inline-flex 不受父宽约束,
+   自然被 flex 子撑开,align-items:stretch 让所有卡与最长者同高. */
+.zn-era-scroll-outer {
+  white-space: nowrap;
+  padding-bottom: 8rpx;
+}
+.zn-era-scroll-inner {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 16rpx;
+}
+.zn-era-item-flex {
+  flex-shrink: 0;
+  width: 340rpx;
+  padding: 24rpx 24rpx 20rpx;
+  background: var(--mz-panel-soft);
+  border: 2rpx solid var(--mz-line);
+  border-radius: 16rpx;
+  box-sizing: border-box;
+  white-space: normal;
+}
+
+/* v2.5: era-timeline 网格布局(2/4 张时用)
+   —— 独立类名,不复用 .zn-era-item(那是横滑用的 inline-block 340rpx),
+      避免宽度冲突导致换行成纵向. */
+.zn-era-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  align-items: stretch;
+}
+.zn-era-item-grid {
+  flex: 1 1 calc(50% - 8rpx);
+  max-width: calc(50% - 8rpx);
+  box-sizing: border-box;
+  padding: 24rpx 24rpx 20rpx;
+  background: var(--mz-panel-soft);
+  border: 2rpx solid var(--mz-line);
+  border-radius: 16rpx;
+}

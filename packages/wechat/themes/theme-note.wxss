@@ -1,0 +1,162 @@
+/**
+ * note 主题 —— 白底 + 红粉大标题 + 无卡片装饰(极简学习笔记感).
+ * 参考图: huajuan-md_学习笔记_学习粉黄_2026-06-220926.png
+ */
+.zone-theme-note {
+  --mz-bg: #FFFFFF;
+  --mz-ink: #1A1A1A;
+  --mz-accent: #FF4D75;
+}
+.zone-theme-note.h2w {
+  background: #FFFFFF;
+  padding: 24rpx 20rpx;
+  border-radius: 20rpx;
+}
+/* H1 —— 居中红粉大字, 极粗 */
+.zone-theme-note .h2w__h1 {
+  display: block;
+  background: transparent;
+  color: #4A1F2E;
+  padding: 12rpx 0;
+  font-weight: 900;
+  font-size: 44rpx;
+  margin: 28rpx 0 20rpx;
+  line-height: 1.4;
+  text-align: center;
+  border-bottom: none;
+}
+/* H2 —— 红粉底白字胶囊(左对齐,小尺寸) */
+.zone-theme-note .h2w__h2 {
+  display: inline-block;
+  background: #FF4D75;
+  color: #FFFFFF;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  font-weight: 700;
+  font-size: 28rpx;
+  margin: 32rpx 0 20rpx;
+  line-height: 1.4;
+  border-bottom: none;
+}
+/* 段落 —— 无卡片,直接黑字白底 */
+.zone-theme-note .h2w__p {
+  background: transparent;
+  padding: 4rpx 8rpx;
+  border: none;
+  margin-bottom: 16rpx;
+  color: #1A1A1A;
+  line-height: 1.8;
+}
+/* 列表 —— 无卡片 */
+.zone-theme-note .h2w__ul,
+.zone-theme-note .h2w__ol {
+  background: transparent;
+  padding: 8rpx 8rpx 8rpx 32rpx;
+  border: none;
+  margin-bottom: 16rpx;
+  color: #1A1A1A;
+}
+/* li 保留 towxml 默认 padding-left:48rpx —— 给 ::before ✦ 留位置, 只改颜色和垂直间距 */
+.zone-theme-note .h2w__li { color: #1A1A1A; padding-top: 4rpx; padding-bottom: 4rpx; }
+.zone-theme-note .h2w__li::before { color: #FF4D75; }
+/* 引用块 —— 淡粉底 + 无描边 */
+.zone-theme-note .h2w__blockquote {
+  background: #FFF0F3;
+  border: none;
+  border-left: 6rpx solid #FF4D75;
+  color: #1A1A1A;
+  padding: 20rpx 24rpx;
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-note .h2w__blockquote .h2w__p {
+  background: transparent; padding: 0; margin: 0;
+}
+/* 表格 —— 极简,只有底部横线 */
+.zone-theme-note .h2w__table {
+  background: transparent;
+  padding: 0;
+  border: none;
+  margin-bottom: 16rpx;
+  border-collapse: collapse;
+  width: 100%;
+}
+.zone-theme-note .h2w__th,
+.zone-theme-note .h2w__td {
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #F5C94A;
+  border-top: none;
+  color: #1A1A1A;
+  background: transparent;
+  font-size: 26rpx;
+  text-align: left;
+}
+.zone-theme-note .h2w__th { font-weight: 700; color: #4A1F2E; }
+/* 内联强调 —— 红粉字, 无背景 */
+.zone-theme-note .h2w__b,
+.zone-theme-note .h2w__strong {
+  color: #FF4D75;
+  font-weight: 700;
+}
+/* 分隔线 —— 极淡黄线 */
+.zone-theme-note .h2w__hr {
+  border: none; height: 2rpx; background: #F5C94A; margin: 32rpx 0; opacity: 0.6;
+}
+/* 代码块 */
+.zone-theme-note .h2w__pre {
+  background: #1E1E1E;
+  color: #E5E5E5;
+  border-radius: 12rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-note .h2w__code { color: #E5E5E5; background: transparent; }
+
+/* ============ 补齐所有 markdown 元素(方案 A) ============ */
+.zone-theme-note .h2w__h3,
+.zone-theme-note .h2w__h4,
+.zone-theme-note .h2w__h5,
+.zone-theme-note .h2w__h6 {
+  color: #4A1F2E;
+  font-weight: 700;
+  margin: 24rpx 0 12rpx;
+  border-bottom: none;
+}
+.zone-theme-note .h2w__h3 { font-size: 28rpx; }
+.zone-theme-note .h2w__h4 { font-size: 26rpx; }
+.zone-theme-note .h2w__h5 { font-size: 24rpx; }
+.zone-theme-note .h2w__h6 { font-size: 22rpx; }
+.zone-theme-note .h2w__a {
+  color: #FF4D75;
+  border-bottom: 2rpx solid #F5C94A;
+  padding-bottom: 2rpx;
+}
+.zone-theme-note .h2w__em,
+.zone-theme-note .h2w__i { color: #FF4D75; font-style: italic; }
+.zone-theme-note .h2w__del,
+.zone-theme-note .h2w__s,
+.zone-theme-note .h2w__strike { color: #B0B0B0; text-decoration: line-through; }
+.zone-theme-note .h2w__mark {
+  background: linear-gradient(180deg, transparent 55%, #F5C94A 55%);
+  color: #1A1A1A;
+  padding: 0 4rpx;
+}
+.zone-theme-note .h2w__ins { color: #FF4D75; text-decoration: underline; }
+.zone-theme-note .h2w__sub,
+.zone-theme-note .h2w__sup { color: #FF4D75; font-size: 20rpx; }
+.zone-theme-note .h2w__img {
+  border-radius: 8rpx;
+  max-width: 100%;
+}
+.zone-theme-note .h2w__p .h2w__code,
+.zone-theme-note .h2w__li .h2w__code,
+.zone-theme-note .h2w__blockquote .h2w__code,
+.zone-theme-note .h2w__td .h2w__code,
+.zone-theme-note .h2w__th .h2w__code {
+  background: #FFF0F3;
+  color: #FF4D75;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  font-size: 26rpx;
+}
+.zone-theme-note .h2w__li.task-list-item { color: #1A1A1A; }

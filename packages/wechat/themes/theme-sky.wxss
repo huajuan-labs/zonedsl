@@ -1,0 +1,188 @@
+/**
+ * sky 主题 —— 简报蓝底 + 深蓝卡片 + 黄色小胶囊(仅正文重点段) + 章节 H2 蓝色胶囊.
+ * 参考图: huajuan-md_简报_鼠尾草_2026-06-220952.png
+ */
+.zone-theme-sky {
+  --mz-bg: #4A87E8;
+  --mz-panel: #2B6BC7;
+  --mz-panel-soft: #FFFFFF;
+  --mz-ink: #FFFFFF;
+  --mz-accent: #F5C94A;
+}
+.zone-theme-sky.h2w {
+  background: #4A87E8;
+  padding: 24rpx 20rpx;
+  border-radius: 20rpx;
+}
+/* H1 大标题:白底蓝框胶囊(顶部大标题) */
+.zone-theme-sky .h2w__h1 {
+  display: inline-block;
+  background: #FFFFFF;
+  color: #2B6BC7;
+  padding: 14rpx 32rpx;
+  border-radius: 12rpx;
+  font-weight: 700;
+  font-size: 34rpx;
+  margin: 28rpx 0 20rpx;
+  line-height: 1.4;
+  border-bottom: none;
+}
+/* H2 章节:蓝色深卡片胶囊(配黄色装饰点) */
+.zone-theme-sky .h2w__h2 {
+  display: block;
+  background: transparent;
+  color: #FFFFFF;
+  padding: 12rpx 0;
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 30rpx;
+  margin: 32rpx 0 20rpx;
+  line-height: 1.4;
+  border-bottom: none;
+}
+.zone-theme-sky .h2w__h2::before { content: ""; }
+/* 段落 —— 蓝色深卡片, 白字 */
+.zone-theme-sky .h2w__p {
+  background: #2B6BC7;
+  padding: 24rpx 28rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #5D9AE6;
+  margin-bottom: 16rpx;
+  color: #FFFFFF;
+}
+/* 列表 —— 蓝色深卡片,白字 */
+.zone-theme-sky .h2w__ul,
+.zone-theme-sky .h2w__ol {
+  background: #2B6BC7;
+  padding: 24rpx 32rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #5D9AE6;
+  margin-bottom: 16rpx;
+  color: #FFFFFF;
+}
+/* li 保留 towxml 默认 padding-left:48rpx —— 给 ::before ✦ 留位置, 不能覆盖左边距 */
+.zone-theme-sky .h2w__li {
+  color: #FFFFFF;
+  padding-top: 6rpx;
+  padding-bottom: 6rpx;
+}
+.zone-theme-sky .h2w__li::before { color: #F5C94A; }
+/* 引用块 —— 白底,深蓝字,底部呼吁 */
+.zone-theme-sky .h2w__blockquote {
+  background: #2B6BC7;
+  border: 2rpx solid #5D9AE6;
+  color: #FFFFFF;
+  padding: 24rpx 28rpx;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-sky .h2w__blockquote .h2w__p {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #FFFFFF;
+}
+/* 表格 —— 蓝色深卡片, 白字 */
+.zone-theme-sky .h2w__table {
+  background: #2B6BC7;
+  padding: 16rpx 20rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #5D9AE6;
+  margin-bottom: 16rpx;
+  border-collapse: collapse;
+  width: 100%;
+}
+.zone-theme-sky .h2w__th,
+.zone-theme-sky .h2w__td {
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #5D9AE6;
+  border-top: none;   /* towxml 默认给 td 加了 top border, 深底会看出深色横线, 关掉 */
+  color: #FFFFFF;
+  background: transparent;   /* towxml 默认 td background 是浅灰 #F9F9F9, 会盖白字, 强制透明 */
+  font-size: 26rpx;
+}
+.zone-theme-sky .h2w__th {
+  font-weight: 700;
+  background: #1E5AAF;
+}
+/* 内联强调 —— 黄色胶囊高亮(用于"调用工具、浏览网页、执行多步任务"这种) */
+.zone-theme-sky .h2w__b,
+.zone-theme-sky .h2w__strong {
+  background: #F5C94A;
+  color: #1A1A1A;
+  font-weight: 700;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+/* 分隔线 */
+.zone-theme-sky .h2w__hr {
+  border: none;
+  height: 3rpx;
+  background: #F5C94A;
+  margin: 32rpx 0;
+  opacity: 0.9;
+}
+/* 代码块 —— 黑底浅字 */
+.zone-theme-sky .h2w__pre {
+  background: #1E1E1E;
+  color: #E5E5E5;
+  border-radius: 12rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-sky .h2w__code {
+  color: #E5E5E5;
+  background: transparent;
+}
+
+/* ============ 补齐所有 markdown 元素(方案 A) ============ */
+.zone-theme-sky .h2w__h3,
+.zone-theme-sky .h2w__h4,
+.zone-theme-sky .h2w__h5,
+.zone-theme-sky .h2w__h6 {
+  color: #FFFFFF;
+  font-weight: 700;
+  margin: 24rpx 0 12rpx;
+  border-bottom: none;
+}
+.zone-theme-sky .h2w__h3 { font-size: 28rpx; }
+.zone-theme-sky .h2w__h4 { font-size: 26rpx; }
+.zone-theme-sky .h2w__h5 { font-size: 24rpx; }
+.zone-theme-sky .h2w__h6 { font-size: 22rpx; }
+.zone-theme-sky .h2w__a {
+  color: #F5C94A;
+  border-bottom: 2rpx solid #F5C94A;
+  padding-bottom: 2rpx;
+}
+.zone-theme-sky .h2w__em,
+.zone-theme-sky .h2w__i { color: #FFFFFF; font-style: italic; }
+.zone-theme-sky .h2w__del,
+.zone-theme-sky .h2w__s,
+.zone-theme-sky .h2w__strike { color: rgba(255,255,255,0.5); text-decoration: line-through; }
+.zone-theme-sky .h2w__mark {
+  background: #F5C94A;
+  color: #1A1A1A;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+}
+.zone-theme-sky .h2w__ins { color: #FFFFFF; text-decoration: underline; text-decoration-color: #F5C94A; }
+.zone-theme-sky .h2w__sub,
+.zone-theme-sky .h2w__sup { color: #F5C94A; font-size: 20rpx; }
+.zone-theme-sky .h2w__img {
+  border-radius: 12rpx;
+  border: 2rpx solid #5D9AE6;
+  max-width: 100%;
+}
+.zone-theme-sky .h2w__p .h2w__code,
+.zone-theme-sky .h2w__li .h2w__code,
+.zone-theme-sky .h2w__blockquote .h2w__code,
+.zone-theme-sky .h2w__td .h2w__code,
+.zone-theme-sky .h2w__th .h2w__code {
+  background: #1E5AAF;
+  color: #F5C94A;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  font-size: 26rpx;
+}
+.zone-theme-sky .h2w__li.task-list-item { color: #FFFFFF; }

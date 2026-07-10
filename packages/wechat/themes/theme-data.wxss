@@ -1,0 +1,52 @@
+/**
+ * data 主题(数据体,白底蓝调,fact-bar/data-board 反色成白底) —— zone 组件规则.
+ */
+.zone-theme-data {
+  --mz-bg: #FFFFFF;
+  --mz-panel: #FAFAFA;
+  --mz-panel-soft: #F5F5F5;
+  --mz-ink: #0F172A;
+  --mz-ink-soft: #334155;
+  --mz-ink-mute: #94A3B8;
+  --mz-line: #E5E7EB;
+  --mz-line-strong: #CBD5E1;
+  --mz-accent: #2563EB;
+  --mz-accent-warm: #3B82F6;
+  --mz-accent-soft: #DBEAFE;
+  --mz-accent-tint: #EFF6FF;
+  --mz-gradient-warm: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+  --mz-font: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --mz-title-tracking: -0.5rpx;
+}
+.zone-theme-data .zn-fact-bar,
+.zone-theme-data .zn-data-board {
+  background: #F8FAFC;
+  border: 2rpx solid var(--mz-line);
+  box-shadow: 0 2rpx 8rpx rgba(15, 23, 42, 0.04);
+}
+.zone-theme-data .zn-fact-bar-label,
+.zone-theme-data .zn-fact-bar-title,
+.zone-theme-data .zn-db-title {
+  color: var(--mz-ink-soft);
+}
+.zone-theme-data .zn-fact-bar-value,
+.zone-theme-data .zn-db-value,
+.zone-theme-data .zn-db-row-value {
+  color: var(--mz-accent);
+}
+.zone-theme-data .zn-db-item {
+  background: #FFFFFF;
+  border: 1rpx solid var(--mz-line);
+}
+.zone-theme-data .zn-db-label,
+.zone-theme-data .zn-db-row-label {
+  color: var(--mz-ink-soft);
+}
+.zone-theme-data .zn-db-tag,
+.zone-theme-data .zn-db-row-tag {
+  background: var(--mz-accent-tint);
+  color: var(--mz-accent);
+}
+.zone-theme-data .zn-db-row {
+  border-top-color: var(--mz-line);
+}

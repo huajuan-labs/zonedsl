@@ -1,0 +1,21 @@
+/**
+ * editorial 主题(默认,暖橙) —— zone 组件规则.
+ * markdown(h2w__*)规则待补.
+ */
+.zone-theme-editorial {
+  --mz-bg: #FBF3E7;
+  --mz-panel: #FFFFFF;
+  --mz-panel-soft: #FFF9F0;
+  --mz-ink: #1A1A1A;
+  --mz-ink-soft: #4A4A4A;
+  --mz-ink-mute: #8B8B8B;
+  --mz-line: #EFE0CC;
+  --mz-line-strong: #D9C4A6;
+  --mz-accent: #FF8200;
+  --mz-accent-warm: #FFB347;
+  --mz-accent-soft: #FFE4C4;
+  --mz-accent-tint: #FFF3E0;
+  --mz-gradient-warm: linear-gradient(135deg, #FF8200 0%, #FFB700 100%);
+  --mz-font: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+  --mz-title-tracking: -1rpx;
+}

@@ -1,0 +1,29 @@
+/**
+ * literary 主题(文人风,象牙+焦茶,衬线宋体) —— zone 组件规则.
+ */
+.zone-theme-literary {
+  --mz-bg: #FDF8EF;
+  --mz-panel: #FFFFFF;
+  --mz-panel-soft: #F5EDD9;
+  --mz-ink: #4A3728;
+  --mz-ink-soft: #6B5540;
+  --mz-ink-mute: #A08B72;
+  --mz-line: #E8DCC0;
+  --mz-line-strong: #D2C199;
+  --mz-accent: #A17141;
+  --mz-accent-warm: #C89B5D;
+  --mz-accent-soft: #F0DFC0;
+  --mz-accent-tint: #F9F1DF;
+  --mz-gradient-warm: linear-gradient(135deg, #A17141 0%, #C89B5D 100%);
+  --mz-font: "Songti SC", "STSong", "SimSun", "PingFang SC", serif;
+  --mz-title-tracking: 0.5rpx;
+}
+.zone-theme-literary .zn-magazine-cover,
+.zone-theme-literary .zn-chapter,
+.zone-theme-literary .zn-editorial-hero,
+.zone-theme-literary .zn-editorial-pullquote,
+.zone-theme-literary .zn-statement,
+.zone-theme-literary .zn-sb-main,
+.zone-theme-literary .zn-df-text {
+  font-family: var(--mz-font);
+}

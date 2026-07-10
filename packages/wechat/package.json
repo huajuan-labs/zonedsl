@@ -1,0 +1,28 @@
+{
+  "name": "@zonedsl/wechat",
+  "version": "1.0.0",
+  "description": "ZoneDSL WeChat mini-program runtime — zone-node dispatcher + towxml markdown + 12 themes. Production-proven.",
+  "license": "MIT",
+  "author": "花卷实验室 / huajuan-labs",
+  "homepage": "https://github.com/huajuan-labs/zonedsl",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huajuan-labs/zonedsl.git",
+    "directory": "packages/wechat"
+  },
+  "bugs": "https://github.com/huajuan-labs/zonedsl/issues",
+  "keywords": ["zonedsl", "wechat", "miniprogram", "zone-node", "towxml", "ai", "streaming"],
+  "main": "index.js",
+  "files": [
+    "zone-node/",
+    "towxml/",
+    "themes/",
+    "shared.wxss"
+  ],
+  "dependencies": {
+    "@zonedsl/core": "^1.0.0"
+  },
+  "scripts": {
+    "test": "echo \"wechat: component tests via DevTools\" && exit 0"
+  }
+}

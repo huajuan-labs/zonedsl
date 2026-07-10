@@ -1,0 +1,8 @@
+/* 基础风格 + 花卷主题 */
+@import './style/main.wxss';
+
+/* ZoneDSL 组件样式 */
+@import './style/zone.wxss';
+
+/* v2.8: 12 主题集中在 zone-components/themes/,由 index.wxss 统一 barrel 导出 */
+@import '../zone-components/themes/index.wxss';

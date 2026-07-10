@@ -1,0 +1,59 @@
+/**
+ * luxe 主题(高端金融,深金铜+温白+居中衬线) v2.5 —— zone 组件规则.
+ * 参考图 37 黄金行情.
+ */
+.zone-theme-luxe {
+  --mz-bg: #FAF7F0;
+  --mz-panel: #FFFFFF;
+  --mz-panel-soft: #F5F0E4;
+  --mz-ink: #2A2A2A;
+  --mz-ink-soft: #555555;
+  --mz-ink-mute: #A08C6B;
+  --mz-line: #E5DFCC;
+  --mz-line-strong: #C4B896;
+  --mz-accent: #A88232;
+  --mz-accent-warm: #C4A052;
+  --mz-accent-soft: #EDE3C7;
+  --mz-accent-tint: #F7F1DE;
+  --mz-gradient-warm: linear-gradient(135deg, #A88232 0%, #C4A052 100%);
+  --mz-font: "Songti SC", "STSong", "SimSun", "PingFang SC", serif;
+  --mz-title-tracking: 2rpx;
+}
+.zone-theme-luxe .zn-mcover-title-text,
+.zone-theme-luxe .zn-chapter-title,
+.zone-theme-luxe .zn-text-hero,
+.zone-theme-luxe .zn-text-title,
+.zone-theme-luxe .zn-ehero-title-text,
+.zone-theme-luxe .zn-df-text,
+.zone-theme-luxe .zn-display-value {
+  font-family: var(--mz-font);
+  color: var(--mz-accent);
+  letter-spacing: var(--mz-title-tracking);
+}
+.zone-theme-luxe .zn-display-value {
+  font-size: 96rpx;
+  font-weight: 700;
+}
+.zone-theme-luxe .zn-kicker {
+  color: var(--mz-accent);
+  letter-spacing: 4rpx;
+  font-size: 24rpx;
+}
+.zone-theme-luxe .zn-quote,
+.zone-theme-luxe .zn-callout,
+.zone-theme-luxe .zn-editorial-summary {
+  background: var(--mz-panel-soft);
+  border-left: 6rpx solid var(--mz-accent);
+  color: var(--mz-ink);
+  padding: 28rpx 36rpx;
+  border-radius: 12rpx;
+}
+.zone-theme-luxe .zn-mcover-bg-light {
+  background: var(--mz-bg);
+  border: 2rpx solid var(--mz-line);
+}
+.zone-theme-luxe .zn-pill {
+  background: var(--mz-accent-tint);
+  color: var(--mz-accent);
+  border: 1rpx solid var(--mz-accent-soft);
+}

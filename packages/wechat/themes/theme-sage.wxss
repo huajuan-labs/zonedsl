@@ -1,0 +1,159 @@
+/**
+ * sage 主题 —— 深墨绿底 + 米色描边卡 + 米色字.
+ * 参考图: huajuan-md_涂鸦速览_预览_2026-06-240731.png
+ */
+.zone-theme-sage {
+  --mz-bg: #2F4F3F;
+  --mz-panel: #3D5F4E;
+  --mz-ink: #EDE5D0;
+  --mz-accent: #D4C29B;
+}
+.zone-theme-sage.h2w {
+  background: #2F4F3F;
+  padding: 24rpx 20rpx;
+  border-radius: 20rpx;
+}
+/* H1 —— 米色字大标题 */
+.zone-theme-sage .h2w__h1 {
+  display: block;
+  background: transparent;
+  color: #EDE5D0;
+  padding: 12rpx 0;
+  font-weight: 700;
+  font-size: 36rpx;
+  margin: 28rpx 0 20rpx;
+  line-height: 1.4;
+  border-bottom: none;
+}
+/* H2 —— 米色字章节标题 */
+.zone-theme-sage .h2w__h2 {
+  display: block;
+  background: transparent;
+  color: #EDE5D0;
+  padding: 12rpx 0;
+  font-weight: 700;
+  font-size: 30rpx;
+  margin: 32rpx 0 20rpx;
+  line-height: 1.4;
+  border-bottom: none;
+}
+/* 段落 / 列表 —— 深绿卡,米色描边+米色字 */
+.zone-theme-sage .h2w__p,
+.zone-theme-sage .h2w__ul,
+.zone-theme-sage .h2w__ol {
+  background: #3D5F4E;
+  padding: 24rpx 28rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #8B9A82;
+  margin-bottom: 16rpx;
+  color: #EDE5D0;
+}
+/* li 保留 towxml 默认 padding-left:48rpx —— 给 ::before ✦ 留位置, 只改颜色和垂直间距 */
+.zone-theme-sage .h2w__li { color: #EDE5D0; padding-top: 6rpx; padding-bottom: 6rpx; }
+.zone-theme-sage .h2w__li::before { color: #D4C29B; }
+/* 引用块 */
+.zone-theme-sage .h2w__blockquote {
+  background: #3D5F4E;
+  border: 2rpx solid #8B9A82;
+  color: #EDE5D0;
+  padding: 24rpx 28rpx;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+}
+.zone-theme-sage .h2w__blockquote .h2w__p {
+  background: transparent; border: none; padding: 0; margin: 0; color: #EDE5D0;
+}
+/* 表格 */
+.zone-theme-sage .h2w__table {
+  background: #3D5F4E;
+  padding: 16rpx 20rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #8B9A82;
+  margin-bottom: 16rpx;
+  border-collapse: collapse;
+  width: 100%;
+}
+.zone-theme-sage .h2w__th,
+.zone-theme-sage .h2w__td {
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #607D6C;
+  border-top: none;
+  color: #EDE5D0;
+  background: transparent;   /* 覆盖 towxml 默认浅灰底, 让深绿卡片底透出 */
+  font-size: 26rpx;
+}
+.zone-theme-sage .h2w__th { font-weight: 700; background: #2F4F3F; }
+/* 内联强调 —— 米色高亮 */
+.zone-theme-sage .h2w__b,
+.zone-theme-sage .h2w__strong {
+  background: #D4C29B;
+  color: #2F4F3F;
+  font-weight: 700;
+  padding: 2rpx 10rpx;
+  border-radius: 4rpx;
+}
+/* 分隔线 */
+.zone-theme-sage .h2w__hr {
+  border: none; height: 2rpx; background: #8B9A82; margin: 32rpx 0;
+}
+/* 代码块 */
+.zone-theme-sage .h2w__pre {
+  background: #1E2C24;
+  color: #EDE5D0;
+  border-radius: 12rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+  border: 2rpx solid #8B9A82;
+}
+.zone-theme-sage .h2w__code { color: #EDE5D0; background: transparent; }
+
+/* ============ 补齐所有 markdown 元素(方案 A) ============ */
+.zone-theme-sage .h2w__h3,
+.zone-theme-sage .h2w__h4,
+.zone-theme-sage .h2w__h5,
+.zone-theme-sage .h2w__h6 {
+  color: #D4C29B;
+  font-weight: 700;
+  margin: 24rpx 0 12rpx;
+  border-bottom: none;
+}
+.zone-theme-sage .h2w__h3 { font-size: 28rpx; }
+.zone-theme-sage .h2w__h4 { font-size: 26rpx; }
+.zone-theme-sage .h2w__h5 { font-size: 24rpx; }
+.zone-theme-sage .h2w__h6 { font-size: 22rpx; }
+.zone-theme-sage .h2w__a {
+  color: #D4C29B;
+  border-bottom: 2rpx solid #D4C29B;
+  padding-bottom: 2rpx;
+}
+.zone-theme-sage .h2w__em,
+.zone-theme-sage .h2w__i { color: #D4C29B; font-style: italic; }
+.zone-theme-sage .h2w__del,
+.zone-theme-sage .h2w__s,
+.zone-theme-sage .h2w__strike { color: #8B9A82; text-decoration: line-through; }
+.zone-theme-sage .h2w__mark {
+  background: #D4C29B;
+  color: #2F4F3F;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+}
+.zone-theme-sage .h2w__ins { color: #EDE5D0; text-decoration: underline; text-decoration-color: #D4C29B; }
+.zone-theme-sage .h2w__sub,
+.zone-theme-sage .h2w__sup { color: #D4C29B; font-size: 20rpx; }
+.zone-theme-sage .h2w__img {
+  border-radius: 12rpx;
+  border: 2rpx solid #8B9A82;
+  max-width: 100%;
+}
+.zone-theme-sage .h2w__p .h2w__code,
+.zone-theme-sage .h2w__li .h2w__code,
+.zone-theme-sage .h2w__blockquote .h2w__code,
+.zone-theme-sage .h2w__td .h2w__code,
+.zone-theme-sage .h2w__th .h2w__code {
+  background: #2F4F3F;
+  color: #D4C29B;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  font-size: 26rpx;
+}
+.zone-theme-sage .h2w__li.task-list-item { color: #EDE5D0; }
