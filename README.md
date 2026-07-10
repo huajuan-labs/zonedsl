@@ -11,7 +11,7 @@
 [![spec](https://img.shields.io/badge/spec-v1-FFB347.svg)](./protocol/spec.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-5E8265.svg)](./CONTRIBUTING.md)
 
-**🎯 [Playground](./docs/)**（本地 `bash docs/serve.sh`）· **📖 [Spec](./protocol/spec.md)** · **🤖 [AI Skill](./packages/skill/SKILL.md)**
+**🎯 [Live Playground](https://zonedsl.huajuan-labs.com)** · **📖 [Spec](./protocol/spec.md)** · **🤖 [AI Skill](./packages/skill/SKILL.md)**
 
 🌐 English: [README.en.md](./README.en.md)
 
@@ -85,7 +85,7 @@ ZoneDSL 的 parser **组件无关**——`::任何名字` 都能解析成 AST，
 
 > npm 包发布前，可 clone 本仓用 `docs/assets/parser.umd.js` + `docs/assets/web-renderer.js` 替代 CDN。
 
-或直接玩 **[本地 Playground](./docs/)** —— `cd docs && bash serve.sh`，12 主题实时切、流式播放、70+ 组件全览。
+或直接玩 **[在线 Playground](https://zonedsl.huajuan-labs.com)** —— 12 主题实时切、流式播放、70+ 组件全览。（本地跑：`cd docs && bash serve.sh`）
 
 ## 🧠 协议是重心
 

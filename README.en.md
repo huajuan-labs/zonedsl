@@ -11,7 +11,7 @@ Turn AI's streaming replies from "an endless wall of markdown" into "a magazine 
 [![spec](https://img.shields.io/badge/spec-v1-FFB347.svg)](./protocol/spec.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-5E8265.svg)](./CONTRIBUTING.md)
 
-**🎯 [Playground](./docs/)** (local `bash docs/serve.sh`) · **📖 [Spec](./protocol/spec.md)** · **🤖 [AI Skill](./packages/skill/SKILL.md)**
+**🎯 [Live Playground](https://zonedsl.huajuan-labs.com)** · **📖 [Spec](./protocol/spec.md)** · **🤖 [AI Skill](./packages/skill/SKILL.md)**
 
 📖 中文版：[README.md](./README.md)
 
@@ -85,7 +85,7 @@ The protocol layer governs only the portable common set; everything platform-spe
 
 > Before the npm packages are published, clone this repo and use `docs/assets/parser.umd.js` + `docs/assets/web-renderer.js` in place of the CDN.
 
-Or play with the **[local Playground](./docs/)** — `cd docs && bash serve.sh` — 12 live themes, streaming playback, 70+ components.
+Or play with the **[live Playground](https://zonedsl.huajuan-labs.com)** — 12 live themes, streaming playback, 70+ components. (Run locally: `cd docs && bash serve.sh`)
 
 ## 🧠 The protocol is the center
 

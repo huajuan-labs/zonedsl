@@ -29,7 +29,7 @@ homepage: https://github.com/huajuan-labs/zonedsl
 </script>
 ```
 
-或 `import { ZonePlayground } from '@zonedsl/web'`（ESM）。流式渲染传 `{ streaming: true }`，骨架传 `{ skeleton: true }`。完整 API 见 [playground](https://zonedsl.dev) 源码 `docs/`。
+或 `import { ZonePlayground } from '@zonedsl/web'`（ESM）。流式渲染传 `{ streaming: true }`，骨架传 `{ skeleton: true }`。完整 API 见 [在线 playground](https://zonedsl.huajuan-labs.com) 源码 `docs/`。
 
 ## 接入 · WeChat 小程序
 
