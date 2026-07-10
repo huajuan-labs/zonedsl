@@ -42,7 +42,7 @@ packages/wechat/
 └── themes/           ← 12 主题 wxss
 ```
 
-> 在包发布前，可参考本仓库 `packageChat/zone-plugin/`（上游小程序的实际集成，含 zone-components/towxml）作为手动接入样例。包发布后此段替换为正式安装步骤。
+> 在包发布前，可参考本仓库 `packages/`（上游小程序的实际集成，含 zone-components/towxml）作为手动接入样例。包发布后此段替换为正式安装步骤。
 
 ### Step 1 · 注册组件（包发布后）
 

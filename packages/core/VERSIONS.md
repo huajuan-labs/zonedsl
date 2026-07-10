@@ -47,14 +47,14 @@
 ### Changed — 三个模块聚合到 zone-plugin/(方案 A vendored plugin)
 
 三个之前分散的目录:
-- `packageChat/towxml/`
-- `packageChat/zonedsl/`
-- `packageChat/zone-components/`
+- `packages/wechat/towxml/`
+- `packages/core/`
+- `packages/wechat/`
 
 统一移到:
-- `packageChat/zone-plugin/towxml/`
-- `packageChat/zone-plugin/zone-dsl/`(重命名 zonedsl → zone-dsl,连字符风格更规范)
-- `packageChat/zone-plugin/zone-components/`
+- `packages/towxml/`
+- `packages/zone-dsl/`(重命名 zonedsl → zone-dsl,连字符风格更规范)
+- `packages/zone-components/`
 
 **动机**:让 Zone 这一整套(markdown 渲染 + zone-DSL 引擎 + 组件视觉层)成为一个**可复制的独立模块**,其他小程序只要:
 1. 复制整个 `zone-plugin/` 目录到自己项目
@@ -75,21 +75,21 @@
 
 ### 引用路径变更
 
-- `agentChat/index.json`: `/packageChat/towxml/towxml` → `/packageChat/zone-plugin/towxml/towxml`
+- `packages/wechat/index.json`: `/packages/wechat/towxml/towxml` → `/packages/towxml/towxml`
 - `agentChat/index.js`: `require('../towxml/index.js')` → `require('../zone-plugin/towxml/index.js')`
 - `message-item/index.json`: 同上更新
-- `zone-plugin/towxml/decode.json`: 全部改指 `/packageChat/zone-plugin/xxx`
+- `packages/wechat/towxml/decode.json`: 全部改指 `/packages/xxx`
 - `zone-plugin/towxml/index.js`: `require('../zonedsl/toWxNodes.js')` → `require('../zone-dsl/toWxNodes.js')`
 - `zone-plugin/zone-components/zone-node/index.json`: echarts 引用路径更新
 
 同步更新的外部文档:
 - `CLAUDE.md`
 - `.claude/skills/zonedsl/{SKILL,CATALOG-INTERACTIVE,CATALOG-PRESET}.md`
-- `packageChat/zone-plugin/zone-dsl/{THEMES,LAYERS}.md`
+- `packages/zone-dsl/{THEMES,LAYERS}.md`
 
 ### Roadmap · v2.9(下一步)
 
-- 抽出微博专属 preset 到 `zone-plugin/weibo-preset/`(city-card / scene-card / person-card / person-grid / glyph-compare / statement)
+- 抽出平台专属 preset 到 `packages/wechat/preset/`(city-card / scene-card / person-card / person-grid / glyph-compare / statement)
 - 加 `zone-plugin/README.md` / `INSTALL.md` / `handlers-example.js`
 - toWxNodes 支持 `registerPresets(map)` 让业务 preset 可选注册
 - CSS 变量分层:`tokens.wxss`(业务方 override)+ `zone-core.wxss`(不动)

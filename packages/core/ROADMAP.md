@@ -71,7 +71,7 @@
 
 ### 阶段三 · v4.0 · Monorepo 化 + 独立仓库
 
-**目标**：整个 ZoneDSL 从 wx-hot-search 分离出来，成为独立开源仓库。
+**目标**：整个 ZoneDSL 从 上游小程序仓库 分离出来，成为独立开源仓库。
 
 **推荐目录结构**（monorepo，pnpm workspaces）：
 
@@ -126,9 +126,9 @@ zonedsl/                          ← 独立仓库(带 LICENSE / README / CI)
 ```
 
 **演进步骤**：
-1. 现有 `wx-hot-search/packages/wechat/` **保留副本**（vendored）确保小程序不受影响
+1. 现有 `上游小程序仓库/packages/wechat/` **保留副本**（vendored）确保小程序不受影响
 2. 独立 `zonedsl/` 仓库创建，把 `zone-plugin/` 内容按上表拆分到 packages
-3. `wx-hot-search` 通过 npm 或 git subtree/submodule 消费 `@zonedsl/wechat`
+3. `上游小程序仓库` 通过 npm 或 git subtree/submodule 消费 `@zonedsl/wechat`
 4. 反向吸收 hot_assistant `demo/zonedsl/` 的独有能力：
    - `RETROFIT.md` / `DOM-COUPLING.md`（业务方接入指南）
    - `spec/zone-dsl-spec.md`（顶层协议规范文档）

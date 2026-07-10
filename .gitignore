@@ -16,3 +16,4 @@ docs/assets/theme-switcher.js
 *.log
 .idea/
 .vscode/
+.omc/

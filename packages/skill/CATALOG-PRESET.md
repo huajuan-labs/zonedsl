@@ -61,8 +61,8 @@ item 自动加 `[n]` 橙色索引；tags 显示为 `#xxx` 话题样式
 
 ```
 ::person-grid cols=2
-  ::person-card name="大姐 吴君如" desc="香港资深演员" avatar="https://..."
-  ::person-card name="二姐 那英" desc="天后级歌手" avatar="https://..."
+  ::person-card name="嘉宾甲" desc="香港资深演员" avatar="https://..."
+  ::person-card name="嘉宾乙" desc="天后级歌手" avatar="https://..."
 ```
 
 `cols`：1-4；无 avatar 时显示名字首字作 fallback。**列数选择规则**同 `::grid`（见 CATALOG-STRUCTURE.md），人名 ≤ 4 字用 3-4 列，长人名/长描述用 2 列。
