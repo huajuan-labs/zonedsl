@@ -22,7 +22,6 @@
       "browser": "./parser.umd.js",
       "default": "./parser.js"
     },
-    "./toWxNodes": "./toWxNodes.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -30,7 +29,6 @@
     "parser.mjs",
     "parser.umd.js",
     "build.mjs",
-    "toWxNodes.js",
     "INTENTS.md",
     "LAYERS.md",
     "THEMES.md",

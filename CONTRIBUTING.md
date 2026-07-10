@@ -5,13 +5,13 @@
 ## 先读
 
 - [`protocol/spec.md`](./protocol/spec.md) —— 协议是源头，所有改动以它为准
-- [`packages/core/toWxNodes.js`](./packages/core/toWxNodes.js) —— 组件 registry + 转换逻辑
+- [`packages/wechat/toWxNodes.js`](./packages/wechat/toWxNodes.js) —— 组件 registry + 转换逻辑
 - [`packages/core/VERSIONS.md`](./packages/core/VERSIONS.md) —— 变更记录
 
 ## 加一个组件（4 处登记）
 
-1. `packages/core/toWxNodes.js` —— `COMPONENT_REGISTRY` 加 `{ layer, since }`
-2. `packages/core/toWxNodes.js` —— `switch` 加 `case` 返回节点
+1. `packages/wechat/toWxNodes.js` —— `COMPONENT_REGISTRY` 加 `{ layer, since }`
+2. `packages/wechat/toWxNodes.js` —— `switch` 加 `case` 返回节点
 3. 渲染器：web 在 `packages/web/src/web-renderer.js` 的 `R` map 加一条（或 `ZonePlayground.register()` 运行时注册）；wechat 在 zone-node wxml 加 `wx:elif` 分支
 4.（推荐）`packages/skill/CATALOG-<LAYER>.md` 加文档，让 AI 知道有这组件
 

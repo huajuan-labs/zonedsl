@@ -59,10 +59,10 @@ packages/wechat/
 ### Step 2 · 渲染消息
 
 ```js
-const { toAst } = require('@zonedsl/wechat')
+const { dslToNodes } = require('@zonedsl/wechat')
 
 // content 是 AI 后端返回的字符串,markdown + zone-DSL 混排
-const ast = toAst(content, { streamingSafe: true })  // 流式渲染保护,推荐开
+const ast = dslToNodes(content, { streamingSafe: true })  // 流式渲染保护,推荐开
 this.setData({ ast })
 ```
 
@@ -146,7 +146,7 @@ const ast = buildAst(content, { streamingSafe: true })
 
 给 zone-DSL 加一个**新组件**,需要在 **4 个地方登记**:
 
-### 1 · `@zonedsl/core/toWxNodes.js` · REGISTRY
+### 1 · `@zonedsl/wechat/toWxNodes.js` · REGISTRY
 
 ```js
 const COMPONENT_REGISTRY = {
@@ -155,7 +155,7 @@ const COMPONENT_REGISTRY = {
 }
 ```
 
-### 2 · `@zonedsl/core/toWxNodes.js` · case 分支
+### 2 · `@zonedsl/wechat/toWxNodes.js` · case 分支
 
 ```js
 case 'my-widget': {

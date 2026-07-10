@@ -218,7 +218,7 @@
 
 ### Changed
 
-- **未知组件默认静默** — `toWxNodes.js` 加 `UNKNOWN_MODE = 'silent'` 常量，默认丢弃未知组件不渲染。debug 模式可显示"未支持"卡片
+- **未知组件默认静默** — `@zonedsl/wechat/toWxNodes.js` 加 `UNKNOWN_MODE = 'silent'` 常量，默认丢弃未知组件不渲染。debug 模式可显示"未支持"卡片
 - **magazine-cover title/subtitle 支持行内高亮** — `**text**` / `~~text~~` / `==text==` 三种标记 + `\\n` 换行
 - **parser 支持 `\"` 转义** — attrs 值内可安全嵌入英文双引号
 - **默认 badge 用橙色渐变** — `linear-gradient(135deg, #FF8200, #FFB347)`
@@ -300,7 +300,7 @@
 ### Planned · v2.x（远期）
 
 - **`dslToNodes(dsl, { allowLayers })`** — 运行时层过滤
-- **`toWxNodes.js` 拆分到 `components/` 目录**
+- **`@zonedsl/wechat/toWxNodes.js` 拆分到 `components/` 目录**
 - **主题定制化 API** — 业务侧覆盖 `--mz-*` 变量
 - **组件级 deprecation 工具** — 扫码里的 `@deprecated` 自动生成迁移文档
 

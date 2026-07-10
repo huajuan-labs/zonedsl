@@ -66,7 +66,7 @@
   - `key-assigner.js` —— 结构化 key（`name#bucket` 路径式，参考 hot_assistant `assignStableChartIds`）
   - `themes.css` —— 12 主题的 Web 版 CSS 变量（从 `zone-components/themes/*.wxss` 抽出）
 - 组件层规范化：
-  - 从 `toWxNodes.js` case 分支里**抽出 spec**，每个组件写一份平台无关的 `spec/{name}.md`（attrs 定义 + 子项规则 + 主题变量 + 示例）
+  - 从 `@zonedsl/wechat/toWxNodes.js` case 分支里**抽出 spec**，每个组件写一份平台无关的 `spec/{name}.md`（attrs 定义 + 子项规则 + 主题变量 + 示例）
   - 从 spec 生成小程序端和 Web 端两套 renderer
 
 ### 阶段三 · v4.0 · Monorepo 化 + 独立仓库
@@ -213,5 +213,5 @@ zonedsl/                          ← 独立仓库(带 LICENSE / README / CI)
 | 12 主题（杂志系 7 + 接管系 5）| `zone-components/themes/*` | 官方主题目录 |
 | 杂志系 18 个 preset 组件 | `zone-components/zone-node/index.wxml` | 官方 preset 规范 |
 | 11 个 intent 白名单 | `zone-dsl/INTENTS.md` | 官方 intent 规范 |
-| `::center` / `::row align=center`（v2.9）| `toWxNodes.js` | 官方 structure 规范 |
+| `::center` / `::row align=center`（v2.9）| `@zonedsl/wechat/toWxNodes.js` | 官方 structure 规范 |
 | Skill 双分层（AI 输出 + 开发者）| `skill/` + `skill-dev/` | 官方 skill 规范 |

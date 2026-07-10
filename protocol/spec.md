@@ -114,7 +114,7 @@ AI 流式吐字时，缓冲区末尾常有半截内容。spec 定义三个流式
 
 ### 5.2 registry
 
-每个组件在 `COMPONENT_REGISTRY`（`toWxNodes.js`）登记 `{ layer, since }`。加组件 = registry 登一条 + toWxNodes 加 case + 渲染器加分支。
+每个组件在 `COMPONENT_REGISTRY`（`@zonedsl/wechat/toWxNodes.js`）登记 `{ layer, since }`。加组件 = registry 登一条 + toWxNodes 加 case + 渲染器加分支。
 
 ### 5.3 未知组件
 

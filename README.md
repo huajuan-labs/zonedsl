@@ -77,10 +77,7 @@ ZoneDSL 的 parser **组件无关**——`::任何名字` 都能解析成 AST，
 <script src="https://unpkg.com/@zonedsl/web/dist/zonedsl-web.umd.js"></script>
 <div id="out"></div>
 <script>
-  ZonePlayground.render(
-    document.getElementById('out'),
-    '::callout "Hello **ZoneDSL**"'
-  );
+  ZonePlayground.mount(document.getElementById('out'), '::callout "Hello **ZoneDSL**"');
 </script>
 ```
 
@@ -88,7 +85,7 @@ ZoneDSL 的 parser **组件无关**——`::任何名字` 都能解析成 AST，
 
 ## 🧠 协议是重心
 
-ZoneDSL 是**协议优先**：spec 是源头，渲染器是实现。真相在 [`protocol/spec.md`](./protocol/spec.md)——语法、流式语义、组件契约。`@zonedsl/core` 是规范解析器，`@zonedsl/web` 和（未来的）`@zonedsl/wechat` 是符合 spec 的参考实现。
+ZoneDSL 是**协议优先**：spec 是源头，渲染器是实现。真相在 [`protocol/spec.md`](./protocol/spec.md)——语法、流式语义、组件契约。`@zonedsl/core` 是规范解析器，`@zonedsl/web` 和 `@zonedsl/wechat` 都是符合 spec 的参考实现。
 
 ```
 protocol/          ← spec（source of truth）
@@ -106,9 +103,9 @@ packages/skill/    ← 生成器: intent → DSL（给 AI 用）
 
 ## 🤝 贡献
 
-加一个组件 = `toWxNodes.js` 加一个 case + `COMPONENT_REGISTRY` 登一条 + 渲染器加一个分支。详见 [`protocol/spec.md`](./protocol/spec.md) 和 [`packages/core/toWxNodes.js`](./packages/core/toWxNodes.js)。
+详见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。要点：parser 组件无关，**加组件无需改 parser**——在所用运行时里注册即可（web：`ZonePlayground.register('my-comp', fn)`；wechat：`toWxNodes.js` 加 case + `zone-node` 加分支 + `COMPONENT_REGISTRY` 登一条）。扩展 intent / 主题同理，见 [spec §10](./protocol/spec.md)。
 
-欢迎 issue / PR / ⭐ star / 推广。做 WeChat/RN/Flutter 渲染器、贡献领域模板（金融/医疗/教育）都是好切入点。
+欢迎的方向：补 React/Vue/RN/Flutter 渲染器（跑通 conformance 套件即 "Compliant"）、贡献领域模板（金融/医疗/教育）、补组件与主题、完善文档与示例。issue / PR / ⭐ star 都欢迎。
 
 ## 📄 License
 

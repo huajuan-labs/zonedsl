@@ -12,8 +12,9 @@
   },
   "bugs": "https://github.com/huajuan-labs/zonedsl/issues",
   "keywords": ["zonedsl", "wechat", "miniprogram", "zone-node", "towxml", "ai", "streaming"],
-  "main": "index.js",
+  "main": "toWxNodes.js",
   "files": [
+    "toWxNodes.js",
     "zone-node/",
     "towxml/",
     "themes/",

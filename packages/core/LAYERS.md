@@ -156,7 +156,7 @@ case 'echarts-raw': return null
 
 ## 层与文件（规划）
 
-当前所有组件在 `toWxNodes.js` 一个大 switch 里。**远期**会拆分到独立模块：
+当前所有组件在 `@zonedsl/wechat/toWxNodes.js` 一个大 switch 里。**远期**会拆分到独立模块：
 
 ```
 @zonedsl/core/
