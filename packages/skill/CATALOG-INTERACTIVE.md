@@ -109,7 +109,7 @@ item 内可嵌套任意子组件作为展开内容
 **会话相关**
 
 ```
-::button "追问更多" intent=followup value="示例综艺 还有哪些看点?"
+::button "追问更多" intent=followup value="盛夏夜 还有哪些看点?"
 ::button "直接发送" intent=send-message value="订阅这个热点"
 ```
 
@@ -151,8 +151,8 @@ item 内可嵌套任意子组件作为展开内容
 **通用操作**
 
 ```
-::button "复制文本" intent=copy value="示例综艺 复盘全文"
-::button "分享" intent=share value="示例综艺 复盘"
+::button "复制文本" intent=copy value="盛夏夜 复盘全文"
+::button "分享" intent=share value="盛夏夜 复盘"
 ::button "看更多" intent=open-url value="https://example.com/more"
 ```
 

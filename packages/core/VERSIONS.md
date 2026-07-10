@@ -193,7 +193,7 @@
 `::button` 支持 **intent 白名单**（详见 `INTENTS.md`）：
 
 - **会话相关**：`followup`（填输入框） / `send-message`（直接发送）
-- **项目跳转**：`search` / `open-weibo` / `open-topic` / `open-tab` / `track-topic`
+- **项目跳转**：`search` / `open-topic` / `open-tab` / `track-topic` 等（含已移除的平台专属项）
 - **账号中心**：`login` / `open-my`
 - **通用操作**：`copy` / `share` / `open-url`（仅站内 `/pages/`）
 

@@ -48,7 +48,7 @@
 ::city-card num="01" country="意大利" city="米兰" en="MILANO" date="6月19日 — 6月21日" color=purple
   item "米兰出发" desc="6月19日启程前往米兰"
   item "米兰自拍" desc="分享米兰行程随拍"
-  tags="示例艺人甲米兰出发,示例艺人甲米兰自拍"
+  tags="林晚米兰出发,林晚米兰自拍"
 ```
 
 `color`：`purple / red / green / blue / pink / accent`（决定卡片 tint 底色）
@@ -61,8 +61,8 @@ item 自动加 `[n]` 橙色索引；tags 显示为 `#xxx` 话题样式
 
 ```
 ::person-grid cols=2
-  ::person-card name="嘉宾甲" desc="香港资深演员" avatar="https://..."
-  ::person-card name="嘉宾乙" desc="天后级歌手" avatar="https://..."
+  ::person-card name="林晚" desc="香港资深演员" avatar="https://..."
+  ::person-card name="苏念" desc="天后级歌手" avatar="https://..."
 ```
 
 `cols`：1-4；无 avatar 时显示名字首字作 fallback。**列数选择规则**同 `::grid`（见 CATALOG-STRUCTURE.md），人名 ≤ 4 字用 3-4 列，长人名/长描述用 2 列。
@@ -70,7 +70,7 @@ item 自动加 `[n]` 橙色索引；tags 显示为 `#xxx` 话题样式
 ## scene-card — 名场面卡
 
 ```
-::scene-card icon="😂" title="示例艺人乙手怎么了" desc="7月1日晚登上热点榜第13位..." tags="名场面,综艺" badge="名场面" rank="峰值 6"
+::scene-card icon="😂" title="苏念手怎么了" desc="7月1日晚登上热点榜第13位..." tags="名场面,综艺" badge="名场面" rank="峰值 6"
 ```
 
 属性：
@@ -97,7 +97,7 @@ item 自动加 `[n]` 橙色索引；tags 显示为 `#xxx` 话题样式
 ## statement — 回应/声明卡
 
 ```
-::statement title="一个美丽的误会" author="示例艺人丙" time="2026.06.25 20:57" source="平台"
+::statement title="一个美丽的误会" author="周屿" time="2026.06.25 20:57" source="平台"
   ::text "一个美丽的误会,不存在原名艺名的区别..."
   ::text "「钧甯」二字,藏着父母对我人生的深深寄望..."
 ```
@@ -209,9 +209,9 @@ item 自动加 `[n]` 橙色索引；tags 显示为 `#xxx` 话题样式
 ::media-card
   url="https://example.com/cover.jpg"
   tag="TOP STORY"
-  title="示例综艺 北京开录"
+  title="盛夏夜 北京开录"
   subtitle="7 月 3 日 · 首都机场"
-  tags="示例综艺,综艺"
+  tags="盛夏夜,综艺"
   height=400
   align=bottom
   overlay=gradient

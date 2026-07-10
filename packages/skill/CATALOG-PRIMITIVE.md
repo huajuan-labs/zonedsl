@@ -65,7 +65,7 @@
 
 ```
 ::avatar url="https://..."
-::avatar url="..." name="示例艺人甲" size=md
+::avatar url="..." name="林晚" size=md
 ```
 
 `size`：`sm / md / lg`
