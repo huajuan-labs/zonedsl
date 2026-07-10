@@ -1,0 +1,12 @@
+# Cloudflare Pages / Netlify 响应头配置
+# sw.js 必须每次 revalidate,否则 Service Worker 更新滞后(CDN 长缓存会卡旧 SW)
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# index.html 同理,保证内容更新即时生效
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# 带 hash 的静态资源可长缓存(parser.umd.js 等由 sync-deps 同步,内容变即重发)
+/assets/*
+  Cache-Control: public, max-age=86400
