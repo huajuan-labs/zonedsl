@@ -2136,6 +2136,20 @@ img.p-avatar { display: inline-block; }
 .p-image img { display: block; width: 100%; border-radius: 8px; }
 .p-image figcaption { margin-top: 6px; font-size: 12px; color: var(--ink-soft); text-align: center; }
 .p-image-empty { padding: 24px; text-align: center; color: var(--ink-soft); border: 1px dashed var(--line); border-radius: 8px; }
+/* v2.11: image fit 固定比例容器 + 流式骨架 + video */
+.p-image-fixed { position: relative; overflow: hidden; border-radius: 8px; background: var(--panel-soft, #f2f2f2); }
+.p-image-fixed img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+.p-image-fixed figcaption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.5)); color: #fff; margin: 0; padding: 16px 12px 8px; }
+.p-image-portrait { max-width: 60%; margin-left: auto; margin-right: auto; }
+.p-image-skeleton { background: var(--panel-soft, #f2f2f2); border-radius: 8px; position: relative; overflow: hidden; }
+.p-image-skeleton::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transform: translateX(-100%); animation: p-shimmer 1.4s infinite; }
+@keyframes p-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.p-video { position: relative; overflow: hidden; border-radius: 8px; background: #000; }
+.p-video-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.p-video-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.5); color: #fff; font-size: 20px; line-height: 44px; text-align: center; }
+.p-video-content { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px 12px 10px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); }
+.p-video-title { color: #fff; font-size: 14px; font-weight: 600; }
+.p-video-sub { color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 2px; }
 .p-spacer { width: 100%; }
 
 /* preset: city-card / statement / editorial-* / fact-bar / step-block / glyph-compare / media-card */

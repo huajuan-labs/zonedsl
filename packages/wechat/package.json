@@ -24,6 +24,6 @@
     "@zonedsl/core": "^1.0.0"
   },
   "scripts": {
-    "test": "echo \"wechat: component tests via DevTools\" && exit 0"
+    "test": "node --test \"test/**/*.test.mjs\""
   }
 }
