@@ -473,12 +473,39 @@
       (desc ? '<div class="p-metric-desc">' + inline(desc) + '</div>' : '') +
       '</div>';
   };
+  // v2.11: fit 宽高适配(16:9 口语化 → CSS aspect-ratio;width 默认向后兼容)
+  var FIT_RATIO = { '16:9': '16 / 9', '9:16': '9 / 16', '4:3': '4 / 3', '3:4': '3 / 4', square: '1 / 1', cover: '16 / 9' };
+  function fitStyle(fit, height) {
+    var f = String(fit || 'width').toLowerCase();
+    if (f === '1:1') f = 'square';
+    if (f === 'fixed' && height) return 'height:' + esc(String(height)) + 'px;';
+    if (FIT_RATIO[f]) return 'aspect-ratio:' + FIT_RATIO[f] + ';';
+    return ''; // width 模式不约束
+  }
   R.image = function (n) {
     var url = attr(n, 'url') || attr(n, 'src') || main(n);
     var cap = attr(n, 'caption') || attr(n, 'alt');
-    if (!url) return '<div class="p-image p-image-empty">(image)</div>';
-    return '<figure class="p-image"><img src="' + esc(url) + '" alt="' + esc(cap) + '">' +
+    var fit = (attr(n, 'fit') || 'width').toLowerCase();
+    var st = fitStyle(fit, attr(n, 'height'));
+    // 流式态 url 未到 → 骨架(对齐 .pending 语义)
+    if (!url) return STREAMING ? '<div class="p-image p-image-skeleton" style="' + st + '"></div>' : '<div class="p-image p-image-empty">(image)</div>';
+    var cls = 'p-image' + (st ? ' p-image-fixed' : '') + (fit === '9:16' ? ' p-image-portrait' : '');
+    return '<figure class="' + cls + '"' + (st ? ' style="' + st + '"' : '') + '><img src="' + esc(url) + '" alt="' + esc(cap) + '">' +
       (cap ? '<figcaption>' + esc(cap) + '</figcaption>' : '') + '</figure>';
+  };
+  // v2.11: video 封面组件(web 端纯展示,点击跳转在小程序端发生)
+  R.video = function (n) {
+    var poster = attr(n, 'poster') || attr(n, 'url') || attr(n, 'src');
+    var title = main(n) || attr(n, 'title');
+    var sub = attr(n, 'subtitle');
+    var fit = (attr(n, 'fit') || '16:9').toLowerCase();
+    var st = fitStyle(fit, attr(n, 'height'));
+    if (!poster && !STREAMING) return '<div class="p-video p-image-empty">(video)</div>';
+    var inner = poster ? '<img class="p-video-poster" src="' + esc(poster) + '">' : '<div class="p-image-skeleton"></div>';
+    return '<div class="p-video' + (fit === '9:16' ? ' p-image-portrait' : '') + '"' + (st ? ' style="' + st + '"' : '') + '>' +
+      inner + '<div class="p-video-play">▶</div>' +
+      (title || sub ? '<div class="p-video-content">' + (title ? '<div class="p-video-title">' + esc(title) + '</div>' : '') + (sub ? '<div class="p-video-sub">' + esc(sub) + '</div>' : '') + '</div>' : '') +
+      '</div>';
   };
   R.spacer = function (n) {
     var h = attr(n, 'h') || attr(n, 'height') || main(n) || 'md';

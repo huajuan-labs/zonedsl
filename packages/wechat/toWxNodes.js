@@ -66,6 +66,18 @@ function validateIntentValue(intent, rawValue) {
   return null
 }
 
+// ========== image/video fit 宽高适配白名单 (v2.11) ==========
+// fit 值对 AI 友好(16:9 口语化),渲染层转 padding-bottom hack(项目不用 aspect-ratio,兼容老基础库).
+// width(默认)= widthFix 向后兼容 + 流式骨架兜底;16:9/9:16/4:3/square = 固定比例容器;
+// cover = 填满裁切(默认 16:9);contain = 完整留白;fixed = height attr 固定高.
+var FIT_WHITELIST = { width: 1, '16:9': 1, '9:16': 1, '4:3': 1, '3:4': 1, square: 1, cover: 1, contain: 1, fixed: 1 }
+function normalizeFit(raw) {
+  var f = String(raw || '').replace(/^\s+|\s+$/g, '').toLowerCase()
+  if (!f) return 'width'
+  if (f === '1:1') return 'square'
+  return FIT_WHITELIST[f] ? f : 'width'
+}
+
 // ========== 组件分层与版本注册表 ==========
 // 记录每个 case 的层归属和引入版本,配合 LAYERS.md / VERSIONS.md 使用.
 // 修改组件时同步更新此表. deprecated 组件在 case 里直接 return null.
@@ -88,6 +100,7 @@ var COMPONENT_REGISTRY = {
   alert:             { layer: 'primitive', since: 'v1.0' },
   metric:            { layer: 'primitive', since: 'v1.0' },
   image:             { layer: 'primitive', since: 'v1.0' },
+  video:             { layer: 'primitive', since: 'v2.11' },
   spacer:            { layer: 'primitive', since: 'v2.3' },
 
   // ---- structure: 结构层 ----
@@ -337,8 +350,15 @@ function toEchartsNode(node) {
 // ========== 行内 markdown 拆分 ==========
 // 把 "**紧急** 优先级 `code`" 拆成 [{type:'bold',text:'紧急'},{type:'text',text:' 优先级 '},{type:'code',text:'code'}]
 // 支持:**bold** / *italic* / `code`
-function splitInlineMd(text) {
+// opts.streamingSafe: 流式态下,未配对的标记符号(** / ` / 单 *)裁到最后一个未闭合标记之前,
+//   避免半截标记当裸字符闪(**紧急 → 空,等 **紧急** 到了再整体显示).非流式/最终态不裁,正则照旧.
+//   详见 spec §4.5.裁剪顺序 ** → ` → 单 *(单 * 计数前先剔除 **),对齐 web-renderer.js bufferMarkdown().
+function splitInlineMd(text, opts) {
   if (!text || typeof text !== 'string') return [{ type: 'text', text: String(text || '') }]
+  var streamingSafe = !!(opts && opts.streamingSafe)
+  if (streamingSafe) {
+    text = trimUnclosedInline(text)
+  }
   var re = /(\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`)/g
   var parts = []
   var last = 0
@@ -355,17 +375,53 @@ function splitInlineMd(text) {
   return parts
 }
 
+// 流式态:把行内文本里"未配对"的标记符号及之后内容裁掉.
+// 裁剪顺序 ** → ` → 单 *(单 * 计数前剔除 **),每个符号奇数次才裁.
+// 算法对齐 web-renderer.js bufferMarkdown() 行 122-151,保证跨端一致(spec §9).
+function trimUnclosedInline(text) {
+  if (!text) return text
+  var s = String(text)
+  // ** (加粗) —— 偶数才闭合
+  var stars = (s.match(/\*\*/g) || []).length
+  if (stars % 2 === 1) {
+    var idx = s.lastIndexOf('**')
+    s = s.slice(0, idx)
+  }
+  // ` (行内代码)
+  var backticks = (s.match(/`/g) || []).length
+  if (backticks % 2 === 1) {
+    var bidx = s.lastIndexOf('`')
+    s = s.slice(0, bidx)
+  }
+  // 单 * 斜体(不能和 ** 冲突,先剔除 ** 再数)
+  var singleStars = (s.replace(/\*\*/g, '').match(/\*/g) || []).length
+  if (singleStars % 2 === 1) {
+    // 找最后一个孤立 *(前后都不是 *)
+    var lastStar = -1
+    for (var i = s.length - 1; i >= 0; i--) {
+      if (s[i] === '*' && s[i - 1] !== '*' && s[i + 1] !== '*') { lastStar = i; break }
+    }
+    if (lastStar >= 0) s = s.slice(0, lastStar)
+  }
+  return s
+}
+
 // ========== magazine-cover 标题/副标题行内高亮拆分 ==========
 // **text** → 主色高亮底黑字   ~~text~~ → 浅色高亮底主色字   ==text== → 主色字
 // `\n` 或字面量 `\n`(反斜杠+n) → 换行(part.type='break')
-function splitCoverHighlights(text) {
+// opts.streamingSafe: 流式态下,每行未配对的 ** / ~~ / == 裁到最后一个未闭合标记前.详见 spec §4.5.
+function splitCoverHighlights(text, opts) {
   if (!text || typeof text !== 'string') return [{ type: 'text', text: String(text || '') }]
+  var streamingSafe = !!(opts && opts.streamingSafe)
   // parser 从 attrs 值里读出的 `\n` 是字面量两字符(反斜杠+n),先归一化成真实换行
   var normalized = String(text).replace(/\\n/g, '\n')
   var lines = normalized.split('\n')
   var out = []
   for (var li = 0; li < lines.length; li++) {
     var ln = lines[li]
+    if (streamingSafe) {
+      ln = trimUnclosedCover(ln)
+    }
     var re = /(\*\*([^*]+)\*\*|~~([^~]+)~~|==([^=]+)==)/g
     var last = 0
     var m
@@ -377,10 +433,26 @@ function splitCoverHighlights(text) {
       last = m.index + m[0].length
     }
     if (last < ln.length) out.push({ type: 'text', text: ln.slice(last) })
+    // 裁剪后整行空(半截标记被裁光)→ 占位一个空 text,避免落到下面兜底用原始 text 闪裸符号
+    else if (streamingSafe && ln === '' && lines[li] !== '') out.push({ type: 'text', text: '' })
     if (li < lines.length - 1) out.push({ type: 'break' })
   }
   if (!out.length) out.push({ type: 'text', text: text })
   return out
+}
+
+// 流式态:magazine-cover/chapter/editorial-hero 的单行高亮标记裁剪.
+// 裁剪顺序 ** → ~~ → ==,每个符号奇数次才裁.对齐 web-renderer.js inline() 行 191-198.
+function trimUnclosedCover(line) {
+  if (!line) return line
+  var s = String(line)
+  var stars = (s.match(/\*\*/g) || []).length
+  if (stars % 2 === 1) s = s.slice(0, s.lastIndexOf('**'))
+  var tildes = (s.match(/~~/g) || []).length
+  if (tildes % 2 === 1) s = s.slice(0, s.lastIndexOf('~~'))
+  var eqs = (s.match(/==/g) || []).length
+  if (eqs % 2 === 1) s = s.slice(0, s.lastIndexOf('=='))
+  return s
 }
 
 // ========== 结构化子节点过滤 ==========
@@ -389,13 +461,14 @@ function isStructuralChild(c) {
 }
 
 // ========== 组件 → 新 tag-based 节点 ==========
-function zoneToNode(node) {
+function zoneToNode(node, ctx) {
   if (!node || node.type !== 'component') return null
+  ctx = ctx || {}
   var name = node.name
   var main = node.main || ''
   var attrs = node.attrs || {}
 
-  // 通用子节点:过滤掉 child 类型和 option 伪节点,其余递归
+  // 通用子节点:过滤掉 child 类型和 option 伪节点,其余递归(透传 ctx 保持 streamingSafe)
   var kids = (node.children || [])
     .filter(function (c) {
       if (isStructuralChild(c)) return false
@@ -413,7 +486,7 @@ function zoneToNode(node) {
       if ((name === 'era-timeline' || name === 'history-strip') && c && c.type === 'component' && c.name === 'item') return false
       return true
     })
-    .map(zoneToNode).filter(Boolean)
+    .map(function (c) { return zoneToNode(c, ctx) }).filter(Boolean)
 
   switch (name) {
 
@@ -447,7 +520,7 @@ function zoneToNode(node) {
           main: main,
           size: attrs.size || '',
           align: attrs.align === 'center' ? 'center' : 'left',
-          parts: splitInlineMd(main),
+          parts: splitInlineMd(main, ctx),
         },
         children: [],
       }
@@ -744,10 +817,10 @@ function zoneToNode(node) {
           tag: attrs.tag || '',
           date: attrs.date || '',
           title: titleText,
-          titleParts: splitCoverHighlights(titleText),
+          titleParts: splitCoverHighlights(titleText, ctx),
           highlight: attrs.highlight || '',
           subtitle: subtitleText,
-          subtitleParts: splitCoverHighlights(subtitleText),
+          subtitleParts: splitCoverHighlights(subtitleText, ctx),
           stats: statsArr,
           footnote: attrs.footnote || '',
           badge: attrs.badge || '',
@@ -930,20 +1003,59 @@ function zoneToNode(node) {
     case 'image': {
       var imgUrl = attrs.url || attrs.src || main
       var imgCap = attrs.caption || attrs.alt || ''
+      var imgFit = normalizeFit(attrs.fit)
       return {
         tag: 'zone-image',
-        attrs: { src: imgUrl, caption: imgCap, mode: attrs.mode || 'widthFix' },
+        attrs: {
+          src: imgUrl,
+          caption: imgCap,
+          fit: imgFit,
+          // fitClass: fit 值的冒号→连字符,用作 wxml class(WXSS 不支持 \: 转义)
+          fitClass: imgFit.replace(/:/g, '-'),
+          height: attrs.height || attrs.h || '',
+          mode: imgFit === 'width' ? (attrs.mode || 'widthFix') : (imgFit === 'contain' ? 'aspectFit' : 'aspectFill'),
+        },
+        children: [],
+      }
+    }
+
+    // ---- 叶子:video(封面 + 点击跳转, v2.11) ----
+    // 不内嵌原生 video,只渲染 poster 封面 + ▶ 角标 + title;点击复用 button intent 链路(open-url).
+    // 流式态 poster 未闭合 → streamingSafe 丢弃 → 渲染层显示骨架(同 image).
+    case 'video': {
+      var vPoster = attrs.poster || attrs.url || attrs.src || ''
+      var vTitle = attrs.title || main || ''
+      var vFit = attrs.fit ? normalizeFit(attrs.fit) : '16:9'
+      var vIntent = ''
+      var vValue = ''
+      var rawVIntent = (attrs.intent || '').toString()
+      if (BUTTON_INTENT_WHITELIST[rawVIntent]) {
+        var vValidated = validateIntentValue(rawVIntent, attrs.value)
+        if (vValidated != null) { vIntent = rawVIntent; vValue = vValidated }
+      }
+      return {
+        tag: 'zone-video',
+        attrs: {
+          poster: vPoster,
+          title: vTitle,
+          subtitle: attrs.subtitle || '',
+          fit: vFit,
+          fitClass: vFit.replace(/:/g, '-'),
+          height: attrs.height || attrs.h || '',
+          intent: vIntent,
+          value: vValue,
+        },
         children: [],
       }
     }
 
     case 'gallery': {
       var imgs = (node.children || []).filter(function (c) { return c.type === 'component' && c.name === 'image' })
-      var count = imgs.length
-      var galleryCols = count === 1 ? 1 : (count === 2 || count === 4) ? 2 : 3
       var urls = imgs.map(function (im) {
         return (im.attrs && (im.attrs.url || im.attrs.src)) || im.main || ''
-      })
+      }).filter(function (u) { return u })  // v2.11: 过滤空 url,流式时未闭合的子图不混入(避免空 src 撑大)
+      var count = urls.length
+      var galleryCols = count === 1 ? 1 : (count === 2 || count === 4) ? 2 : 3
       return {
         tag: 'zone-gallery',
         attrs: { main: main, cols: galleryCols, urls: urls },
@@ -955,7 +1067,7 @@ function zoneToNode(node) {
     case 'scroller': {
       var hSlides = (node.children || [])
         .filter(function (c) { return c.type === 'component' })
-        .map(zoneToNode).filter(Boolean)
+        .map(function (c) { return zoneToNode(c, ctx) }).filter(Boolean)
       return {
         tag: 'zone-hscroll',
         attrs: { main: main },
@@ -967,7 +1079,7 @@ function zoneToNode(node) {
     case 'carousel': {
       var swSlides = (node.children || [])
         .filter(function (c) { return c.type === 'component' })
-        .map(zoneToNode).filter(Boolean)
+        .map(function (c) { return zoneToNode(c, ctx) }).filter(Boolean)
       return {
         tag: 'zone-swiper',
         attrs: {
@@ -1095,7 +1207,7 @@ function zoneToNode(node) {
           // item 的子组件(::text/::list 等)作为展开内容
           var itChildren = (it.children || [])
             .filter(function (c) { return c.type === 'component' })
-            .map(zoneToNode).filter(Boolean)
+            .map(function (c) { return zoneToNode(c, ctx) }).filter(Boolean)
           return { main: itMain, desc: itDesc, children: itChildren }
         })
       return { tag: 'zone-accordion', attrs: { main: main, items: accordionItems }, children: [] }
@@ -1222,7 +1334,7 @@ function zoneToNode(node) {
         attrs: {
           main: main,
           title: chapTitle,
-          titleParts: splitCoverHighlights(chapTitle),
+          titleParts: splitCoverHighlights(chapTitle, ctx),
           subtitle: chapSubtitle,
           category: chapCategory,
           variant: chapVariant,
@@ -1308,7 +1420,7 @@ function zoneToNode(node) {
         tag: 'zone-editorial-hero',
         attrs: {
           title: ehTitle,
-          titleParts: splitCoverHighlights(ehTitle),
+          titleParts: splitCoverHighlights(ehTitle, ctx),
           subtitle: ehSubtitle,
           bg: ehBg,
           kicker: ehKicker,
@@ -1408,6 +1520,10 @@ function dslToNodes(dsl, options) {
   // v2.8 streamingSafe:流式安全模式,只对"未换行的尾行"的最后一个 bare attr 丢弃,
   // 组件始终显示,attrs 只在闭合时更新.比 dropPartialLastLine 更精细.
   var ast = parser.buildAst(dsl, { streamingSafe: !!opts.streamingSafe })
+  // v2.10: 把 streamingSafe 透传给 zoneToNode → splitInlineMd/splitCoverHighlights,
+  // 让流式态下组件 main 文本里的半截行内标记(** / ` / * / ~~ / ==)裁到未闭合标记前,
+  // 避免裸符号闪烁.详见 spec §4.5.
+  var ctx = { streamingSafe: !!opts.streamingSafe }
   var meta = extractTheme(ast)
   var layerFilter = null
   if (Array.isArray(opts.allowLayers) && opts.allowLayers.length) {
@@ -1420,18 +1536,23 @@ function dslToNodes(dsl, options) {
         var reg = COMPONENT_REGISTRY[node.name]
         if (reg && !layerFilter[reg.layer]) return null
       }
-      return zoneToNode(node)
+      return zoneToNode(node, ctx)
     })
     .filter(Boolean)
   // v2.5 主题穿透:把主题写到每个子节点的 attrs.theme 上,
   // 让 zone-node 组件的最外层 view 都能挂上 zone-theme-<name> class,
   // 从而 shared.wxss 里 `.zone-theme-serene .zn-xxx` 选择器能在每个组件内部命中.
-  function injectTheme(n) {
+  // v2.11: 同时注入 _streaming(流式态),让 image/video/gallery 在 src 未闭合时显示骨架而非撑大.
+  var isStreaming = !!opts.streamingSafe
+  function injectMeta(n) {
     if (!n || typeof n !== 'object') return
-    if (n.attrs) n.attrs['_theme'] = meta.theme
-    if (Array.isArray(n.children)) n.children.forEach(injectTheme)
+    if (n.attrs) {
+      n.attrs['_theme'] = meta.theme
+      if (isStreaming && n.tag !== 'zone-block') n.attrs['_streaming'] = true
+    }
+    if (Array.isArray(n.children)) n.children.forEach(injectMeta)
   }
-  nodes.forEach(injectTheme)
+  nodes.forEach(injectMeta)
   return [{
     tag: 'zone-block',
     attrs: {
@@ -1447,6 +1568,8 @@ function dslToNodes(dsl, options) {
 module.exports = {
   dslToNodes: dslToNodes,
   zoneToNode: zoneToNode,
+  splitInlineMd: splitInlineMd,
+  splitCoverHighlights: splitCoverHighlights,
   COMPONENT_REGISTRY: COMPONENT_REGISTRY,
   UNKNOWN_MODE: UNKNOWN_MODE,
 }

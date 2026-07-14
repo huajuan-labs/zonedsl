@@ -1010,9 +1010,10 @@
   border-radius: 6rpx;
 }
 
-/* ============ image ============ */
+/* ============ image (v2.11: fit 宽高适配 + 流式骨架) ============ */
 .zn-image {
   display: block;
+  position: relative;
   width: 100%;
   margin: 16rpx 0;
   border-radius: 20rpx;
@@ -1023,6 +1024,36 @@
   display: block;
   width: 100%;
 }
+/* width 模式(默认):widthFix,高度按图片 — 流式时靠骨架兜底不撑大 */
+.zn-image-fit-width .zn-image-img { display: block; width: 100%; }
+
+/* 固定比例容器模式:padding-bottom hack 撑比例,图片绝对定位填满(不用 aspect-ratio,兼容老基础库).
+   注意:class 名用连字符(16-9)不用冒号,WXSS 不支持 \: 转义;toWxNodes 输出 fitClass 已把 : → - */
+.zn-image-fit-16-9, .zn-video.zn-image-fit-16-9 { padding-bottom: 56.25%; }
+.zn-image-fit-4-3 { padding-bottom: 75%; }
+.zn-image-fit-3-4 { padding-bottom: 133.33%; }
+.zn-image-fit-square { padding-bottom: 100%; }
+/* cover 默认 16:9 比例;contain 用固定高度容器(默认 400rpx,可 height attr 覆盖) */
+.zn-image-fit-cover { padding-bottom: 56.25%; }
+.zn-image-fit-contain { height: 400rpx; padding-bottom: 0; }
+.zn-image-fit-fixed { padding-bottom: 0; }
+/* 9:16 竖屏:full-width 过高,限宽 60% 居中。padding-bottom 相对容器宽(60%屏),9:16 高/宽=16/9=177.78% */
+.zn-image-portrait { width: 60%; margin-left: auto; margin-right: auto; padding-bottom: 177.78%; }
+
+/* 固定比例/cover/contain 模式下,图片绝对定位填满容器 */
+.zn-image-fit-16-9 .zn-image-img,
+.zn-image-fit-4-3 .zn-image-img,
+.zn-image-fit-3-4 .zn-image-img,
+.zn-image-fit-square .zn-image-img,
+.zn-image-fit-cover .zn-image-img,
+.zn-image-fit-contain .zn-image-img,
+.zn-image-fit-fixed .zn-image-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .zn-image-caption {
   padding: 12rpx 20rpx;
   font-size: 22rpx;
@@ -1031,6 +1062,104 @@
   background: var(--hj-panel);
   border-top: 1rpx solid var(--hj-border);
 }
+
+/* ============ video (v2.11) ============ */
+.zn-video {
+  display: block;
+  position: relative;
+  width: 100%;
+  margin: 16rpx 0;
+  border-radius: 20rpx;
+  overflow: hidden;
+  background: var(--hj-bg);
+}
+.zn-video-clickable { cursor: pointer; }
+.zn-video-pressed { opacity: 0.88; }
+.zn-video-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.zn-video-mask {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%);
+  z-index: 1;
+}
+.zn-video-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.35);
+  border: 2rpx solid rgba(255,255,255,0.25);
+}
+/* CSS 三角形播放图标(纯白,比 ▶ 字符更清晰好看) */
+.zn-video-play-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 16rpx 0 16rpx 26rpx;
+  border-color: transparent transparent transparent #fff;
+  margin-left: 8rpx;
+}
+.zn-video-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 24rpx 24rpx 20rpx;
+}
+.zn-video-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+}
+.zn-video-subtitle {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.8);
+  margin-top: 4rpx;
+}
+
+/* ============ skeleton 骨架屏 (v2.11) ============ */
+.zn-skeleton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--hj-panel-soft, #f2f2f2);
+  overflow: hidden;
+}
+.zn-skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: zn-shimmer 1.4s infinite;
+}
+/* width 模式骨架:4:3 默认比例兜底(流式时 src 未闭合不撑大) */
+.zn-image-streaming.zn-image-fit-width { padding-bottom: 75%; }
+.zn-image-streaming.zn-image-fit-width .zn-skeleton { position: absolute; inset: 0; }
+@keyframes zn-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 
 /* ============ gallery(1/2/3/4/9 图) ============ */
 .zn-gallery-wrap {
