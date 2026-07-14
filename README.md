@@ -100,6 +100,8 @@ npm install github:huajuan-labs/zonedsl#main
 | [`@zonedsl/wechat`](./packages/wechat) | 微信小程序运行时（zone-node + towxml + 12 主题，生产验证） | ✅ v1 | 小程序 AI 客服 |
 | [`@zonedsl/skill`](./packages/skill) | AI 输出规范 + 模板 + 组件目录 | ✅ v1 | Claude / Cursor / 各类 Agent |
 
+> 🎨 **主题扩展工具**：[MD Theme Lab](https://github.com/huajuan-labs/md-theme-lab) —— 可视化设计 ZoneDSL 主题（20+ 预设 + AI 生成 + 实时预览），导出 `.wxss` 直接用于 ZoneDSL。也可独立做 markdown 排版 + 图片导出。
+
 > ZoneDSL 是市面**唯一带微信小程序渲染层的 A2UI 协议**——web 和小程序都生产可用，不是 demo。
 
 ## 协议与架构

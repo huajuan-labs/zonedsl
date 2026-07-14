@@ -100,6 +100,8 @@ Streaming render passes `{ streaming: true }`, skeleton `{ skeleton: true }`, cu
 | [`@zonedsl/wechat`](./packages/wechat) | WeChat mini-program runtime (zone-node + towxml + 12 themes, production-proven) | ✅ v1 | Mini-program AI assistant |
 | [`@zonedsl/skill`](./packages/skill) | AI output spec + templates + catalog | ✅ v1 | Claude / Cursor / any Agent |
 
+> 🎨 **Theme tool**: [MD Theme Lab](https://github.com/huajuan-labs/md-theme-lab) — visually design ZoneDSL themes (20+ presets + AI generation + live preview), export `.wxss` for ZoneDSL. Also works standalone for markdown styling + image export.
+
 > ZoneDSL is the **only A2UI protocol with a WeChat mini-program runtime** — both web and mini-program are production-ready, not demos.
 
 ## Protocol & architecture
