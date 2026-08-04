@@ -502,13 +502,39 @@
     <echarts data="{{item}}" data-data="{{item}}"/>
   </block>
 
-  <!-- ===== image(zone-image 组件式) ===== -->
+  <!-- ===== image(zone-image,v2.11: fit 宽高适配 + 流式骨架) ===== -->
   <block wx:elif="{{item.tag==='zone-image'}}">
-    <view class="zn-image">
-      <image class="zn-image-img" src="{{item.attrs.src}}" mode="{{item.attrs.mode || 'widthFix'}}" data-data="{{item}}" catch:tap="_tap"/>
+    <view class="zn-image zn-image-fit-{{item.attrs.fitClass || 'width'}} {{item.attrs._streaming && !item.attrs.src ? 'zn-image-streaming' : ''}} {{item.attrs.fitClass === '9-16' ? 'zn-image-portrait' : ''}}" style="{{item.attrs.fitClass === 'fixed' && item.attrs.height ? 'height:' + item.attrs.height + 'rpx;' : ''}}">
+      <!-- 有 src:正常图(width 模式 widthFix,其它模式 aspectFill/aspectFit 由 toWxNodes 设 mode) -->
+      <image wx:if="{{item.attrs.src}}" class="zn-image-img" src="{{item.attrs.src}}" mode="{{item.attrs.mode || 'widthFix'}}" data-data="{{item}}" catch:tap="_tap"/>
+      <!-- 流式态 src 未闭合:显示骨架(按 fit 比例撑高,不撑大) -->
+      <view wx:elif="{{item.attrs._streaming}}" class="zn-skeleton zn-skeleton-{{item.attrs.fitClass || 'width'}}"></view>
       <view class="zn-image-caption" wx:if="{{item.attrs.caption}}">{{item.attrs.caption}}</view>
     </view>
   </block>
+
+  <!-- ===== video(zone-video,v2.11: 封面 + ▶ 角标 + 点击跳转) ===== -->
+  <block wx:elif="{{item.tag==='zone-video'}}">
+    <view
+      class="zn-video zn-image-fit-{{item.attrs.fitClass || '16-9'}} {{item.attrs._streaming && !item.attrs.poster ? 'zn-image-streaming' : ''}} {{item.attrs.fitClass === '9-16' ? 'zn-image-portrait' : ''}} {{item.attrs.intent ? 'zn-video-clickable' : ''}}"
+      style="{{item.attrs.fitClass === 'fixed' && item.attrs.height ? 'height:' + item.attrs.height + 'rpx;' : ''}}"
+      hover-class="{{item.attrs.intent ? 'zn-video-pressed' : ''}}"
+      hover-stay-time="80"
+      bindtap="{{item.attrs.intent ? 'onButtonAction' : ''}}"
+      data-intent="{{item.attrs.intent}}"
+      data-value="{{item.attrs.value}}"
+    >
+      <image wx:if="{{item.attrs.poster}}" class="zn-video-poster" src="{{item.attrs.poster}}" mode="aspectFill"/>
+      <view wx:elif="{{item.attrs._streaming}}" class="zn-skeleton zn-skeleton-{{item.attrs.fitClass || '16-9'}}"></view>
+      <view class="zn-video-mask"></view>
+      <view class="zn-video-play" wx:if="{{item.attrs.poster}}"><view class="zn-video-play-icon"></view></view>
+      <view class="zn-video-content" wx:if="{{item.attrs.title || item.attrs.subtitle}}">
+        <view class="zn-video-title" wx:if="{{item.attrs.title}}">{{item.attrs.title}}</view>
+        <view class="zn-video-subtitle" wx:if="{{item.attrs.subtitle}}">{{item.attrs.subtitle}}</view>
+      </view>
+    </view>
+  </block>
+
   <!-- ===== gallery(1/2/3/4/9 图) ===== -->
   <block wx:elif="{{item.tag==='zone-gallery'}}">
     <view class="zn-gallery-wrap">

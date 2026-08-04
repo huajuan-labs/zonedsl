@@ -2419,10 +2419,21 @@ zone-node.onButtonAction   →  message-item.onZoneAction  →  agentChat/index.
       <div class="comp-head"><span class="comp-name">::image</span><span class="comp-title">图片</span><span class="comp-since">v1.0</span></div>
       <div class="comp-body">
         <div class="comp-src"><span class="k">::image</span> <span class="a">url=</span><span class="s">"https://..."</span>
-  <span class="a">caption=</span><span class="s">"江南梅雨"</span></div>
+  <span class="a">caption=</span><span class="s">"江南梅雨"</span> <span class="a">fit=</span><span class="s">16:9</span></div>
         <div class="comp-preview"><div class="p-image-ph">图片占位</div></div>
       </div>
-      <div class="comp-attrs"><strong>url</strong> 图片地址 · <strong>caption</strong> 图注 · <strong>mode</strong> 显示模式</div>
+      <div class="comp-attrs"><strong>url</strong> 图片地址 · <strong>caption</strong> 图注 · <strong>fit</strong> 宽高适配 <code>width/16:9/9:16/4:3/3:4/square/cover/contain/fixed</code>（v2.11，默认 width）· <strong>height</strong> fixed 模式高 rpx</div>
+    </div>
+
+    <div class="comp-item">
+      <div class="comp-head"><span class="comp-name">::video</span><span class="comp-title">视频封面</span><span class="comp-since">v2.11</span></div>
+      <div class="comp-body">
+        <div class="comp-src"><span class="k">::video</span> <span class="a">poster=</span><span class="s">"https://封面.jpg"</span>
+  <span class="a">title=</span><span class="s">"标题"</span> <span class="a">fit=</span><span class="s">16:9</span>
+  <span class="a">intent=</span><span class="s">open-url</span> <span class="a">value=</span><span class="s">"/pages/video?id=1"</span></div>
+        <div class="comp-preview"><div class="p-image-ph">▶ 视频封面</div></div>
+      </div>
+      <div class="comp-attrs"><strong>poster</strong> 封面图 · <strong>title/subtitle</strong> 叠加文字 · <strong>fit</strong> 复用 image（默认 16:9）· <strong>intent=open-url</strong> + <strong>value</strong> 点击跳转（不内嵌播放）</div>
     </div>
 
     <div class="comp-item">

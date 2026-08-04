@@ -191,6 +191,11 @@ ZoneDSL 支持三种混排方式，按内容形态选：
 - **整段都是 zone 组件**，没有 markdown 混排
 - **需要在围栏行传 meta**（如 `\`\`\`zone theme=literary`）
 - **保护语法**（zone 语法与外层 markdown 有冲突时）
+- **强隔离**：块内容里出现下面任一情况，顶格 `::`（遇空行止）会失效，必须用围栏
+  - 块内**含空行** —— 顶格 `::` 遇第一个空行就结束，后半截被 markdown 抢走
+  - 块内有**行首 markdown 字符**（`#` / `-` / `>` / `1.` / `*`）—— 不是顶格 `::`、也不在 child 缩进里，被 markdown 当标题/列表
+  - 块内**嵌入长 markdown 或代码块** —— 内层 ` ``` ` 会和外层 markdown 串味
+  - **多个 zone 块紧贴**想用空行分隔 —— 空行会提前终止前一个顶格 `::` 块
 
 ```
 \`\`\`zone theme=literary
@@ -199,7 +204,7 @@ ZoneDSL 支持三种混排方式，按内容形态选：
 \`\`\`
 ```
 
-大部分情况**不需要围栏**，顶格 `::` 直接混排在 markdown 里更自然。
+大部分情况**不需要围栏**，顶格 `::` 直接混排在 markdown 里更自然。判断口诀：**块内容里只要出现"空行"或"行首是 markdown 标记字符"，就上围栏**；纯连续行、行首都是 `::` 或 child 缩进的简单块，顶格 `::` 即可。详见 spec §2.3。
 
 ## 6 个排版模板
 
@@ -454,7 +459,33 @@ towxml 默认给 `**加粗**` 加**马克笔黄底**高亮块（editorial 主题
 
 ### 11 · 流式渲染的 zone 组件
 
-流式过程中 zone 组件的 attrs 可能吐到一半，parser 有内部 streamingSafe 机制会**只在完整闭合时更新最后一个 bare attr**，避免 `bg=a → bg=acc → bg=accent` 的中间态闪烁。AI 输出**不需要感知**，只要按正常语法写就行。
+流式过程中 zone 组件的 attrs 可能吐到一半，parser 有内部 streamingSafe 机制会**只在完整闭合时更新最后一个 bare attr**，避免 `bg=a → bg=acc → bg=accent` 的中间态闪烁。
+
+v2.10 起，组件 `main` 文本里的**行内 markdown 标记**（`**bold**` / `*italic*` / `` `code` `` / `~~del~~` / `==hl==`）也有流式保护：吐到一半（如 `**紧急` 还没闭合）时，未配对的标记会被裁掉，等下一 tick 闭合标记到了再整体显示——**不会闪裸 `**` / `` ` `` 符号**，代价是半截词临时不可见。AI 输出**不需要感知**，只要按正常语法写就行（详见 spec §4.5）。
+
+### 12 · 围栏强隔离
+
+顶格 `::`（遇空行止）对 95% 场景够用，但块内容出现**空行**或**行首 markdown 字符**（`#`/`-`/`>`/`1.`/`*`）时会和 markdown 打架。这时必须用 ` ```zone ` 围栏强隔离（见 §C 与 spec §2.3）。AI 判断口诀：块内只要出现空行或行首是 markdown 标记字符，就上围栏。
+
+### 13 · 多媒体 image / video（v2.11）
+
+**图片宽高适配** — 默认 `fit=width`（widthFix，向后兼容）。需要固定比例或避免流式撑大时显式声明：
+
+```
+::image url="https://..." fit=16:9 caption="说明"
+::image url="https://..." fit=square
+::image url="https://..." fit=fixed height=400
+```
+
+`fit` 值：`width` / `16:9` / `9:16`（竖屏，自动限宽居中）/ `4:3` / `3:4` / `square` / `cover` / `contain` / `fixed`（配 `height` rpx）。**推荐给图片显式写 `fit`** — 固定比例容器流式时不撑大、不抖动。
+
+**视频** — `::video` 是封面 + 点击跳转（不内嵌播放），用 `poster` 给封面、`intent=open-url` + `value` 跳转：
+
+```
+::video poster="https://封面.jpg" title="标题" fit=16:9 intent=open-url value="/pages/video?id=1"
+```
+
+流式态下图片/视频的 url/poster 未吐完时自动显示骨架，AI **不需要感知**，正常写即可。详见 spec §5.5。
 
 ## 完整示例
 
