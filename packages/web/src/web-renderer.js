@@ -70,8 +70,18 @@
         while (i < lines.length && !fenceRe.test(lines[i].replace(/^\s+/, ''))) {
           body.push(lines[i]); i++;
         }
-        i++; // 跳过闭合围栏
-        segs.push({ type: 'zone', content: body.join('\n') });
+        if (i < lines.length) {
+          // 闭合围栏存在:正常抽 zone 段
+          i++; // 跳过闭合围栏
+          segs.push({ type: 'zone', content: body.join('\n') });
+        } else {
+          // 未闭合(流式态):开头 ```zone 行 + body 都暂留 md 段,等下一帧闭合再抽。
+          // 否则开头 ```zone 行裸露到界面(marked 当代码块/原文显示)。
+          // body 内若含顶格 :: 组件,splitSegments 的 B 分支会逐行抽成 zone 段,
+          // 视觉上等同于无围栏写法 —— 不影响流式体验,只是 ```zone 头不闪。
+          mdBuf.push(line);
+          for (var bi = 0; bi < body.length; bi++) mdBuf.push(body[bi]);
+        }
         continue;
       }
       // B. 顶格 :: 组件(非 :: 注释)
