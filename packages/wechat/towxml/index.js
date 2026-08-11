@@ -55,6 +55,7 @@ function extractZoneBlocks(text) {
         if (fenceMatch) {
             const fence = fenceMatch[1];
             const fenceRe = new RegExp('^' + fence[0] + '{' + fence.length + ',}\\s*$');
+            const fenceStart = i;
             i++;
             const body = [];
             while (i < lines.length && !fenceRe.test(lines[i].replace(/^\s+/, ''))) {
@@ -66,10 +67,10 @@ function extractZoneBlocks(text) {
                 i++; // 吃掉结束围栏
                 pushPlaceholder(body.join('\n'));
             } else {
-                // 未闭合(流式态):丢弃开头 ```zone 行(否则 marked 当代码块渲染),
-                // 只留 body。body 内顶格 :: 组件仍走 B 分支抽成 zone 块组件级流式渲染,
-                // 视觉上等同于无围栏写法 —— 不影响流式体验,``` 也不暴露到界面。
-                for (let bi = 0; bi < body.length; bi++) out.push(body[bi]);
+                // 未闭合(流式态):丢弃开头 ```zone 行(不暴露反引号),
+                // 不收集 body —— 让 i 回到 body 第一行,后续 while 迭代里顶格 :: 组件
+                // 自然走 B 分支逐个抽成 zone 块,组件级流式渲染(等同无围栏写法)。
+                i = fenceStart + 1;
             }
             continue;
         }

@@ -65,6 +65,7 @@
         flushMd();
         var fenceCh = fence[1][0];
         var fenceRe = new RegExp('^' + fenceCh + '{' + fence[1].length + ',}\\s*$');
+        var fenceStart = i;
         i++;
         var body = [];
         while (i < lines.length && !fenceRe.test(lines[i].replace(/^\s+/, ''))) {
@@ -75,10 +76,10 @@
           i++; // 跳过闭合围栏
           segs.push({ type: 'zone', content: body.join('\n') });
         } else {
-          // 未闭合(流式态):丢弃开头 ```zone 行(否则 marked 当代码块渲染),
-          // 只留 body。body 内顶格 :: 组件仍走 B 分支逐行抽成 zone 段,
-          // 视觉上等同于无围栏写法 —— 不影响流式体验,``` 也不暴露到界面。
-          for (var bi = 0; bi < body.length; bi++) mdBuf.push(body[bi]);
+          // 未闭合(流式态):丢弃开头 ```zone 行(不暴露反引号),
+          // 不收集 body —— 让 i 回到 body 第一行,后续 while 迭代里顶格 :: 组件
+          // 自然走 B 分支逐个抽成 zone 段,组件级流式渲染(等同无围栏写法)。
+          i = fenceStart + 1;
         }
         continue;
       }
