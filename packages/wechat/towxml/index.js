@@ -66,11 +66,9 @@ function extractZoneBlocks(text) {
                 i++; // 吃掉结束围栏
                 pushPlaceholder(body.join('\n'));
             } else {
-                // 未闭合(流式态):开头 ```zone 行 + body 都暂留文本段,等下一帧闭合再抽。
-                // 否则开头 ```zone 行裸露到界面(marked 当代码块/原文显示)。
-                // body 内容若含 :: 顶格组件,towxml 仍会走 B 分支抽成 zone 块组件级流式渲染,
-                // 视觉上等同于无围栏写法 —— 不影响流式体验,只是 ```zone 头不闪。
-                out.push(line);
+                // 未闭合(流式态):丢弃开头 ```zone 行(否则 marked 当代码块渲染),
+                // 只留 body。body 内顶格 :: 组件仍走 B 分支抽成 zone 块组件级流式渲染,
+                // 视觉上等同于无围栏写法 —— 不影响流式体验,``` 也不暴露到界面。
                 for (let bi = 0; bi < body.length; bi++) out.push(body[bi]);
             }
             continue;
