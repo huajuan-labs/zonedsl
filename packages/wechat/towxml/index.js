@@ -85,8 +85,9 @@ function extractZoneBlocks(text) {
 
 /**
  * 遍历 towxml 输出的 AST,找到 h2w__zone-dsl 占位节点,原地替换成 zone 渲染树.
+ * v2.12: 加 refMap 参数,把消息级引文注册表透传给 dslToNodes.
  */
-function expandZoneNodes(node, streamingSafe) {
+function expandZoneNodes(node, streamingSafe, refMap) {
     if (!node || !node.children) return;
     for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i];
@@ -94,12 +95,12 @@ function expandZoneNodes(node, streamingSafe) {
             const src = child.attrs['data-src'] || '';
             let dsl = '';
             try { dsl = decodeURIComponent(src); } catch (e) { dsl = src; }
-            const replacement = zonedsl.dslToNodes(dsl, { streamingSafe: !!streamingSafe });
+            const replacement = zonedsl.dslToNodes(dsl, { streamingSafe: !!streamingSafe, sources: refMap || undefined });
             node.children.splice(i, 1, ...replacement);
             i += replacement.length - 1;
             continue;
         }
-        expandZoneNodes(child, streamingSafe);
+        expandZoneNodes(child, streamingSafe, refMap);
     }
 }
 
@@ -124,6 +125,67 @@ function applyThemeToRoot(node, theme) {
     node.docTheme = theme;
 }
 
+/* ============ v2.12: markdown 正文引文/链接支持 ============
+ * 让 [^1](url) / [^@名](url) / [@名](url) / [文字](url) 在纯 markdown 正文也生效,
+ * 与 zone 组件内同一套渲染(zone-node)和跳转(zoneaction).
+ *
+ * 只支持自包含写法(带 (url)):markdown 原生把 [x](url) 转成 navigator 节点,
+ * expandLinkNodes 按文本前缀(^/@)拦截重分类成 zone-cite/zone-link.
+ * 裸 [^n] 依赖 sources 注册表,正文不支持(sources 只在 zone 组件内)—— 正文裸 [^n] 按普通文本透出.
+ */
+
+// 遍历 navigator 节点(markdown 链接),按文本前缀重分类成 zone-cite/zone-link.
+// markdown 把 [^1](url) 的文本解析成 '^1',[^@名](url) 解析成 '^@名',[@名](url) 解析成 '@名'.
+// parseLinkTarget 不认的 href(相对锚点/mailto 等)保持 navigator 原样,向后兼容.
+function expandLinkNodes(node) {
+    if (!node || !node.children) return;
+    for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child && child.tag === 'navigator' && child.attrs && child.attrs.href) {
+            const link = zonedsl.parseLinkTarget(child.attrs.href);
+            if (link) {
+                const text = collectNodeText(child);
+                node.children[i] = buildInlineNode(text, link);
+                continue;
+            }
+        }
+        if (child && child.children) expandLinkNodes(child);
+    }
+}
+
+// 拍平 navigator 子节点文本(链接文字里嵌套格式时降级为纯文本).
+function collectNodeText(node) {
+    let t = '';
+    (node.children || []).forEach(function (c) {
+        if (c && typeof c.text === 'string') t += c.text;
+        else if (c && c.children) t += collectNodeText(c);
+    });
+    return t;
+}
+
+// 按文本前缀把链接节点重分类:^@名→chip,^数字→徽章,@名→提及,其余→下划线链接.
+// 产出带 isZone 的 zone-cite / zone-link 节点,复用 zone-node 渲染和 zoneaction 跳转.
+function buildInlineNode(text, link) {
+    // ^@名 → 昵称 chip
+    if (/^\^@/.test(text)) {
+        const name = text.slice(1); // 去掉 ^
+        const attrs = { label: 1, display: name, text: name, intent: link.intent, value: link.value };
+        return { isZone: true, tag: 'zone-cite', attrs: attrs, children: [] };
+    }
+    // ^数字 → 数字徽章
+    if (/^\^\d+$/.test(text)) {
+        const num = text.slice(1);
+        const attrs = { label: 0, display: num, text: num, intent: link.intent, value: link.value };
+        return { isZone: true, tag: 'zone-cite', attrs: attrs, children: [] };
+    }
+    // @名 → 橙色提及;name 存 @ 后的昵称,供跳转用户主页用
+    if (text.charAt(0) === '@') {
+        return { isZone: true, tag: 'zone-link', attrs: { text: text, name: text.slice(1), intent: link.intent, value: link.value, mention: 1 }, children: [] };
+    }
+    // 普通链接
+    return { isZone: true, tag: 'zone-link', attrs: { text: text, intent: link.intent, value: link.value }, children: [] };
+}
+
 module.exports = (str, type, option) => {
     option = option || {};
     // v2.8: streamingSafe 透传到 dslToNodes,让每帧 zone 组件丢掉未闭合尾行.
@@ -131,10 +193,21 @@ module.exports = (str, type, option) => {
     let result;
     const docTheme = type === 'markdown' ? extractDocTheme(str) : '';
     switch (type) {
-        case 'markdown':
+        case 'markdown': {
+            // v2.12: 消息级引文注册表.
+            //   option.quoteList: 宿主截下的后端 quote_list(最可靠)
+            //   buildSourcesRefMap(str): DSL 原生 ::source 行预扫(AI 手写 sources 时)
+            const refMap = type === 'markdown'
+                ? (zonedsl.quoteListToRefMap(option.quoteList) || zonedsl.buildSourcesRefMap(str, { streamingSafe: streamingSafe }))
+                : null;
             result = parse(md(extractZoneBlocks(str)), option);
-            expandZoneNodes(result, streamingSafe);
+            expandZoneNodes(result, streamingSafe, refMap);
+            // v2.12: markdown 正文的行内链接/引文(navigator 节点)→ zone-link/zone-cite.
+            // 只支持自包含写法 [^1](url)/[^@名](url)/[@名](url)/[文字](url);
+            // 裸 [^n] 依赖 sources 注册表,正文不支持(sources 只在 zone 组件内).
+            expandLinkNodes(result);
             break;
+        }
         case 'html':
             result = parse(str, option);
             expandZoneNodes(result, streamingSafe);

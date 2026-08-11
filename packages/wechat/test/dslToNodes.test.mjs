@@ -134,17 +134,18 @@ test('流式态: zone-block 根节点不注入 _streaming', () => {
   assert.equal(block[0].attrs._streaming, undefined);
 });
 
-// ============ gallery 过滤空 url ============
-test('gallery: 流式时未闭合 url 子图被过滤', () => {
-  // 第二张 url 引号未闭合 → streamingSafe 丢弃 → 该子图 url 为空 → 被过滤
+// ============ gallery 过滤空 url(v2.12: urls → items) ============
+test('gallery: 流式闭合完整 url 全保留', () => {
+  // 两条 url 都闭合完整 → streamingSafe 全保留
   const block = dslToNodes('::gallery "三连"\n  ::image url="https://a.jpg"\n  ::image url="https://b.jpg"', { streamingSafe: true });
   const g = firstChild(block);
   assert.equal(g.tag, 'zone-gallery');
-  assert.equal(g.attrs.urls.length, 2);
+  assert.equal(g.attrs.items.length, 2);
 });
 
 test('gallery: 非流式 3 图 cols=3', () => {
   const g = firstChild(dslToNodes('::gallery\n  ::image url="https://a.jpg"\n  ::image url="https://b.jpg"\n  ::image url="https://c.jpg"'));
-  assert.equal(g.attrs.urls.length, 3);
+  assert.equal(g.attrs.items.length, 3);
+  assert.equal(g.attrs.imageUrls.length, 3);
   assert.equal(g.attrs.cols, 3);
 });

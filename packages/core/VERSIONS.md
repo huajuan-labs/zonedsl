@@ -2,86 +2,106 @@
 
 按语义化版本记录组件的**新增 / 修改 / 废弃 / 移除**，便于 skill / 业务 prompt / 前端渲染层同步演进。
 
-## v2.11 · 2026-07-14 · 多媒体流式视觉稳定性(image fit + video + 媒体骨架屏)
+## v2.12 · 2026-07-24 · 引文与行内链接(citation + inline link + item 级跳转)
 
 ### 背景
 
-v2.10 解决了行内标记流式闪烁,但多媒体组件仍有三类视觉问题:
-1. `::image` 流式撑大 — `widthFix`+空 src+无 height 兜底,流式首帧按默认 4:3 撑满屏宽
-2. 无视频组件 — 微博视频场景缺 `::video`
-3. wechat 端无骨架屏 — web 端有 `.pending` 体系,wechat 端流式态字段未闭合时空白/撑大
+AI 输出的长文本需要「引文溯源」和「行内可点」能力。v2.12 把这套能力纳入 ZoneDSL 语法体系。**设计原则:形态由语法前缀决定,零标志位、不看 url**。
+
+### 最终语法模型(行内)
+
+`^` 前缀 = 引文家族(徽章/chip),`@` 前缀 = 提及,其余 = 普通链接:
+
+| 写法 | 渲染 | 判定 |
+|---|---|---|
+| `[文字](url)` | 下划线链接 | 无特殊前缀 |
+| `[1](url)` | 下划线链接 | 纯数字不特殊,就是普通链接 |
+| `[@名](url)` | 橙色提及文字 | `@` 前缀,不看 url |
+| `[^1](url)` | 数字徽章 | `^` + 数字,行内自包含 |
+| `[^@名](url)` | 昵称 chip | `^` + `@`,行内自包含 |
+| `[^n]` 裸写 | 数字徽章 | 注册表(内部保留,模型不写) |
 
 ### Added
 
-- **`::video`**(primitive 层)— 视频封面组件:poster 封面 + ▶ 角标 + title/subtitle overlay + 点击跳转(复用 button intent 链路 `open-url`,不内嵌原生 video)。`fit` 复用 image 体系,默认 16:9。详见 spec §5.5
-- **`::image` `fit` 宽高适配体系** — `fit=width`(默认,向后兼容 widthFix)/ `16:9` / `9:16` / `4:3` / `3:4` / `square` / `cover` / `contain` / `fixed`。`16:9` 口语化写法,渲染层转 padding-bottom hack(不用 aspect-ratio,兼容老基础库)。非法值 fallback `width`。`9:16` 竖屏限宽 60% 居中
-- **媒体骨架屏** — `dslToNodes` 流式态注入 `_streaming: true`(仿 `_theme` 注入);`image`/`video` 在 src/poster 未闭合时显示 `.zn-skeleton` 骨架块(按 fit 比例撑高 + `@keyframes zn-shimmer` 扫光),不撑大不空白;`gallery` 过滤空 url(流式时未闭合子图不混入)。对齐 web `.pending` 语义
+- **行内链接/引文** — 任何流过 `splitInlineMd` 的正文性文本字段(text/quote/alert/list/timeline/era-timeline item/table cell)都支持。`parseLinkTarget` 把 target 映射 intent:宿主自定义 scheme → `open-scheme`,`/pages/` → `open-url`,`https://` → `open-web`,显式 `intent:value` 走白名单。
+- **行内自包含引文** `[^1](url)` / `[^@名](url)` — url 就地写,不查注册表,一次性引用首选。
+- **注册表引文** `[^n]` + `::sources` — 多次引用去重 / 文末列表。**`::sources` 是内部保留能力,不暴露给 agent**(见下「设计决策」)。
+- **宿主引文数据桥接** — 宿主在 markdown 预处理阶段截下引文来源数据,经 `quoteListToRefMap` 建注册表,DSL `[^n]` 解析。只剥离被 `[^n]` 引用到的数据块,其余渲染逻辑不受影响。
+- **item 级可点击** — `era-timeline`/`timeline`/`list` 的 `::item` 支持 `intent`/`value`,每项独立跳转。
+- **新 intent**:`open-scheme`(宿主自定义 scheme)、`open-web`(https 外链走 webview)。
+- **table cell 引文 + `|` 分隔符** — cell 走 splitInlineMd 支持引文/链接;`|` 优先分隔(内容可含逗号),逗号保留向后兼容。
+- **gallery 支持 image + video 混排** — `gallery` 子节点从只收 `image` 扩展为 `image`/`video` 共存。video 子节点渲染为封面格(封面 + ▶ 角标),点击走自己的 intent 跳转(复用 `onButtonAction`,同独立 `::video`);image 仍走原生灯箱预览(`onGalleryTap`),灯箱集合 `imageUrls` 只含图、不含视频封面。列数按 image+video 总项数一起算(沿用 1/2/4→对应列数规则)。video 无 intent 或非法时降级纯封面。
 
-### Changed
+### 设计决策(为什么这么做)
 
-- `zoneToNode(node)` 已在 v2.10 加 `ctx` 透传;本次 `dslToNodes` 的 `injectTheme` 升级为 `injectMeta`,同时注入 `_theme` + `_streaming`
-- `::image` case:`mode` 由 `fit` 决定(width→widthFix,contain→aspectFit,其它→aspectFill),`attrs.fit`/`attrs.height` 输出
-- `::gallery` case:`urls.filter(Boolean)` 过滤空 url,`cols` 按过滤后数量算
+- **`::sources` 保留但不给 agent**:引擎完整支持(供宿主下发引文数据和未来扩展),但 SKILL.md 不教、不让 agent 手写。agent 一律用行内自包含写法 `[^1](url)`/`[^@名](url)`。
+- **不接管宿主的 markdown 正文渲染体系**:引文/链接的 DSL 语法只在 zone 组件内解析;宿主自有的正文增强体系(如数据胶囊)与 ZoneDSL 可混排、各管各的。
+- **不接 `[x](x)` 多属性**:行内式保持最简(agent 零学习成本)。要富数据用 `::source` 加 attr(内部),或未来新增 `::mention` 组件。
+- **标题不做引文**:magazine-cover/chapter/editorial-hero 标题只认高亮(`**`/`~~`/`==`),不解析引文/链接 —— 大标题是 AI 自己的提炼,不是引用陈述。
+- **`::source` 最小集**:只有 `name` + `url` 必需,`n=` 可选。
+
+### 流式安全
+
+- `trimUnclosedInline` 加 `[` 系列裁剪:`[^1` / `[^@名](` / `[文字](url` 半截裁到未闭合标记前
+- 普通 `Array[0]` 等非标记用法不误裁
 
 ### 落地登记
 
-- `packages/wechat/toWxNodes.js`:新增 `normalizeFit`/`FIT_WHITELIST`;image case 加 fit;新增 video case;gallery 过滤空 url;`injectTheme`→`injectMeta` + `_streaming`;REGISTRY 加 `video v2.11`;导出不变
-- `packages/wechat/zone-node/index.wxml`:zone-image 加 fit 容器+src 守卫+骨架;新增 zone-video 分支;gallery urls 已在 toWxNodes 过滤
-- `packages/wechat/zone-node/index.wxss`:`.zn-image-fit-*` 比例样式(padding-bottom hack);`.zn-video-*`;`.zn-skeleton` + `@keyframes zn-shimmer`
-- `packages/web/src/web-renderer.js`:`R.image` 加 fit(aspect-ratio)+ 流式骨架;新增 `R.video`
-- `docs/assets/style.css`:`.p-image-fixed`/`.p-image-skeleton`/`.p-video-*` + `@keyframes p-shimmer`
-- `protocol/spec.md`:§5.1 五层表加 video;新增 §5.5 多媒体组件规范
-- `packages/core/LAYERS.md`:primitive 清单 + 计数 18
-- `packages/skill/SKILL.md`:速查表 + image fit + video + 避坑
+- `zone-dsl/toWxNodes.js`:`parseLinkTarget`(target→intent);`pickIntent`(item intent);`splitInlineMd` 加 cite/link/mention part;`makeCitePart`/`makeInlineCite`;`trimUnclosedBracket`;`parseSourceNode`/`assignSourceNumbers`/`buildRefMapFromAst`/`buildSourcesRefMap`/`quoteListToRefMap`;`sources`/`source` case(返回 null,纯数据);`splitCells`(table `|` 分隔);REGISTRY `sources v2.12`;白名单加 `open-scheme`/`open-web`
+- `towxml/index.js`:入口 `buildSourcesRefMap` 预扫 + `option.quoteList` 合并建消息级 refMap,透传 `dslToNodes`;`expandLinkNodes` 把 markdown 正文 navigator 节点接管为 zone-link/zone-cite
+- `zone-components/zone-node/index.wxml`:新增 `znParts` 共享模板;text/quote/alert/list/timeline/era-timeline/table 接 parts;item 可点击;新增 zone-cite/zone-link 独立节点
+- `zone-components/zone-node/index.wxss`:`.zn-link`/`.zn-mention`(橙色)/`.zn-cite-num`/`.zn-cite-name`/`.zn-cite-dead`/`.zn-item-clickable`(引文样式对齐宿主正文胶囊)
+- `agentChat/index.js`:onZoneAction 加 `open-scheme`/`open-web` 分发;宿主预处理截引文数据传 towxml;demo 调试原文弹窗
+- `agentChat/libs/demo-data.js`:demo-magazine-25(DSL 引文)/ demo-magazine-26(宿主数据桥接)
+- gallery 混排落地:`zone-dsl/toWxNodes.js` gallery case 改收 image+video、输出 `items`+`imageUrls`;`zone-components/zone-node/index.wxml` gallery 分支按 `gi.type` 两路渲染(image→`onGalleryTap`,video→`onButtonAction`);`zone-components/zone-node/index.wxss` 补 `.zn-gallery-video-*`;`demo-data.js` gallery demo 补图文混排示例(原 `urls` 字段废弃)
 
-### 跨端同步
+## v2.11 · 2026-07-14 · 多媒体流式视觉稳定性(image fit + video + 媒体骨架屏)
 
-小程序实际加载版 `packageChat/zone-plugin/`(toWxNodes / zone-node wxml+wxss / VERSIONS / SKILL)已同步同一改动(保留宿主 intent 差异:open-weibo / TAB_WHITELIST)。
+### Added
+
+- **`::video`**(primitive)— 视频封面组件:poster + ▶ + title + 点击跳转(复用 button intent `open-url`,不内嵌原生 video),fit 默认 16:9
+- **`::image` `fit`** — `width`(默认兼容)/`16:9`/`9:16`/`4:3`/`3:4`/`square`/`cover`/`contain`/`fixed`,padding-bottom hack 撑比例(不用 aspect-ratio),非法值 fallback width,9:16 限宽 60%
+- **媒体骨架屏** — 流式态注入 `_streaming`;image/video src/poster 未闭合时显示 `.zn-skeleton`(按 fit 比例 + `@keyframes zn-shimmer`);gallery 过滤空 url
+
+### Changed
+
+- `injectTheme`→`injectMeta`,同时注入 `_theme` + `_streaming`
+- image case:`mode` 由 fit 决定;gallery:`urls.filter(Boolean)`
+
+### 落地登记
+
+- `zone-dsl/toWxNodes.js`:`normalizeFit`/`FIT_WHITELIST`;image fit;video case;gallery 过滤;`injectMeta` + `_streaming`;REGISTRY `video v2.11`
+- `zone-components/zone-node/index.wxml`:zone-image fit 容器+守卫+骨架;新增 zone-video
+- `zone-components/zone-node/index.wxss`:`.zn-image-fit-*`/`.zn-video-*`/`.zn-skeleton`+`@keyframes zn-shimmer`
+
+详见 spec §5.5。与 `@zonedsl/wechat` v2.11 对齐。
 
 ## v2.10 · 2026-07-14 · 组件内行内标记流式安全
 
 ### 背景
 
 流式吐字时,zone 组件 `main` 文本里的行内标记(`**` / `*` / `` ` `` / `~~` / `==`)常处于未配对状态。
-渲染层 `splitInlineMd` / `splitCoverHighlights` 的正则 `[^*]+` 匹配失败,半截标记当裸字符显示,
-视觉上闪烁。web 端 `inline()` 早有"裁到未闭合标记前"的保护,wechat 端缺失 —— 跨端一致性缺口。
+渲染层 `splitInlineMd` / `splitCoverHighlights` 的正则匹配失败,半截标记当裸字符显示,视觉闪烁。
+本次给 wechat 渲染层补上"裁到未闭合标记前"的流式保护,对齐 web 端 `inline()` 既有行为(详见 spec §4.5)。
 
 ### Added
 
-- **spec §4.5「组件内行内标记流式安全」**(`protocol/spec.md`)—— 协议层正式定义:
-  流式态(`streamingSafe=true`)下,若某行内标记符号在文本中出现奇数次(未配对),
-  裁到最后一个未闭合标记**之前**(标记本身及其后文本整段丢弃),等下一 tick 闭合后再整体渲染。
-  明确这是**渲染层职责**(parser 仍只把 main 字符串原样吐出)。
-
-- **wechat `splitInlineMd` / `splitCoverHighlights` 加 `opts.streamingSafe`**(`packages/wechat/toWxNodes.js`):
-  - `splitInlineMd(text, opts)`:流式态裁剪 `**` → `` ` `` → 单 `*`(单 `*` 计数前先剔除 `**`)
-  - `splitCoverHighlights(text, opts)`:流式态每行裁剪 `**` → `~~` → `==`;半截裁光时占位空 text 避免兜底闪裸符号
-  - 裁剪算法对齐 web-renderer.js `bufferMarkdown()`(行 122-151)/ `inline()`(行 191-198),保证跨端一致(spec §9)
-  - `dslToNodes` 把 `streamingSafe` 透传给 `zoneToNode`(新增 `ctx` 参)→ 4 个调用点(`::text` main、`magazine-cover` title/subtitle、`chapter` title、`editorial-hero` title)同步透传
-  - 签名向后兼容:`splitInlineMd(text)`(无第二参)行为零变化
-
-- **wechat 单元测试**(`packages/wechat/test/toWxNodes.test.mjs`)—— 14 个用例锁定 spec §4.5 行为:
-  非流式向后兼容 / 流式半截裁剪 / 裁剪顺序 / 完整闭合不受影响。`node --test` 跑,零依赖。
-
-### Changed
-
-- **wechat `zoneToNode(node)` → `zoneToNode(node, ctx)`**:透传 `streamingSafe`,内部 4 处
-  `.map(zoneToNode)` 递归同步带 ctx(kids / hscroll / swiper / accordion-item children)
-- **wechat `package.json`**:`scripts.test` 从 DevTools 占位改为 `node --test`
+- **`splitInlineMd(text, opts)` / `splitCoverHighlights(text, opts)`** 加 `opts.streamingSafe`:
+  流式态下未配对的标记符号裁到最后一个未闭合标记之前(标记+其后文本丢弃),等下一 tick 闭合再整体显示。
+  - `splitInlineMd` 裁剪顺序 `**` → `` ` `` → 单 `*`(单 `*` 计数前先剔除 `**`)
+  - `splitCoverHighlights` 每行裁剪 `**` → `~~` → `==`;半截裁光时占位空 text 避免兜底闪裸符号
+  - 签名向后兼容:无第二参时行为零变化
+- **`zoneToNode(node, ctx)`** 加 ctx 参,`dslToNodes` 构造 `{ streamingSafe }` 透传给 4 个调用点(`::text` main、`magazine-cover` title/subtitle、`chapter` title、`editorial-hero` title)及 4 处递归 map
 
 ### 落地登记
 
-- `protocol/spec.md`:§4 新增 4.5 小节
-- `packages/wechat/toWxNodes.js`:`splitInlineMd` / `splitCoverHighlights` 加参 + 新增 `trimUnclosedInline` / `trimUnclosedCover`;`zoneToNode` 加 ctx 透传;`dslToNodes` 构造 ctx;`module.exports` 导出两个函数
-- `packages/wechat/test/toWxNodes.test.mjs`:新建
-- `packages/wechat/package.json`:`test` 脚本
-- `packages/skill/SKILL.md`:避坑 #11 扩写 + 围栏 §C 强隔离场景补强
+- `zone-dsl/toWxNodes.js`:`splitInlineMd` / `splitCoverHighlights` 加参 + 新增 `trimUnclosedInline` / `trimUnclosedCover`;`zoneToNode` 加 ctx 透传;`dslToNodes` 构造 ctx
+- 算法对齐 `@zonedsl/web` 的 `inline()` / `bufferMarkdown()`,保证跨端一致
 
 ### 未改动
 
-- web 端 `inline()` 已符合规范(`**` / `~~` / `==` 半截裁剪),本次不动
-- parser(`packages/core/parser.js`)未改 —— 行内标记是渲染层职责,parser 只管组件结构
-- spec §4.4 建议的 `dropPartialLastLine` 在 wechat 渲染层启用(另一独立议题)
+- parser(`zone-dsl/parser.js`)未改 —— 行内标记是渲染层职责
+- web 端 `inline()` 已符合规范,不动
 
 ## v2.9 · 2026-07-08 · 通用居中容器 + row/col 居中
 
@@ -128,14 +148,14 @@ v2.10 解决了行内标记流式闪烁,但多媒体组件仍有三类视觉问�
 ### Changed — 三个模块聚合到 zone-plugin/(方案 A vendored plugin)
 
 三个之前分散的目录:
-- `packages/wechat/towxml/`
-- `packages/core/`
-- `packages/wechat/`
+- `packageChat/towxml/`
+- `packageChat/zonedsl/`
+- `packageChat/zone-components/`
 
 统一移到:
-- `packages/towxml/`
-- `packages/zone-dsl/`(重命名 zonedsl → zone-dsl,连字符风格更规范)
-- `packages/zone-components/`
+- `packageChat/zone-plugin/towxml/`
+- `packageChat/zone-plugin/zone-dsl/`(重命名 zonedsl → zone-dsl,连字符风格更规范)
+- `packageChat/zone-plugin/zone-components/`
 
 **动机**:让 Zone 这一整套(markdown 渲染 + zone-DSL 引擎 + 组件视觉层)成为一个**可复制的独立模块**,其他小程序只要:
 1. 复制整个 `zone-plugin/` 目录到自己项目
@@ -156,21 +176,21 @@ v2.10 解决了行内标记流式闪烁,但多媒体组件仍有三类视觉问�
 
 ### 引用路径变更
 
-- `packages/wechat/index.json`: `/packages/wechat/towxml/towxml` → `/packages/towxml/towxml`
+- `agentChat/index.json`: `/packageChat/towxml/towxml` → `/packageChat/zone-plugin/towxml/towxml`
 - `agentChat/index.js`: `require('../towxml/index.js')` → `require('../zone-plugin/towxml/index.js')`
 - `message-item/index.json`: 同上更新
-- `packages/wechat/towxml/decode.json`: 全部改指 `/packages/xxx`
+- `zone-plugin/towxml/decode.json`: 全部改指 `/packageChat/zone-plugin/xxx`
 - `zone-plugin/towxml/index.js`: `require('../zonedsl/toWxNodes.js')` → `require('../zone-dsl/toWxNodes.js')`
 - `zone-plugin/zone-components/zone-node/index.json`: echarts 引用路径更新
 
 同步更新的外部文档:
 - `CLAUDE.md`
 - `.claude/skills/zonedsl/{SKILL,CATALOG-INTERACTIVE,CATALOG-PRESET}.md`
-- `packages/zone-dsl/{THEMES,LAYERS}.md`
+- `packageChat/zone-plugin/zone-dsl/{THEMES,LAYERS}.md`
 
 ### Roadmap · v2.9(下一步)
 
-- 抽出平台专属 preset 到 `packages/wechat/preset/`(city-card / scene-card / person-card / person-grid / glyph-compare / statement)
+- 抽出业务专属 preset 到独立子包(city-card / scene-card / person-card / person-grid / glyph-compare / statement)
 - 加 `zone-plugin/README.md` / `INSTALL.md` / `handlers-example.js`
 - toWxNodes 支持 `registerPresets(map)` 让业务 preset 可选注册
 - CSS 变量分层:`tokens.wxss`(业务方 override)+ `zone-core.wxss`(不动)
@@ -274,7 +294,7 @@ v2.10 解决了行内标记流式闪烁,但多媒体组件仍有三类视觉问�
 `::button` 支持 **intent 白名单**（详见 `INTENTS.md`）：
 
 - **会话相关**：`followup`（填输入框） / `send-message`（直接发送）
-- **项目跳转**：`search` / `open-topic` / `open-tab` / `track-topic` 等（含已移除的平台专属项）
+- **内容跳转**：`search` / `open-topic` / `open-tab` / `open-scheme` / `open-url` / `open-web`
 - **账号中心**：`login` / `open-my`
 - **通用操作**：`copy` / `share` / `open-url`（仅站内 `/pages/`）
 
@@ -299,7 +319,7 @@ v2.10 解决了行内标记流式闪烁,但多媒体组件仍有三类视觉问�
 
 ### Changed
 
-- **未知组件默认静默** — `@zonedsl/wechat/toWxNodes.js` 加 `UNKNOWN_MODE = 'silent'` 常量，默认丢弃未知组件不渲染。debug 模式可显示"未支持"卡片
+- **未知组件默认静默** — `toWxNodes.js` 加 `UNKNOWN_MODE = 'silent'` 常量，默认丢弃未知组件不渲染。debug 模式可显示"未支持"卡片
 - **magazine-cover title/subtitle 支持行内高亮** — `**text**` / `~~text~~` / `==text==` 三种标记 + `\\n` 换行
 - **parser 支持 `\"` 转义** — attrs 值内可安全嵌入英文双引号
 - **默认 badge 用橙色渐变** — `linear-gradient(135deg, #FF8200, #FFB347)`
@@ -381,7 +401,7 @@ v2.10 解决了行内标记流式闪烁,但多媒体组件仍有三类视觉问�
 ### Planned · v2.x（远期）
 
 - **`dslToNodes(dsl, { allowLayers })`** — 运行时层过滤
-- **`@zonedsl/wechat/toWxNodes.js` 拆分到 `components/` 目录**
+- **`toWxNodes.js` 拆分到 `components/` 目录**
 - **主题定制化 API** — 业务侧覆盖 `--mz-*` 变量
 - **组件级 deprecation 工具** — 扫码里的 `@deprecated` 自动生成迁移文档
 

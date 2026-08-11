@@ -1,6 +1,6 @@
 ---
 name: zonedsl
-version: 2.9.0
+version: 2.12.0
 description: Render structured magazine-style content in streaming AI chat using ZoneDSL — a text-first Agent-to-UI protocol coexisting with markdown, covering recap, event decode, travel log, data report, science explainer. Use when the user asks to summarize, recap, decode, report, or explain a multi-section topic (3+ sections, data/lists/timeline/people involved). Do NOT use for single-line answers, simple Q&A, emotional support, or when the user explicitly asks for "brief" / "short" replies — use plain markdown for those.
 homepage: https://github.com/huajuan-labs/zonedsl
 ---
@@ -68,7 +68,7 @@ homepage: https://github.com/huajuan-labs/zonedsl
 
 **其他情况一律不写 `::theme` 也不写 `theme=`**,让内容走默认。
 
-**要写的时候可用主题**（12 套,详见 `@zonedsl/core/THEMES.md`）:
+**要写的时候可用主题**（12 套,详见 `packageChat/zone-plugin/zone-dsl/THEMES.md`）:
 
 - **杂志系（7 套）**:`editorial`(默认) / `literary`(人文) / `serious`(严肃) / `data`(数据) / `serene`(人文青绿) / `warm`(温暖) / `luxe`(高端金融)
 - **markdown 接管系（5 套,v2.8+）**:`purple` / `sky` / `pop` / `sage` / `note` —— 不写 zone 组件,纯 markdown 也能变成杂志视觉
@@ -83,7 +83,7 @@ homepage: https://github.com/huajuan-labs/zonedsl
 
 ## 组件分四层
 
-不同层组件承担不同职责，业务场景可以只用其中几层。详细规范见 `@zonedsl/core/LAYERS.md`。
+不同层组件承担不同职责，业务场景可以只用其中几层。详细规范见 `packageChat/zone-plugin/zone-dsl/LAYERS.md`。
 
 ### 1 · primitive（原语层）— 无状态、无场景
 
@@ -204,7 +204,7 @@ ZoneDSL 支持三种混排方式，按内容形态选：
 \`\`\`
 ```
 
-大部分情况**不需要围栏**，顶格 `::` 直接混排在 markdown 里更自然。判断口诀：**块内容里只要出现"空行"或"行首是 markdown 标记字符"，就上围栏**；纯连续行、行首都是 `::` 或 child 缩进的简单块，顶格 `::` 即可。详见 spec §2.3。
+大部分情况**不需要围栏**，顶格 `::` 直接混排在 markdown 里更自然。判断口诀：**块内容里只要出现"空行"或"行首是 markdown 标记字符"，就上围栏**；纯连续行、行首都是 `::` 或 child 缩进的简单块，顶格 `::` 即可。
 
 ## 6 个排版模板
 
@@ -388,6 +388,34 @@ const x = 1;
 - `~~text~~` → **橙色字 + 底部半高浅金橙块**（次强调，马克笔效果）
 - `==text==` → title：深炭字 + 橙下划线；subtitle：**橙色加粗字**（轻强调）
 
+**行内链接与引文**（v2.12,text/quote/alert/list/timeline/table 的正文性文本字段可用）：
+
+形态由**语法前缀**决定，零标志位、不看 url。`^` 前缀 = 引文家族，`@` 前缀 = 提及，其余 = 普通链接。四种写法：
+
+| 写法 | 渲染 | 何时用 |
+|---|---|---|
+| `[文字](target)` | 下划线链接 | 普通可点文字 |
+| `[1](target)` | 下划线链接 | 就是普通链接,数字不特殊 |
+| `[@名](target)` | 橙色提及文字 | 正文提及用户 |
+| `[^1](target)` | 圆形数字徽章 | 行内自包含引文 |
+| `[^@名](target)` | 灰色昵称 chip | 提及媒体/账号作引文来源 |
+
+**判定规则(纯前缀,不看 url)**：
+- `[^数字](url)` → 数字徽章
+- `[^@名](url)` → 昵称 chip
+- `[@名](url)` → 橙色提及
+- `[其它](url)` → 下划线链接(含纯数字)
+
+**target 写法**（自动映射 intent，不用管 intent 名）：
+- `[文字](https://...)` → 外部链接
+- `[文字](/pages/...)` → 站内页面
+- `[文字](open-xxx:值)` → 显式 intent（见 INTENTS.md）
+- 宿主自定义 scheme（如 `xxx://...`）→ 由宿主分发器解析
+
+> **引文必须带 url**：一律用 `[^1](url)` / `[^@名](url)` 行内自包含写法，数据就地写在一行里。**不要写裸的 `[^n]`（不带 url）** —— 裸写法依赖注册表，模型写了会变成不可点的灰徽章。
+
+**边界**：引文/链接在 zone 组件和 markdown 正文的正文性文本字段里都能解析。**item 级跳转**:`era-timeline`/`timeline`/`list` 的 `::item` 支持 `intent=`/`value=`,每个条目独立可点。
+
 ## 避坑清单（重要）
 
 ### 1 · 双引号嵌套
@@ -418,7 +446,7 @@ parser 按行 tokenize，attrs 内真实换行会截断组件。
 
 从 v1.6 开始，未知组件默认 **silent 模式**——直接不渲染，不会显示"未支持"卡片。所以：
 - 不要写没定义过的组件，会消失
-- 不确定组件名时，参考本文速查表或 `@zonedsl/core/LAYERS.md`
+- 不确定组件名时，参考本文速查表或 `packageChat/zone-plugin/zone-dsl/LAYERS.md`
 - 已删除的组件：`echarts-raw`（用 `::line/bar/pie/radar`）、`tree`（视觉差，改用 `::step-block` 或 `::timeline`）
 
 ### 6 · 网格列数与嵌套
@@ -434,14 +462,15 @@ parser 按行 tokenize，attrs 内真实换行会截断组件。
 
 ### 7 · button intent 交互（v2.0）
 
-`::button` 从 v2.0 起支持 **intent 白名单**（`followup / send-message / search / open-topic / open-tab / open-url / copy / share`）。写法：
+`::button` 从 v2.0 起支持 **intent 白名单**（`followup / send-message / search / open-topic / open-tab / open-url / open-scheme / open-web / copy / share`）。写法：
 
 ```
-::button "追问看点" intent=followup value="这个话题还有哪些看点?"
-::button "搜相关" intent=search value="示例关键词"
+::button "追问看点" intent=followup value="盛夏夜 还有哪些看点?"
+::button "搜相关词" intent=search value="盛夏夜"
+::button "看详情" intent=open-scheme value="xxx://detail?id=123"
 ```
 
-**未知 intent / 非法 value 会静默降级成纯样式**，不会报错。**引导 followup / 跳转优先用 button，别再用 `::text "→ 追问..."` 的文字凑合**。详见 `CATALOG-INTERACTIVE.md` 和 `@zonedsl/core/INTENTS.md`。
+**未知 intent / 非法 value（如 https:// 外链 / 无效 mid）会静默降级成纯样式**，不会报错。**引导 followup / 跳转优先用 button，别再用 `::text "→ 追问..."` 的文字凑合**。详见 `CATALOG-INTERACTIVE.md` 和 `packageChat/zone-plugin/zone-dsl/INTENTS.md`。
 
 ### 8 · numbered-list 换行
 
@@ -461,11 +490,11 @@ towxml 默认给 `**加粗**` 加**马克笔黄底**高亮块（editorial 主题
 
 流式过程中 zone 组件的 attrs 可能吐到一半，parser 有内部 streamingSafe 机制会**只在完整闭合时更新最后一个 bare attr**，避免 `bg=a → bg=acc → bg=accent` 的中间态闪烁。
 
-v2.10 起，组件 `main` 文本里的**行内 markdown 标记**（`**bold**` / `*italic*` / `` `code` `` / `~~del~~` / `==hl==`）也有流式保护：吐到一半（如 `**紧急` 还没闭合）时，未配对的标记会被裁掉，等下一 tick 闭合标记到了再整体显示——**不会闪裸 `**` / `` ` `` 符号**，代价是半截词临时不可见。AI 输出**不需要感知**，只要按正常语法写就行（详见 spec §4.5）。
+v2.10 起，组件 `main` 文本里的**行内 markdown 标记**（`**bold**` / `*italic*` / `` `code` `` / `~~del~~` / `==hl==`）也有流式保护：吐到一半（如 `**紧急` 还没闭合）时，未配对的标记会被裁掉，等下一 tick 闭合标记到了再整体显示——**不会闪裸 `**` / `` ` `` 符号**，代价是半截词临时不可见。AI 输出**不需要感知**，只要按正常语法写就行。
 
 ### 12 · 围栏强隔离
 
-顶格 `::`（遇空行止）对 95% 场景够用，但块内容出现**空行**或**行首 markdown 字符**（`#`/`-`/`>`/`1.`/`*`）时会和 markdown 打架。这时必须用 ` ```zone ` 围栏强隔离（见 §C 与 spec §2.3）。AI 判断口诀：块内只要出现空行或行首是 markdown 标记字符，就上围栏。
+顶格 `::`（遇空行止）对 95% 场景够用，但块内容出现**空行**或**行首 markdown 字符**（`#`/`-`/`>`/`1.`/`*`）时会和 markdown 打架。这时必须用 ` ```zone ` 围栏强隔离（见 §C）。AI 判断口诀：块内只要出现空行或行首是 markdown 标记字符，就上围栏。
 
 ### 13 · 多媒体 image / video（v2.11）
 
@@ -479,17 +508,28 @@ v2.10 起，组件 `main` 文本里的**行内 markdown 标记**（`**bold**` / 
 
 `fit` 值：`width` / `16:9` / `9:16`（竖屏，自动限宽居中）/ `4:3` / `3:4` / `square` / `cover` / `contain` / `fixed`（配 `height` rpx）。**推荐给图片显式写 `fit`** — 固定比例容器流式时不撑大、不抖动。
 
-**视频** — `::video` 是封面 + 点击跳转（不内嵌播放），用 `poster` 给封面、`intent=open-url` + `value` 跳转：
+**视频** — `::video` 是封面 + 点击跳转（不内嵌播放），用 `poster` 给封面、`intent=open-url` + `value` 跳转。`title`/`subtitle` 可选,有就叠加在封面底部:
 
 ```
 ::video poster="https://封面.jpg" title="标题" fit=16:9 intent=open-url value="/pages/video?id=1"
 ```
 
-流式态下图片/视频的 url/poster 未吐完时自动显示骨架，AI **不需要感知**，正常写即可。详见 spec §5.5。
+流式态下图片/视频的 url/poster 未吐完时自动显示骨架，AI **不需要感知**，正常写即可。
+
+**gallery 图文混排（v2.12）** — `::gallery` 子节点支持 `::image` 和 `::video` 共存。video 子节点作为视频封面格渲染(封面 + ▶ 角标),image 点击开原生灯箱预览(集合只含图),video 点击走自己的 intent 跳转(同独立 `::video`)。列数按 image+video 总项数一起算。
+
+```
+::gallery "图文混排"
+  ::image url="https://..."
+  ::image url="https://..."
+  ::video poster="https://封面.jpg" intent=open-scheme value="xxx://detail?id=..."
+```
+
+**gallery 里的 video 不要传 `title`/`subtitle`/`fit`** —— 格子只有封面 + 角标,这些字段会被忽略(小格子也塞不下标题)。只有独立写的 `::video` 才支持标题叠加。video 无 intent 或非法 intent 时降级成纯封面(不可点)。
 
 ## 完整示例
 
-参考项目内 `examples/` 里的 DEMO 5-11 是 7 个完整杂志式示例，直接对照模板套用即可。
+参考项目内 `packageChat/agentChat/libs/demo-data.js` 里的 DEMO 5-11 是 7 个完整杂志式示例，直接对照模板套用即可。
 
 ## 相关文档
 
@@ -501,9 +541,9 @@ v2.10 起，组件 `main` 文本里的**行内 markdown 标记**（`**bold**` / 
 - [CATALOG-CHART.md](./CATALOG-CHART.md) — 图表层
 
 **项目内权威文档**：
-- `@zonedsl/core/THEMES.md` — 主题详细规范、CSS 变量清单、扩展方式
-- `@zonedsl/core/LAYERS.md` — 组件分层规范、每层职责边界
-- `@zonedsl/core/VERSIONS.md` — 组件变更记录、废弃/新增标记
+- `packageChat/zone-plugin/zone-dsl/THEMES.md` — 主题详细规范、CSS 变量清单、扩展方式
+- `packageChat/zone-plugin/zone-dsl/LAYERS.md` — 组件分层规范、每层职责边界
+- `packageChat/zone-plugin/zone-dsl/VERSIONS.md` — 组件变更记录、废弃/新增标记
 
 ## 一句话总结
 

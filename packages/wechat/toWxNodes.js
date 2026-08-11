@@ -34,6 +34,8 @@ var BUTTON_INTENT_WHITELIST = {
   'open-tab':      1,
   // 通用操作
   'open-url':      1,
+  'open-scheme':   1,
+  'open-web':      1,
   'copy':          1,
   'share':         1,
 }
@@ -60,10 +62,168 @@ function validateIntentValue(intent, rawValue) {
       // 宿主应自校验协议白名单(站内路径或 https 外链,拒绝 javascript: 等).
       // 默认放行非空 URL,长度截断.
       return v ? v.slice(0, 300) : null
+    case 'open-scheme':
+      // 宿主自定义 scheme(如 xxx://detail?id=...) → 宿主分发器解析成站内跳转
+      return /^[a-z][a-z0-9+.-]*:\/\//.test(v) ? v.slice(0, 300) : null
+    case 'open-web':
+      // 外部 https 链接,宿主走 webview 页
+      return /^https?:\/\//.test(v) ? v.slice(0, 300) : null
     case 'copy':
       return v ? v.slice(0, 500) : null
   }
   return null
+}
+
+// ========== 行内链接/引文 target 解析 (v2.12) ==========
+// 把 [文字](target) 的 target 映射成 { intent, value }.规则:
+//   open-xxx:值        —— 显式 intent(走白名单 + validateIntentValue)
+//   xxx://...          —— 宿主自定义 scheme → open-scheme(宿主分发器解析)
+//   /pages/...         —— 站内页面 → open-url
+//   https?://...       —— 外部链接 → open-web(webview)
+// 不合法返回 null(调用方降级为纯文本).
+function parseLinkTarget(rawTarget) {
+  var t = String(rawTarget == null ? '' : rawTarget).replace(/^\s+|\s+$/g, '')
+  if (!t) return null
+  // 显式 intent:value(intent 字母/连字符开头,避免把 xxx:// 的 scheme 名误当 intent)
+  var m = /^([a-z][a-z-]*):(\S+)$/.exec(t)
+  if (m && BUTTON_INTENT_WHITELIST[m[1]]) {
+    var v = validateIntentValue(m[1], m[2])
+    return v != null ? { intent: m[1], value: v } : null
+  }
+  var auto = ''
+  if (/^https?:\/\//.test(t)) auto = 'open-web'
+  else if (/^\/pages\//.test(t)) auto = 'open-url'
+  // 宿主自定义 scheme(如 xxx://detail?id=...) —— 排除 http(s),否则 https 被误判成 open-scheme
+  else if (/^[a-z][a-z0-9+.-]*:\/\//.test(t)) auto = 'open-scheme'
+  if (!auto) return null
+  var av = validateIntentValue(auto, t)
+  return av != null ? { intent: auto, value: av } : null
+}
+
+// 从一组 attrs 里提取合法 intent/value(白名单校验).不合法返回 {}.
+// 供组件级(video)和 item 级(timeline/list item)复用,保持校验逻辑只有一处.
+function pickIntent(attrs) {
+  var out = {}
+  if (!attrs) return out
+  var raw = (attrs.intent || '').toString()
+  if (BUTTON_INTENT_WHITELIST[raw]) {
+    var v = validateIntentValue(raw, attrs.value)
+    if (v != null) { out.intent = raw; out.value = v }
+  }
+  return out
+}
+
+// ========== sources 引文注册表 (v2.12) ==========
+// ::source 子节点 → 统一 item { n,name,url,intent,value }.
+// 最小集:name + url 必需,n= 可选显式编号.账号富字段不进 DSL ——
+// 引文形态由语法决定:[\^1](url)=数字徽章,[^@名](url)=昵称 chip,与 source 无关.
+function parseSourceNode(c) {
+  var a = (c && c.attrs) || {}
+  var item = {
+    n: parseInt(a.n, 10) || 0,
+    name: (c && c.main) || a.name || '',
+    url: a.url || a.scheme || '',
+  }
+  var link = parseLinkTarget(item.url)
+  if (link) { item.intent = link.intent; item.value = link.value }
+  return item
+}
+
+// 编号:显式 n 优先;未写的按顺序补号(跳过已被显式占用的号).
+function assignSourceNumbers(items) {
+  var used = {}
+  items.forEach(function (it) { if (it.n > 0) used[it.n] = 1 })
+  var auto = 0
+  items.forEach(function (it) {
+    if (it.n > 0) return
+    auto++
+    while (used[auto]) auto++
+    it.n = auto
+    used[auto] = 1
+  })
+  return items
+}
+
+// 从 AST 收集所有 ::source(无论在 ::sources 内还是独立) → refMap { n: item }.无来源返回 null.
+function buildRefMapFromAst(ast) {
+  var items = []
+  walk(ast)
+  function walk(list) {
+    if (!list) return
+    list.forEach(function (nd) {
+      if (!nd || nd.type !== 'component') return
+      if (nd.name === 'source') items.push(parseSourceNode(nd))
+      if (nd.children) walk(nd.children)
+    })
+  }
+  if (!items.length) return null
+  assignSourceNumbers(items)
+  var map = {}
+  items.forEach(function (it) { if (!map[it.n]) map[it.n] = it })
+  return map
+}
+
+// 消息级预扫(由 towxml 入口在抽 zone 块之前调用):从原始消息文本收集 ::source 行建 refMap.
+// 一条消息 = 一个引文命名空间,sources 写在哪个块都能查到.
+// 跳过非 zone 代码围栏里的 ::source 行(那是代码示例,不是真来源).
+function buildSourcesRefMap(text, opts) {
+  if (!text || text.indexOf('::source') === -1) return null
+  var lines = String(text).split('\n')
+  var items = []
+  var inFence = false
+  var fenceCh = ''
+  var fenceLen = 0
+  var fenceIsZone = false
+  for (var i = 0; i < lines.length; i++) {
+    var trimmed = lines[i].replace(/^\s+|\s+$/g, '')
+    var fm = /^(`{3,}|~{3,})/.exec(trimmed)
+    if (fm) {
+      if (!inFence) {
+        inFence = true
+        fenceCh = fm[1][0]
+        fenceLen = fm[1].length
+        fenceIsZone = /^(`{3,}|~{3,})zone\b/.test(trimmed)
+        continue
+      }
+      var closeRe = new RegExp('^\\' + fenceCh + '{' + fenceLen + ',}$')
+      if (closeRe.test(trimmed)) { inFence = false }
+      continue
+    }
+    if (inFence && !fenceIsZone) continue
+    if (!/^::source(\s|$)/.test(trimmed)) continue
+    var ast = parser.buildAst(trimmed, { streamingSafe: !!(opts && opts.streamingSafe) })
+    var node = ast && ast[0]
+    if (node && node.type === 'component' && node.name === 'source') items.push(parseSourceNode(node))
+  }
+  if (!items.length) return null
+  assignSourceNumbers(items)
+  var map = {}
+  items.forEach(function (it) { if (!map[it.n]) map[it.n] = it })
+  return map
+}
+
+// 宿主引文数据桥接(v2.12):宿主把后端 quote_list 截下经 towxml option.quoteList 传进来.
+// 字段映射:index→n, scheme→url, name→name, label→昵称chip开关.
+function quoteListToRefMap(quoteList) {
+  if (!Array.isArray(quoteList) || !quoteList.length) return null
+  var items = []
+  quoteList.forEach(function (q) {
+    if (!q) return
+    var item = {
+      n: parseInt(q.index, 10) || 0,
+      name: q.name || '',
+      url: q.scheme || '',
+      label: (q.label === true || q.label === 1) ? 1 : 0,
+    }
+    var link = parseLinkTarget(item.url)
+    if (link) { item.intent = link.intent; item.value = link.value }
+    items.push(item)
+  })
+  if (!items.length) return null
+  assignSourceNumbers(items)
+  var map = {}
+  items.forEach(function (it) { if (!map[it.n]) map[it.n] = it })
+  return map
 }
 
 // ========== image/video fit 宽高适配白名单 (v2.11) ==========
@@ -116,6 +276,7 @@ var COMPONENT_REGISTRY = {
   table:             { layer: 'structure', since: 'v1.0' },
   timeline:          { layer: 'structure', since: 'v1.0' },
   gallery:           { layer: 'structure', since: 'v1.0' },
+  sources:           { layer: 'structure', since: 'v2.12', note: '引文来源列表,配合 [^n] 使用' },
   hscroll:           { layer: 'structure', since: 'v1.0' },
   swiper:            { layer: 'structure', since: 'v1.0' },
   chapter:           { layer: 'structure', since: 'v1.0' },
@@ -356,18 +517,41 @@ function toEchartsNode(node) {
 function splitInlineMd(text, opts) {
   if (!text || typeof text !== 'string') return [{ type: 'text', text: String(text || '') }]
   var streamingSafe = !!(opts && opts.streamingSafe)
+  var refMap = (opts && opts.refMap) || null
   if (streamingSafe) {
     text = trimUnclosedInline(text)
   }
-  var re = /(\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`)/g
+  var re = /(\[\^(@[^\]]+)\]\(([^)\s]*)\)|\[\^(\d+)\]\(([^)\s]*)\)|\[\^(\d+)\]|\[([^\]]+)\]\(([^)\s]*)\)|\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`)/g
   var parts = []
   var last = 0
   var m
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) parts.push({ type: 'text', text: text.slice(last, m.index) })
-    if (m[2]) parts.push({ type: 'bold', text: m[2] })
-    else if (m[3]) parts.push({ type: 'italic', text: m[3] })
-    else if (m[4]) parts.push({ type: 'code', text: m[4] })
+    if (m[2] !== undefined) {
+      // [^@名](url) 行内昵称 chip
+      parts.push(makeInlineCite(m[2], 1, m[3]))
+    } else if (m[4] !== undefined) {
+      // [^1](url) 行内数字徽章
+      parts.push(makeInlineCite(m[4], 0, m[5]))
+    } else if (m[6] !== undefined) {
+      // [^n] 裸引文(注册表)
+      parts.push(makeCitePart(parseInt(m[6], 10), refMap))
+    } else if (m[7] !== undefined) {
+      // [文字](target) 链接 / [@名](url) 提及
+      var link = parseLinkTarget(m[8])
+      if (link) {
+        var linkPart = { type: 'link', text: m[7], intent: link.intent, value: link.value }
+        // @ 开头 → 橙色提及(不看 url);name 存 @ 后的昵称,供跳转用户主页用
+        if (m[7].charAt(0) === '@') { linkPart.mention = 1; linkPart.name = m[7].slice(1) }
+        parts.push(linkPart)
+      } else {
+        // target 不合法 → 降级为纯文本(保文字,丢掉标记和 target)
+        parts.push({ type: 'text', text: m[7] })
+      }
+    }
+    else if (m[9]) parts.push({ type: 'bold', text: m[9] })
+    else if (m[10]) parts.push({ type: 'italic', text: m[10] })
+    else if (m[11]) parts.push({ type: 'code', text: m[11] })
     last = m.index + m[0].length
   }
   if (last < text.length) parts.push({ type: 'text', text: text.slice(last) })
@@ -375,9 +559,39 @@ function splitInlineMd(text, opts) {
   return parts
 }
 
+// 由 ref 序号 + refMap 构建 cite part.
+// 命中:带 intent/value 可点;未命中(dangling)或 url 非法:dead 徽章,不崩.
+// 形态:source 带 label=1(来自宿主 quote_list)→ @昵称 chip;否则数字徽章.
+// display: 渲染文本 —— chip=@名;徽章=序号.
+function makeCitePart(ref, refMap) {
+  var src = refMap && refMap[ref]
+  if (!src) return { type: 'cite', ref: ref, dead: 1, display: String(ref), text: String(ref) }
+  var label = src.label ? 1 : 0
+  var part = { type: 'cite', ref: ref, label: label }
+  part.display = label ? ('@' + (src.name || ref)) : String(ref)
+  // text 兜底:杂志封面/章节标题等只认 p.text 的渲染分支里,引文至少显示文本(不可点)
+  part.text = part.display
+  var link = parseLinkTarget(src.url || '')
+  if (link) { part.intent = link.intent; part.value = link.value }
+  else part.dead = 1
+  return part
+}
+
+// 行内自包含引文(v2.12):[^1](url) 数字徽章 / [^@名](url) 昵称 chip.
+// 和注册表 [^n] 的区别:自包含 —— url 直接写在 () 里,不查 refMap,一次性引用首选.
+// label: 1=昵称 chip,0=数字徽章.url 非法 → dead 降级(不崩).
+function makeInlineCite(display, label, url) {
+  var part = { type: 'cite', label: label, display: display, text: display }
+  var link = parseLinkTarget(url || '')
+  if (link) { part.intent = link.intent; part.value = link.value }
+  else part.dead = 1
+  return part
+}
+
 // 流式态:把行内文本里"未配对"的标记符号及之后内容裁掉.
-// 裁剪顺序 ** → ` → 单 *(单 * 计数前剔除 **),每个符号奇数次才裁.
-// 算法对齐 web-renderer.js bufferMarkdown() 行 122-151,保证跨端一致(spec §9).
+// 裁剪顺序 ** → ` → 单 *(单 * 计数前剔除 **)→ [^n] → [text]( → 裸 [,每个符号奇数次才裁.
+// 算法对齐 web-renderer.js bufferMarkdown(),保证跨端一致(spec §9).
+// v2.12: 补 [ 系列裁剪 —— 引文 [^1 / 链接 [文字](url 半截时不闪裸符号.
 function trimUnclosedInline(text) {
   if (!text) return text
   var s = String(text)
@@ -402,6 +616,35 @@ function trimUnclosedInline(text) {
       if (s[i] === '*' && s[i - 1] !== '*' && s[i + 1] !== '*') { lastStar = i; break }
     }
     if (lastStar >= 0) s = s.slice(0, lastStar)
+  }
+  // [ 系列(引文 [^n] / 链接 [text](url)) —— 找最后一个未闭合的 [
+  s = trimUnclosedBracket(s)
+  return s
+}
+
+// 裁掉末尾未闭合的 [ 起始标记.三种半截形态:
+//   [^1     → 引文半截(有 [^ 无 ])
+//   [文字](  → 链接半截(有 [text]( 无 ))
+//   [文字    → 裸 [ 未闭合(可能是引文或链接的前缀)
+// 已闭合的 [^1] / [text](url) 不动;普通 Array[0] 这类非标记用法也不裁(无 ^ 且无后续().
+function trimUnclosedBracket(s) {
+  if (!s || s.indexOf('[') === -1) return s
+  var i = s.length - 1
+  while (i >= 0) {
+    var idx = s.lastIndexOf('[', i)
+    if (idx === -1) break
+    var rest = s.slice(idx)
+    if (rest.charAt(1) === '^') {
+      // [^ 引文:找 ] 或 ( 。均无 → 半截,裁掉
+      if (rest.indexOf(']') === -1) return s.slice(0, idx)
+    } else {
+      // 普通 [ :可能是链接 [text](url) 前缀。有 ]( 才算链接;否则是数组/文本用法,不动
+      var close = rest.indexOf(']')
+      if (close !== -1 && rest.charAt(close + 1) === '(' && rest.indexOf(')') === -1) {
+        return s.slice(0, idx)
+      }
+    }
+    i = idx - 1
   }
   return s
 }
@@ -458,6 +701,13 @@ function trimUnclosedCover(line) {
 // ========== 结构化子节点过滤 ==========
 function isStructuralChild(c) {
   return c && c.type === 'child'
+}
+
+// v2.12: table cell 引号感知分隔 —— 单元格内容带逗号时用 | 分隔,逗号保留向后兼容
+function splitCells(str) {
+  var s = String(str == null ? '' : str)
+  var sep = s.indexOf('|') !== -1 ? '|' : ','
+  return s.split(sep).map(function (x) { return x.replace(/^\s+|\s+$/g, '') })
 }
 
 // ========== 组件 → 新 tag-based 节点 ==========
@@ -533,7 +783,7 @@ function zoneToNode(node, ctx) {
     case 'alert': {
       var alertType = attrs.type || attrs.color || 'info'
       var iconStr = alertType === 'danger' ? '⚠' : alertType === 'success' ? '✓' : (alertType === 'warn' || alertType === 'warning') ? '!' : 'ⓘ'
-      return { tag: 'zone-alert', attrs: { main: main, type: alertType, icon: iconStr }, children: [] }
+      return { tag: 'zone-alert', attrs: { main: main, type: alertType, icon: iconStr, parts: splitInlineMd(main, ctx) }, children: [] }
     }
 
     // ---- 叶子:metric ----
@@ -569,7 +819,23 @@ function zoneToNode(node, ctx) {
 
     // ---- 叶子:quote ----
     case 'quote':
-      return { tag: 'zone-quote', attrs: { main: main, cite: attrs.cite || '' }, children: [] }
+      return {
+        tag: 'zone-quote',
+        attrs: {
+          main: main,
+          cite: attrs.cite || '',
+          // v2.12: main 走行内解析,引文 [^n] 和链接 [文字](target) 在引用块里也能用
+          parts: splitInlineMd(main, ctx),
+        },
+        children: [],
+      }
+
+    // ---- sources 引文来源注册表 (v2.12) ----
+    // ::sources 是纯数据组件,自身不渲染 —— 唯一职责是把 ::source 子项喂给 refMap,
+    // 供 [^n] 引文徽章/chip 解析.(buildRefMapFromAst 在 zoneToNode 之前就已扫 AST 收集)
+    case 'sources':
+    case 'source':
+      return null
 
     // ---- 结构消费:list ----
     case 'list': {
@@ -579,7 +845,18 @@ function zoneToNode(node, ctx) {
           // child 类型:文本在 _raw;component 类型(::item):文本在 main
           // child 类型:若 main 已被 parser 提取则用它,否则用 _raw(裸文本无引号情况)
           var itMain = it.main || (it._raw || '').replace(/^\s+|\s+$/g, '')
-          return { main: itMain, desc: (it.attrs && it.attrs.desc) || '' }
+          var itDesc = (it.attrs && it.attrs.desc) || ''
+          var liIntent = pickIntent(it.attrs)
+          return {
+            main: itMain,
+            desc: itDesc,
+            // v2.12: item 文本走行内解析,支持引文/链接
+            mainParts: splitInlineMd(itMain, ctx),
+            descParts: itDesc ? splitInlineMd(itDesc, ctx) : null,
+            // v2.12: item 级可点击
+            intent: liIntent.intent || '',
+            value: liIntent.value || '',
+          }
         })
       return { tag: 'zone-list', attrs: { main: main, items: listItems }, children: [] }
     }
@@ -617,22 +894,27 @@ function zoneToNode(node, ctx) {
       if (!colCount && rows.length) {
         var firstR = rows[0]
         var firstCells = (firstR.attrs && firstR.attrs.cells) || []
-        if (typeof firstCells === 'string') firstCells = firstCells.split(',')
+        if (typeof firstCells === 'string') firstCells = splitCells(firstCells)
         if ((!Array.isArray(firstCells) || !firstCells.length) && firstR._raw) {
-          firstCells = String(firstR._raw).split(',')
+          firstCells = splitCells(firstR._raw)
         }
         colCount = firstCells.length || 3
       }
       var cellsCount = Math.max(1, Math.min(6, colCount))
 
+      // v2.12: cells 用引号感知分隔(内容带逗号用引号包裹),且每个 cell 走行内解析支持引文/链接
       var tableRows = rows.map(function (r) {
         var cells = (r.attrs && r.attrs.cells) || []
-        if (typeof cells === 'string') cells = cells.split(',').map(function (s) { return s.replace(/^\s+|\s+$/g, '') })
+        if (typeof cells === 'string') cells = splitCells(cells)
         if ((!Array.isArray(cells) || !cells.length) && r._raw) {
-          cells = String(r._raw).split(',').map(function (s) { return s.replace(/^\s+|\s+$/g, '') })
+          cells = splitCells(r._raw)
         }
-        return cells.map(String)
+        return cells.map(function (cellText) {
+          var txt = String(cellText)
+          return { text: txt, parts: splitInlineMd(txt, ctx) }
+        })
       })
+      var cellsCount = Math.max(1, Math.min(6, colCount))
 
       return {
         tag: 'zone-table',
@@ -647,13 +929,21 @@ function zoneToNode(node, ctx) {
         .filter(function (c) { return (c.type === 'child' || c.type === 'component') && c.name === 'item' })
         .map(function (it) {
           var itMain = it.main || (it._raw || '').replace(/^\s+|\s+$/g, '')
+          var itDesc = (it.attrs && it.attrs.desc) || ''
+          var tlIntent = pickIntent(it.attrs)
           return {
             when: (it.attrs && it.attrs.when) || '',
             main: itMain,
-            desc: (it.attrs && it.attrs.desc) || '',
+            desc: itDesc,
             tag: (it.attrs && it.attrs.tag) || '',
             location: (it.attrs && it.attrs.location) || '',
             highlight: !!(it.attrs && it.attrs.highlight),
+            // v2.12: item 文本走行内解析,支持引文/链接
+            mainParts: splitInlineMd(itMain, ctx),
+            descParts: itDesc ? splitInlineMd(itDesc, ctx) : null,
+            // v2.12: item 级可点击,每个事件独立跳转
+            intent: tlIntent.intent || '',
+            value: tlIntent.value || '',
           }
         })
       return { tag: 'zone-timeline', attrs: { main: main, items: tlItems }, children: [] }
@@ -1050,15 +1340,34 @@ function zoneToNode(node, ctx) {
     }
 
     case 'gallery': {
-      var imgs = (node.children || []).filter(function (c) { return c.type === 'component' && c.name === 'image' })
-      var urls = imgs.map(function (im) {
-        return (im.attrs && (im.attrs.url || im.attrs.src)) || im.main || ''
-      }).filter(function (u) { return u })  // v2.11: 过滤空 url,流式时未闭合的子图不混入(避免空 src 撑大)
-      var count = urls.length
+      // v2.12: 支持 image + video 混排。image 点击灯箱预览,video 点击走 intent 跳转。
+      var rawItems = (node.children || []).filter(function (c) {
+        return c.type === 'component' && (c.name === 'image' || c.name === 'video')
+      })
+      var items = rawItems.map(function (c) {
+        var ca = c.attrs || {}
+        if (c.name === 'image') {
+          var src = (ca.url || ca.src) || c.main || ''
+          return src ? { type: 'image', src: src } : null  // v2.11: 过滤空 url,流式时未闭合的子图不混入
+        }
+        // video: 复用 video case 的 intent 校验逻辑(BUTTON_INTENT_WHITELIST + validateIntentValue)
+        var poster = ca.poster || ca.url || ca.src || ''
+        var intent = ''
+        var value = ''
+        var rawVIntent = (ca.intent || '').toString()
+        if (BUTTON_INTENT_WHITELIST[rawVIntent]) {
+          var vValidated = validateIntentValue(rawVIntent, ca.value)
+          if (vValidated != null) { intent = rawVIntent; value = vValidated }
+        }
+        return poster ? { type: 'video', poster: poster, intent: intent, value: value } : null
+      }).filter(Boolean)
+      // 灯箱集合:只含 image 的 src(点视频是跳转,不该进灯箱)
+      var imageUrls = items.filter(function (it) { return it.type === 'image' }).map(function (it) { return it.src })
+      var count = items.length
       var galleryCols = count === 1 ? 1 : (count === 2 || count === 4) ? 2 : 3
       return {
         tag: 'zone-gallery',
-        attrs: { main: main, cols: galleryCols, urls: urls },
+        attrs: { main: main, cols: galleryCols, items: items, imageUrls: imageUrls },
         children: [],
       }
     }
@@ -1525,6 +1834,16 @@ function dslToNodes(dsl, options) {
   // 避免裸符号闪烁.详见 spec §4.5.
   var ctx = { streamingSafe: !!opts.streamingSafe }
   var meta = extractTheme(ast)
+  // v2.12: 引文注册表.两路来源合并 ——
+  //   opts.sources: towxml 入口消息级预扫(buildSourcesRefMap),跨块/跨围栏都能查到
+  //   块内 ::sources: dslToNodes 直接从 AST 收(直接用引擎、不走 towxml 时的兜底)
+  // 块内优先(同号覆盖消息级),因为块内 source 离引用最近、最可能是新写的.
+  var refMap = {}
+  var msgMap = opts.sources || null
+  if (msgMap) { for (var mk in msgMap) refMap[mk] = msgMap[mk] }
+  var blockMap = buildRefMapFromAst(meta.ast)
+  if (blockMap) { for (var bk in blockMap) refMap[bk] = blockMap[bk] }
+  if (msgMap || blockMap) ctx.refMap = refMap
   var layerFilter = null
   if (Array.isArray(opts.allowLayers) && opts.allowLayers.length) {
     layerFilter = {}
@@ -1568,6 +1887,9 @@ function dslToNodes(dsl, options) {
 module.exports = {
   dslToNodes: dslToNodes,
   zoneToNode: zoneToNode,
+  buildSourcesRefMap: buildSourcesRefMap,
+  quoteListToRefMap: quoteListToRefMap,
+  parseLinkTarget: parseLinkTarget,
   splitInlineMd: splitInlineMd,
   splitCoverHighlights: splitCoverHighlights,
   COMPONENT_REGISTRY: COMPONENT_REGISTRY,

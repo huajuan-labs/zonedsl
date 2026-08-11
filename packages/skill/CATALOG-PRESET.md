@@ -9,7 +9,7 @@
 ```
 
 属性：
-- `theme`：12 套主题任选（详见 `@zonedsl/core/THEMES.md`），只声明一次，整块继承
+- `theme`：12 套主题任选（详见 `packageChat/zone-plugin/zone-dsl/THEMES.md`），只声明一次，整块继承
 - `tag` / `date`：顶部胶囊标签（如 `HOT SPOTS · 日期`），tag/date 之间自动加 `·` 分隔
 - `tag-style`：顶部胶囊样式 —— `pill`（默认，白底米线）/ `dark`（深炭底 + 白字）/ `accent`（橙底 + 白字）/ `light`（同 pill）
 - `title`：主标题，支持行内高亮语法 + `\\n` 换行
@@ -61,8 +61,8 @@ item 自动加 `[n]` 橙色索引；tags 显示为 `#xxx` 话题样式
 
 ```
 ::person-grid cols=2
-  ::person-card name="林晚" desc="香港资深演员" avatar="https://..."
-  ::person-card name="苏念" desc="天后级歌手" avatar="https://..."
+  ::person-card name="大姐 吴君如" desc="香港资深演员" avatar="https://..."
+  ::person-card name="二姐 那英" desc="天后级歌手" avatar="https://..."
 ```
 
 `cols`：1-4；无 avatar 时显示名字首字作 fallback。**列数选择规则**同 `::grid`（见 CATALOG-STRUCTURE.md），人名 ≤ 4 字用 3-4 列，长人名/长描述用 2 列。

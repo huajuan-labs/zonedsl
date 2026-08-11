@@ -1010,6 +1010,63 @@
   border-radius: 6rpx;
 }
 
+/* ============ 行内链接 / 引文 (v2.12) ============ */
+.zn-link {
+  color: var(--hj-accent-deep);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--hj-accent-soft);
+  text-underline-offset: 4rpx;
+}
+/* 橙色提及文字([@名](url) → mention):正文提及用户 */
+.zn-mention {
+  color: #eb7340;
+  font-weight: 700;
+}
+
+/* 引文 chip / 数字徽章(v2.12):数字徽章=内容短呈圆;昵称 chip= @名 pill,超长截断. */
+.zn-cite-name,
+.zn-cite-num {
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 36rpx;
+  line-height: 36rpx;
+  border-radius: 18rpx;
+  background-color: #f5f5f5;
+  color: #636363;
+  font-weight: 400;
+  font-size: 22rpx;
+  vertical-align: middle;
+  margin: 0 6rpx;
+  position: relative;
+  top: -4rpx;
+  cursor: pointer;
+}
+/* 数字徽章:单/双数字,min-width 兜底 */
+.zn-cite-num {
+  min-width: 36rpx;
+  padding: 0 8rpx;
+}
+/* 昵称 chip:长名超宽截断 */
+.zn-cite-name {
+  max-width: 240rpx;
+  padding: 0 16rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 不可点(dangling / 流式未闭合):降低透明度 */
+.zn-cite-dead {
+  opacity: 0.5;
+}
+
+/* ============ item 级可点击 (v2.12: timeline/list 每项独立跳转) ============ */
+.zn-item-clickable {
+  cursor: pointer;
+}
+
 /* ============ image (v2.11: fit 宽高适配 + 流式骨架) ============ */
 .zn-image {
   display: block;
@@ -1194,6 +1251,48 @@
 .zn-gallery-img {
   background: var(--hj-bg);
 }
+/* gallery 内 video 格子(v2.12: 尺寸继承 .zn-gallery-img,只补覆盖层) */
+.zn-gallery-video {
+  position: relative;
+  overflow: hidden;
+}
+.zn-gallery-video-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.zn-gallery-video-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.18);
+}
+.zn-gallery-video-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.3);
+  border: 2rpx solid rgba(255,255,255,0.25);
+}
+/* CSS 三角形播放图标(比独立 .zn-video 的 96rpx 容器小一档) */
+.zn-gallery-video-play-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 11rpx 0 11rpx 18rpx;
+  border-color: transparent transparent transparent #fff;
+  margin-left: 6rpx;
+}
+.zn-gallery-video-clickable { cursor: pointer; }
+.zn-gallery-video-pressed { opacity: 0.88; }
 
 /* ============ hscroll(横向 scroll-view) ============ */
 .zn-hscroll-wrap {

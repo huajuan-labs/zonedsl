@@ -2,7 +2,7 @@
 
 交互层 — 有 state、用户可点击/输入的组件。
 
-> **✅ v2.0 起 `button` 支持 intent 白名单交互**（详见下方 button 章节及 `@zonedsl/core/INTENTS.md`）。不带 `intent` 的旧写法仍保持纯样式，向后兼容。
+> **✅ v2.0 起 `button` 支持 intent 白名单交互**（详见下方 button 章节及 `packageChat/zone-plugin/zone-dsl/INTENTS.md`）。不带 `intent` 的旧写法仍保持纯样式，向后兼容。
 
 ## tabs — 标签页切换
 
@@ -123,42 +123,41 @@ item 内可嵌套任意子组件作为展开内容
 ::button "打开链接" intent=open-url value="https://example.com"
 ::button "看话题" intent=open-topic value="示例话题"
 ::button "切到首页" intent=open-tab value="home"
-::button "复制口令" intent=copy value="zone-1234"
+::button "看详情" intent=open-scheme value="xxx://detail?id=123"
 ```
 
 | Intent | value | 校验 |
 |---|---|---|
 | `search` | 搜索关键词 | ≤ 50 字 |
-| `open-url` | URL（站内或外链，宿主校验白名单） | 协议白名单 |
+| `open-url` | 站内路径 | 必须 `/pages/` 开头 |
+| `open-web` | https 外链 | 走 webview |
+| `open-scheme` | 宿主自定义 scheme | 宿主校验 |
 | `open-topic` | 话题名（不带 `#`） | ≤ 50 字 |
 | `open-tab` | tab 标识 | 宿主白名单 |
-| `copy` | 要复制的文本 | ≤ 500 字 |
 
-> 平台专属 intent（如电商 `open-cart`、视频 `play-video`）由宿主自管，不进通用白名单。完整规范见 `@zonedsl/core/INTENTS.md`。
+> 平台专属 intent（如电商 `open-cart`、视频 `play-video`）由宿主自管，不进通用白名单。
 
-**账号/个人中心（宿主能力就绪后再启用，暂不进通用白名单）**
+**账号/个人中心**
 
 ```
 ::button "登录后追踪" intent=login
 ::button "去我的" intent=open-my
 ```
 
-- `login` — 未登录时跳登录页，value 可空或 `sms / quick`（登录不应是 AI 决策，建议放在需要鉴权的 intent 分发器内部前置检查）
-- `open-my` — 跳个人中心，value 空（宿主无独立"我的"页面时不需要）
-
-> 这两个 intent 通用白名单暂未列入，宿主可自行实现。详见 `@zonedsl/core/INTENTS.md`「暂未列入」节。
+- `login` — 未登录时跳登录页，value 可空或 `sms / quick`
+- `open-my` — 跳个人中心，value 空
 
 **通用操作**
 
 ```
 ::button "复制文本" intent=copy value="盛夏夜 复盘全文"
 ::button "分享" intent=share value="盛夏夜 复盘"
-::button "看更多" intent=open-url value="https://example.com/more"
+::button "看更多榜单" intent=open-url value="/pages/list?type=hot"
 ```
 
 - `copy` — 复制到剪贴板，≤ 500 字
 - `share` — 分享提示(各端能力不同,如小程序需右上角触发)，≤ 200 字
-- `open-url` — URL 跳转，**宿主校验协议白名单**（站内路径或 https 外链，拒绝 `javascript:` 等危险协议）
+- `open-url` — 站内 URL 跳转，**必须 `/pages/` 开头**，拒绝 https:// 外链
 
 ### 推荐用法
 
@@ -166,7 +165,7 @@ item 内可嵌套任意子组件作为展开内容
 - 用 `::row` 让 button 并排显示
 - `variant=primary` 主推动作（如追问），`outline / ghost` 次要动作
 
-完整规范：`@zonedsl/core/INTENTS.md`
+完整规范：`packageChat/zone-plugin/zone-dsl/INTENTS.md`
 
 ## steps — 步骤列表
 

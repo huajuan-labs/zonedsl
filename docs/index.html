@@ -1761,7 +1761,7 @@ body.js-ready .page-loading {
       <div class="skill-download-icon">📦</div>
       <div class="skill-download-body">
         <div class="skill-download-title">zonedsl-skill.zip</div>
-        <div class="skill-download-meta">v2.9.0 · SKILL.md + 5 CATALOG · Claude Code / Codex / OpenClaw / Agent SDK 兼容</div>
+        <div class="skill-download-meta">v2.12.0 · SKILL.md + 5 CATALOG · Claude Code / Codex / OpenClaw / Agent SDK 兼容</div>
         <div class="skill-download-desc">
           解压后含 <code>zonedsl/SKILL.md</code> + <code>CATALOG-{PRIMITIVE,STRUCTURE,INTERACTIVE,CHART,PRESET}.md</code>,
           放到 Claude Code 的 <code>~/.claude/skills/</code> 目录即可自动被 agent 发现和调用。
@@ -1811,7 +1811,7 @@ unzip zonedsl-skill.zip -d ~/.claude/skills/
       <div class="skill-download-icon">🛠️</div>
       <div class="skill-download-body">
         <div class="skill-download-title">zonedsl-dev-skill.zip</div>
-        <div class="skill-download-meta">v2.9.0 · 接入 / 扩展 / 跨平台 · Claude Code / Codex / OpenClaw / Cursor / Copilot 兼容</div>
+        <div class="skill-download-meta">v2.12.0 · 接入 / 扩展 / 跨平台 · Claude Code / Codex / OpenClaw / Cursor / Copilot 兼容</div>
         <div class="skill-download-desc">
           <strong>让 AI 直接帮你接入、加组件、跨平台适配——你不用翻文档。</strong>
           装到 Claude Code / Cursor / 自研 agent 后,平常向 AI 提问「加个新组件叫 xxx」/「接入到 X 平台」,
@@ -1895,6 +1895,7 @@ handleZoneAction(intent, value) {
       <li><a href="#inline">markdown 与 zone 混排</a></li>
       <li><a href="#fence">围栏语法</a></li>
       <li><a href="#hl">行内高亮</a></li>
+      <li><a href="#links">行内链接与引文(v2.12)</a></li>
     </ul>
     <div class="doc-toc-title">主题</div>
     <ul>
@@ -2061,6 +2062,21 @@ markdown 段落继续,不会被 zone 影响。</code></pre>
         </tr>
       </tbody>
     </table>
+
+    <h2 id="links">行内链接与引文(v2.12)</h2>
+    <p>text/quote/alert/list/timeline/table 的正文性文本字段支持行内链接与引文。形态由<strong>语法前缀</strong>决定,零标志位、不看 url。</p>
+    <table>
+      <thead><tr><th>写法</th><th>渲染</th><th>何时用</th></tr></thead>
+      <tbody>
+        <tr><td><code>[文字](target)</code></td><td>下划线链接</td><td>普通可点文字</td></tr>
+        <tr><td><code>[@名](target)</code></td><td>橙色提及文字</td><td>正文提及用户</td></tr>
+        <tr><td><code>[^1](target)</code></td><td>圆形数字徽章</td><td>行内自包含引文</td></tr>
+        <tr><td><code>[^@名](target)</code></td><td>灰色昵称 chip</td><td>提及媒体/账号作引文来源</td></tr>
+      </tbody>
+    </table>
+    <p>target 写法自动映射 intent:<code>[文字](https://...)</code> → 外部链接、<code>[文字](/pages/...)</code> → 站内页面、<code>[文字](open-xxx:值)</code> → 显式 intent、宿主自定义 scheme(如 <code>xxx://...</code>)→ 宿主分发器解析。</p>
+    <p><strong>引文必须带 url</strong> —— 一律用 <code>[^1](url)</code> / <code>[^@名](url)</code> 行内自包含写法,数据就地写在一行里。裸 <code>[^n]</code> 会渲染成不可点灰徽章。</p>
+    <pre><code>::text "这里是一段正文,引用来源[^1](https://example.com/a),提及 [@某人](https://example.com/user/1),以及[普通链接](https://example.com)"</code></pre>
 
     <h2 id="theme-decl">主题声明</h2>
     <p>三种入口都可以,一个 zone 块只需要写一次:</p>
@@ -2633,7 +2649,7 @@ zone-node.onButtonAction   →  message-item.onZoneAction  →  agentChat/index.
           <div class="s-gallery-cell"></div>
         </div></div>
       </div>
-      <div class="comp-attrs"><strong>cols</strong> 1-3 · 子项为 image</div>
+      <div class="comp-attrs"><strong>cols</strong> 1-3 · 子项为 image · <strong>v2.12</strong> 支持 <code>::video</code> 混排(封面 + ▶ 角标,点击走 intent)</div>
     </div>
 
     <div class="comp-item">
@@ -4538,7 +4554,7 @@ h1/h2 自动变成黄色胶囊,段落自动变白卡片。</pre>
     <a href="#examples">示例画廊</a>
     <a href="https://github.com/huajuan-labs/zonedsl" target="_blank" rel="noopener">GitHub</a>
     <br><br>
-    ::ZoneDSL · v2.9 · 来自<a href="https://github.com/huajuan-labs" target="_blank" rel="noopener" style="color:var(--accent);font-weight:bold;">花卷实验室</a> · MIT
+    ::ZoneDSL · v2.12 · 来自<a href="https://github.com/huajuan-labs" target="_blank" rel="noopener" style="color:var(--accent);font-weight:bold;">花卷实验室</a> · MIT
   </div>
 </footer>
 <script src="assets/theme-switcher.js"></script>

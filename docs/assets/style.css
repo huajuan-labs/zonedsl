@@ -2246,6 +2246,8 @@ img.p-avatar { display: inline-block; }
 
 .s-gallery { display: grid; gap: 6px; }
 .s-gallery-cell img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+.s-gallery-video { position: relative; }
+.s-gallery-video .s-gallery-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; font-size: 13px; display: flex; align-items: center; justify-content: center; padding-left: 3px; box-sizing: border-box; }
 .s-hscroll { display: flex; overflow-x: auto; gap: 12px; scroll-snap-type: x mandatory; padding-bottom: 4px; }
 .s-hscroll > * { flex: 0 0 auto; scroll-snap-align: start; min-width: 200px; }
 .s-swiper { position: relative; padding: 4px; border: 1px dashed var(--line); border-radius: 8px; }

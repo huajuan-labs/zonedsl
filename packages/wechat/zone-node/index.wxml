@@ -3,6 +3,25 @@
      v2.5: item.attrs._theme 由 dslToNodes 注入到每个节点上,
      让每个 zone-node 组件的最外层 view 都能挂 zone-theme-<name> class,
      使 shared.wxss 里 .zone-theme-serene .zn-xxx 选择器能在每个组件内部命中. -->
+
+<!-- v2.12: 行内 parts 共享渲染模板 —— text/quote/alert/list/timeline 等正文性文本统一用它,
+     支持 **bold** *italic* `code` [文字](target)链接 [^n]引文徽章/chip.
+     用法:<template is="znParts" data="{{parts: item.attrs.parts}}"/> -->
+<template name="znParts">
+  <block wx:for="{{parts}}" wx:for-item="p" wx:key="index">
+    <text class="zn-text-bold" wx:if="{{p.type==='bold'}}">{{p.text}}</text>
+    <text class="zn-text-italic" wx:elif="{{p.type==='italic'}}">{{p.text}}</text>
+    <text class="zn-text-code" wx:elif="{{p.type==='code'}}">{{p.text}}</text>
+    <!-- link:mention 橙色提及 / chip·badge 用 view(需 inline-flex,text 不支持)/ 下划线链接用 text -->
+    <text wx:elif="{{p.type==='link' && p.mention}}" class="zn-mention" catch:tap="onButtonAction" data-intent="{{p.intent}}" data-value="{{p.value}}" data-name="{{p.name}}">{{p.text}}</text>
+    <view wx:elif="{{p.type==='link' && (p.chip || p.badge)}}" class="{{p.chip ? 'zn-cite-name' : 'zn-cite-num'}}" hover-class="none" catch:tap="onButtonAction" data-intent="{{p.intent}}" data-value="{{p.value}}">{{p.text}}</view>
+    <text wx:elif="{{p.type==='link'}}" class="zn-link" catch:tap="onButtonAction" data-intent="{{p.intent}}" data-value="{{p.value}}">{{p.text}}</text>
+    <!-- cite:[^n] 引文 → view pill(label 决定昵称 chip 或数字徽章) -->
+    <view wx:elif="{{p.type==='cite'}}" class="{{p.label ? 'zn-cite-name' : 'zn-cite-num'}} {{p.dead ? 'zn-cite-dead' : ''}}" hover-class="none" catch:tap="onButtonAction" data-intent="{{p.intent}}" data-value="{{p.value}}">{{p.display}}</view>
+    <text wx:else>{{p.text}}</text>
+  </block>
+</template>
+
 <view class="zone-node zone-node-{{item.tag}} {{item.attrs._theme ? 'zone-theme-' + item.attrs._theme : ''}}" wx:if="{{item && item.tag}}">
 
   <!-- ===== zone-block 容器 (dslToNodes 根节点) ===== -->
@@ -23,15 +42,10 @@
     <view class="zn-spacer {{item.attrs.size ? 'zn-spacer-' + item.attrs.size : ''}}" style="{{item.attrs.custom ? 'height:' + item.attrs.custom + ';' : ''}}"></view>
   </block>
 
-  <!-- ===== text (支持行内 markdown:**bold** *italic* `code`) ===== -->
+  <!-- ===== text (行内渲染走共享模板 znParts:**bold** *italic* `code` [^n]引文 [文字](target)链接) ===== -->
   <block wx:elif="{{item.tag==='zone-text'}}">
     <view class="zn-text {{item.attrs.size ? 'zn-text-'+item.attrs.size : ''}} {{item.attrs.align === 'center' ? 'zn-text-align-center' : ''}}">
-      <block wx:for="{{item.attrs.parts}}" wx:for-item="p" wx:key="index">
-        <text class="zn-text-bold" wx:if="{{p.type==='bold'}}">{{p.text}}</text>
-        <text class="zn-text-italic" wx:elif="{{p.type==='italic'}}">{{p.text}}</text>
-        <text class="zn-text-code" wx:elif="{{p.type==='code'}}">{{p.text}}</text>
-        <text wx:else>{{p.text}}</text>
-      </block>
+      <template is="znParts" data="{{parts: item.attrs.parts}}"/>
     </view>
   </block>
 
@@ -40,11 +54,11 @@
     <view class="zn-tag {{item.attrs.color ? 'zn-color-'+item.attrs.color : ''}}">{{item.attrs.main}}</view>
   </block>
 
-  <!-- ===== alert ===== -->
+  <!-- ===== alert(v2.12: main 走 znParts,支持引文/链接) ===== -->
   <block wx:elif="{{item.tag==='zone-alert'}}">
     <view class="zn-alert zn-alert-{{item.attrs.type || 'info'}}">
       <view class="zn-alert-icon">{{item.attrs.icon}}</view>
-      <view class="zn-alert-text">{{item.attrs.main}}</view>
+      <view class="zn-alert-text"><template is="znParts" data="{{parts: item.attrs.parts}}"/></view>
     </view>
   </block>
 
@@ -67,12 +81,28 @@
     </view>
   </block>
 
-  <!-- ===== quote ===== -->
+  <!-- ===== quote(v2.12: main 走 znParts,支持 [^n] 引文 / [文字](target) 链接) ===== -->
   <block wx:elif="{{item.tag==='zone-quote'}}">
     <view class="zn-quote">
-      <view class="zn-quote-main">{{item.attrs.main}}</view>
+      <view class="zn-quote-main">
+        <template is="znParts" data="{{parts: item.attrs.parts}}" wx:if="{{item.attrs.parts}}"/>
+        <block wx:else>{{item.attrs.main}}</block>
+      </view>
       <view class="zn-quote-cite" wx:if="{{item.attrs.cite}}">— {{item.attrs.cite}}</view>
     </view>
+  </block>
+
+  <!-- ===== sources(v2.12:纯数据组件,不渲染 —— ::source 子项只进 refMap 供 [^n] 解析) ===== -->
+
+  <!-- ===== cite 独立节点(v2.12: markdown 正文里的引文,由 expandLinkNodes 注入) ===== -->
+  <block wx:elif="{{item.tag==='zone-cite'}}">
+    <view class="{{item.attrs.label ? 'zn-cite-name' : 'zn-cite-num'}} {{item.attrs.dead ? 'zn-cite-dead' : ''}}" hover-class="none" catch:tap="onButtonAction" data-intent="{{item.attrs.intent}}" data-value="{{item.attrs.value}}">{{item.attrs.display}}</view>
+  </block>
+
+  <!-- ===== link 独立节点(v2.12: markdown 正文链接,由 expandLinkNodes 接管,与组件内链接同样式同跳转) ===== -->
+  <block wx:elif="{{item.tag==='zone-link'}}">
+    <text wx:if="{{item.attrs.mention}}" class="zn-mention" catch:tap="onButtonAction" data-intent="{{item.attrs.intent}}" data-value="{{item.attrs.value}}" data-name="{{item.attrs.name}}">{{item.attrs.text}}</text>
+    <text wx:else class="zn-link" catch:tap="onButtonAction" data-intent="{{item.attrs.intent}}" data-value="{{item.attrs.value}}">{{item.attrs.text}}</text>
   </block>
 
   <!-- ===== list ===== -->
@@ -81,11 +111,13 @@
     <view class="zn-list">
       <view class="zn-list-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
       <view class="zn-list-body">
-        <view class="zn-list-item" wx:for="{{item.attrs.items}}" wx:for-item="li" wx:key="index">
+        <view class="zn-list-item {{li.intent ? 'zn-item-clickable' : ''}}" wx:for="{{item.attrs.items}}" wx:for-item="li" wx:key="index"
+              hover-class="none"
+              catch:tap="{{li.intent ? 'onButtonAction' : ''}}" data-intent="{{li.intent}}" data-value="{{li.value}}">
           <view class="zn-list-dot"></view>
           <view class="zn-list-text-wrap">
-            <view class="zn-list-text">{{li.main}}</view>
-            <view class="zn-list-desc" wx:if="{{li.desc}}">{{li.desc}}</view>
+            <view class="zn-list-text"><template is="znParts" data="{{parts: li.mainParts}}"/></view>
+            <view class="zn-list-desc" wx:if="{{li.desc}}"><template is="znParts" data="{{parts: li.descParts}}"/></view>
           </view>
         </view>
       </view>
@@ -120,7 +152,7 @@
       </view>
       <view class="zn-table-row" wx:for="{{item.attrs.rows}}" wx:for-item="row" wx:key="rIdx">
         <view class="zn-table-td zn-cell-of-{{item.attrs.cellsCount}}"
-              wx:for="{{row}}" wx:for-item="cell" wx:key="cIdx">{{cell}}</view>
+              wx:for="{{row}}" wx:for-item="cell" wx:key="cIdx"><template is="znParts" data="{{parts: cell.parts}}"/></view>
       </view>
     </view>
   </block>
@@ -131,8 +163,10 @@
     <view class="zn-timeline">
       <view class="zn-tl-header" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
       <view class="zn-tl-list">
-        <view class="zn-tl-item {{index === item.attrs.items.length - 1 ? 'zn-tl-last' : ''}} {{tl.highlight ? 'zn-tl-highlight' : ''}}"
-              wx:for="{{item.attrs.items}}" wx:for-item="tl" wx:key="index">
+        <view class="zn-tl-item {{index === item.attrs.items.length - 1 ? 'zn-tl-last' : ''}} {{tl.highlight ? 'zn-tl-highlight' : ''}} {{tl.intent ? 'zn-item-clickable' : ''}}"
+              wx:for="{{item.attrs.items}}" wx:for-item="tl" wx:key="index"
+              hover-class="none"
+              catch:tap="{{tl.intent ? 'onButtonAction' : ''}}" data-intent="{{tl.intent}}" data-value="{{tl.value}}">
           <view class="zn-tl-marker">
             <view class="zn-tl-dot"></view>
             <view class="zn-tl-line"></view>
@@ -143,8 +177,8 @@
               <view class="zn-tl-tag" wx:if="{{tl.tag}}">{{tl.tag}}</view>
               <view class="zn-tl-location" wx:if="{{tl.location}}">{{tl.location}}</view>
             </view>
-            <view class="zn-tl-title">{{tl.main}}</view>
-            <view class="zn-tl-desc" wx:if="{{tl.desc}}">{{tl.desc}}</view>
+            <view class="zn-tl-title"><template is="znParts" data="{{parts: tl.mainParts}}"/></view>
+            <view class="zn-tl-desc" wx:if="{{tl.desc}}"><template is="znParts" data="{{parts: tl.descParts}}"/></view>
           </view>
         </view>
       </view>
@@ -535,22 +569,37 @@
     </view>
   </block>
 
-  <!-- ===== gallery(1/2/3/4/9 图) ===== -->
+  <!-- ===== gallery(1/2/3/4/9 图,v2.12: 支持 image+video 混排) ===== -->
   <block wx:elif="{{item.tag==='zone-gallery'}}">
     <view class="zn-gallery-wrap">
       <view class="zn-gallery-title" wx:if="{{item.attrs.main}}">{{item.attrs.main}}</view>
       <view class="zn-gallery zn-gallery-cols-{{item.attrs.cols}}">
-        <image
-          wx:for="{{item.attrs.urls}}"
-          wx:for-item="u"
-          wx:key="index"
-          class="zn-gallery-img"
-          src="{{u}}"
-          mode="aspectFill"
-          data-src="{{u}}"
-          data-urls="{{item.attrs.urls}}"
-          catch:tap="onGalleryTap"
-        />
+        <block wx:for="{{item.attrs.items}}" wx:for-item="gi" wx:key="index">
+          <!-- image 格子:点击灯箱预览(集合只含图) -->
+          <image
+            wx:if="{{gi.type === 'image'}}"
+            class="zn-gallery-img"
+            src="{{gi.src}}"
+            mode="aspectFill"
+            data-src="{{gi.src}}"
+            data-urls="{{item.attrs.imageUrls}}"
+            catch:tap="onGalleryTap"
+          />
+          <!-- video 格子:封面 + ▶ 角标 + 点击走 intent(复用 onButtonAction) -->
+          <view
+            wx:elif="{{gi.type === 'video'}}"
+            class="zn-gallery-img zn-gallery-video {{gi.intent ? 'zn-gallery-video-clickable' : ''}}"
+            hover-class="{{gi.intent ? 'zn-gallery-video-pressed' : ''}}"
+            hover-stay-time="80"
+            catch:tap="{{gi.intent ? 'onButtonAction' : ''}}"
+            data-intent="{{gi.intent}}"
+            data-value="{{gi.value}}"
+          >
+            <image class="zn-gallery-video-poster" src="{{gi.poster}}" mode="aspectFill"/>
+            <view class="zn-gallery-video-mask"></view>
+            <view class="zn-gallery-video-play" wx:if="{{gi.poster}}"><view class="zn-gallery-video-play-icon"></view></view>
+          </view>
+        </block>
       </view>
     </view>
   </block>

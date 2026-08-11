@@ -136,6 +136,19 @@
 
 自动按数量选 1/2/3 列布局
 
+**v2.12 · 支持 image + video 混排**:video 子节点作为视频封面格渲染(封面 + ▶ 角标)。image 点击开原生灯箱预览(集合只含图),video 点击走自己的 intent 跳转(`open-scheme`/`open-url` 等,同独立 `::video`)。列数按 image+video 总项数一起算。
+
+```
+::gallery "图文混排"
+  ::image url="..."
+  ::image url="..."
+  ::video poster="..." intent=open-scheme value="xxx://detail?id=..."
+```
+
+video 无 intent 或 intent 非法时降级成纯封面(不可点)。
+
+**gallery 内的 video 不要传 `title`/`subtitle`/`fit`** —— 格子只有封面 + 角标,这些字段会被忽略。只有独立写的 `::video` 才支持标题叠加。
+
 ## hscroll — 横划列表
 
 ```

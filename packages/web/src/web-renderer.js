@@ -643,10 +643,14 @@
     return '<div class="pg-timeline">' + (main(n) ? '<div class="pg-tl-title">' + esc(main(n)) + '</div>' : '') + items + '</div>';
   };
   R.gallery = function (n) {
-    var imgs = kids(n).filter(function (c) { return c.name === 'image'; });
-    var cols = imgs.length === 1 ? 1 : (imgs.length === 2 || imgs.length === 4) ? 2 : 3;
-    var cells = imgs.map(function (im) {
-      var url = attr(im, 'url') || attr(im, 'src') || main(im);
+    var items = kids(n).filter(function (c) { return c.name === 'image' || c.name === 'video'; });
+    var cols = items.length === 1 ? 1 : (items.length === 2 || items.length === 4) ? 2 : 3;
+    var cells = items.map(function (c) {
+      if (c.name === 'video') {
+        var poster = attr(c, 'poster') || attr(c, 'url') || attr(c, 'src') || '';
+        return '<div class="s-gallery-cell s-gallery-video">' + (poster ? '<img src="' + esc(poster) + '" alt="">' : '') + '<span class="s-gallery-play">▶</span></div>';
+      }
+      var url = attr(c, 'url') || attr(c, 'src') || main(c);
       return '<div class="s-gallery-cell">' + (url ? '<img src="' + esc(url) + '" alt="">' : '') + '</div>';
     }).join('');
     return '<div class="s-gallery" style="grid-template-columns:repeat(' + cols + ',1fr)">' + cells + '</div>';
